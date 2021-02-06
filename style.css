@@ -1,0 +1,44 @@
+/* 
+ * Joshua Maxwell 
+ */
+
+body {
+  background-color: rgb(179, 179, 179);
+}
+
+header {
+  text-align: center;
+  color: rgb(68, 68, 68);
+}
+
+nav {
+  text-align: center;
+}
+
+.navContainer {
+  display: inline-block;
+  background-color: rgb(216, 216, 216);
+  list-style: none;
+  padding: 10px;
+  margin-inline: 20px;
+}
+
+.navItem:link {
+  color: black;
+  text-decoration: none;
+}
+
+p {
+  font-size: 18px;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  line-height: 35px;
+}
+
+section {
+  background-color: honeydew;
+  vertical-align: middle;
+  width: 50%;
+  padding: 50px;
+  margin-left: auto;
+  margin-right: auto;
+}
