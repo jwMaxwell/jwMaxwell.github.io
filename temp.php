@@ -4,7 +4,6 @@
 <head>
     <meta charset="utf-8" />
     <meta name="author" content="Joshua Maxwell">
-    <meta http-equiv="refresh" content="0; url = temp.php"/>
     <title>JWMaxwell Welcome page</title>
 
     <link rel="stylesheet" href="style.css" />
