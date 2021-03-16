@@ -34,6 +34,12 @@ p {
   line-height: 35px;
 }
 
+.code {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: rgb(68, 68, 68);
+  color: aqua;
+}
+
 section {
   background-color: honeydew;
   vertical-align: middle;
