@@ -1,3 +1,4 @@
+<?php // this is the php file?>
 <!DOCTYPE html>
 <html lang="en">
 
