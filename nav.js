@@ -1,19 +1,4 @@
-/*
- * <nav>
- *      <ul>
- *          <li class="navContainer">
- *              <a href="index.html" class="navItem">Home</a>
- *          </li>
- *          <li class="navContainer">
- *              <a href="projects.html" class="navItem">Projects</a>
- *          </li>
- *          <li class="navContainer">
- *              <a href="about.html" class="navItem">About me</a>
- *          </li>
- *      </ul>
- *  </nav>
- */
-const body = document.getElementById('');
+const body = document.getElementById('body');
 
 //adds nav
 const nav = document.createElement('nav');
