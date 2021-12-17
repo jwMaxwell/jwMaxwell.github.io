@@ -4,7 +4,7 @@
       .map(
         (p) =>
           `
-           <div class="item">
+          <div class="item">
             <div class="window">
               <div class="title-bar">
                 <div class="title-bar-text">${p.title}</div>
@@ -16,7 +16,7 @@
               </div>
             </div>
           </div>
-           `
+          `
       )
       .join('') +
     `
