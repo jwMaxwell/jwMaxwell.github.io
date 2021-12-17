@@ -1,0 +1,39 @@
+
+body { font-family: sans-serif; background: #EEE}
+img { width: 100%; border-radius: 3px; }
+a:hover {background: #DDD}
+.desc {color: #888; font-size: 0.8em}
+
+.container {
+  display: flex;
+  flex-flow: column wrap;
+  align-content: space-between;
+  height: 4000px;
+  width: 75%;
+  margin: 40px auto;
+}
+
+.item {
+  text-decoration: none; 
+  color: black;
+  width: 24%;
+  position: relative;
+  margin-bottom: 2%;
+  border-radius: 3px;
+  box-sizing: border-box;
+  padding: 10px;
+  background: #FFF;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2)
+}
+
+.item:nth-of-type(4n+1) { order: 1; }
+.item:nth-of-type(4n+2) { order: 2; }
+.item:nth-of-type(4n+3) { order: 3; }
+.item:nth-of-type(4n)   { order: 4; }
+.break {
+  flex-basis: 100%;
+  width: 0;
+  margin: 0;
+  padding: 0;
+}
+    

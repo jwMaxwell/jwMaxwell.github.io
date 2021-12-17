@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/98.css">
+  <link rel="stylesheet" href="style.css">
+  <title>Guild, Gild, Gilled</title>
+</head>
+<body>
+  <div id="ico">
+    <img id="icoimg" src="Computer.jpg" alt="Your game" width="50" height="50" left="5">
+    <div class="title-bar-text">Your game</div>
+  </div>
+   
+
+  <div class="window hide-win"  style="width: 910px" id="win">
+    <div class="title-bar" id="winh">
+      <div class="title-bar-text">A Window With Stuff In It</div>
+      <div class="title-bar-controls">
+        <button aria-label="Help"></button>
+        <button aria-label="Close" onclick="document.getElementById('win').classList.add('hide-win')"></button>
+      </div>
+    </div>
+    <div class="window-body">
+      <canvas id="myCanvas" width="900" height="600"></canvas>
+    </div>
+  </div>
+
+  <div class="window" id="footer"> 
+    <button><img src="win-start.png" width="60" height="30"/></button>  
+  </div>
+</body>
+
+<script src="open-win.js"></script>
+<script src="window-movement.js"></script>
+<script src="index.js"></script>
+
+</html>
+
