@@ -48,7 +48,7 @@ fish.img.src = 'fish.png';
 bubbles.img.src = 'bubbles.png';
 enemy.img.src = 'enemy.png';
 
-window.onkeydown = window.onkeyup = function(e) {
+window.onkeydown = window.onkeyup = (e) => {
   key[{37: 'left', 38: 'up', 39: 'right'}[e.keyCode]] = e.type == 'keydown';
   if (youDead) {
     reset();
