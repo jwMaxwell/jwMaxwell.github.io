@@ -3,7 +3,7 @@ body { font-family: sans-serif; background: #EEE}
 img { width: 100%; border-radius: 3px; }
 a:hover {background: #DDD}
 .desc {color: #888; font-size: 0.8em}
-
+h3 { text-align: center; }
 .container {
   display: flex;
   flex-flow: column wrap;
