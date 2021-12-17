@@ -1,6 +1,6 @@
 (async () => {
   document.querySelector('.container').innerHTML =
-    (await (await fetch('./home/data.json')).json())
+    (await (await fetch('./home/dat.json')).json())
       .map(
         (p) =>
           `
