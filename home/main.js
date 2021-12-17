@@ -4,7 +4,7 @@
       .map(
         (p) =>
           `
-           <dic class="item">
+           <div class="item">
             <div class="window">
               <div class="title-bar">
                 <div class="title-bar-text">${p.title}</div>
