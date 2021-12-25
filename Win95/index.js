@@ -8,7 +8,8 @@ function smaller() {
   HEIGHT = 450;
   C.width = WIDTH;
   C.height = HEIGHT;
-  document.getElementById("win").width = 680;
+  document.getElementById("win").setAttribute('style', 'width: 680px');
+  reset();
 }
 
 var speed = 0.3,
