@@ -8,6 +8,7 @@ function smaller() {
   HEIGHT = 450;
   C.width = WIDTH;
   C.height = HEIGHT;
+  document.getElementById("win").width = 680;
 }
 
 var speed = 0.3,
