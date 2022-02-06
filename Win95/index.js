@@ -3,6 +3,15 @@ var C = document.getElementById('myCanvas'),
   HEIGHT = (C.height = 600),
   canvas = C.getContext('2d');
 
+function smaller() {
+  WIDTH =  675;
+  HEIGHT = 450;
+  C.width = WIDTH;
+  C.height = HEIGHT;
+  document.getElementById("win").setAttribute('style', 'width: 680px');
+  reset();
+}
+
 var speed = 0.3,
   turnSpeed = 0.1,
   friction = 0.03,
