@@ -1,9 +1,7 @@
-const canvas = document.getElementById('C');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("C");
+const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-
-const particles = [];
 
 class Particle {
   constructor(x, y, dirX, dirY, size, color) {
@@ -12,14 +10,7 @@ class Particle {
     this.dirX = dirX;
     this.dirY = dirY;
     this.size = size;
-    this.color = (() => {
-      var letters = '0123456789ABCDEF';
-      var color = '#';
-      for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-      }
-      return color;
-    })();
+    this.color = "#" + ((Math.random() * 0xffffff) << 0).toString(16);
   }
 
   draw() {
@@ -43,34 +34,31 @@ class Particle {
   }
 }
 
-const randColor = () => {
-  var letters = '0123456789ABCDEF';
-  var color = '#';
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return "#" + ((1<<24)*Math.random() | 0).toString(16);
-}
-
 const init = () => {
+  const particles = [];
   const particleCount = (canvas.height * canvas.width) / 9000;
   for (let i = 0; i < particleCount; ++i) {
-    const size = (Math.random() * 5) + 1;
-    particles.push(new Particle(
-      (Math.random() * ((innerWidth - size * 2) - (size * 2))),
-      (Math.random() * ((innerHeight - size * 2) - (size * 2))),
-      (Math.random() * 5) - 2.5,
-      (Math.random() * 5) - 2.5,
-      size,
-      '#'+(Math.random()*0xFFFFFF<<0).toString(16)
-    ));
+    const size = Math.random() * 5 + 1;
+    particles.push(
+      new Particle(
+        Math.random() * (innerWidth - size * 2 - size * 2),
+        Math.random() * (innerHeight - size * 2 - size * 2),
+        Math.random() * 5 - 2.5,
+        Math.random() * 5 - 2.5,
+        size
+      )
+    );
   }
-}
 
-const connect = () => {
+  return particles;
+};
+
+const connect = (particles) => {
   for (let i = 0; i < particles.length; ++i) {
     for (let j = i; j < particles.length; ++j) {
-      const dist = ((particles[i].x - particles[j].x) ** 2) + ((particles[i].y - particles[j].y) ** 2);
+      const dist =
+        (particles[i].x - particles[j].x) ** 2 +
+        (particles[i].y - particles[j].y) ** 2;
       const maxDist = (canvas.width / 7) * (canvas.height / 7);
       if (dist < (canvas.width / 7) * (canvas.height / 7)) {
         const opacity = (maxDist - dist) / maxDist;
@@ -83,14 +71,19 @@ const connect = () => {
       }
     }
   }
-}
+};
 
-const draw = () => {
+const draw = (particles) => {
   requestAnimationFrame(draw);
   ctx.clearRect(0, 0, innerWidth, innerHeight);
-  connect();
-  particles.map(t => t.update());
-}
+  connect(particles);
+  particles.map((t) => t.update());
+};
 
 init();
 draw();
+
+const main = (() => {
+  const particles = init();
+  draw(particles);
+})();
