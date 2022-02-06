@@ -80,9 +80,6 @@ const draw = (particles) => {
   particles.map((t) => t.update());
 };
 
-init();
-draw();
-
 const main = (() => {
   const particles = init();
   draw(particles);
