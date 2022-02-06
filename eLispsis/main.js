@@ -1,6 +1,5 @@
-const { core } = require('./coreFunctions');
-const { parse, evaluate } = require("./evaluate.js");
-const { exit } = require("process");
+import { core } from './coreFunctions';
+import { parse, evaluate } from "./evaluate.js";
 console.error = (x) => {
   console.log('\x1b[1m\x1b[31m' + x + '\x1b[0m'); 
   exit();

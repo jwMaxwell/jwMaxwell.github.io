@@ -1,7 +1,5 @@
-const { parse, evaluate, isAtom } = require('./evaluate');
-const { exit } = require("process");
-const fs = require("fs");
-const prompt = require("prompt-sync")();
+import { parse, evaluate, isAtom } from './evaluate';
+import { exit } from "process";
 console.error = (x) => {
   console.log('\x1b[1m\x1b[31m' + x + '\x1b[0m'); 
   exit();
@@ -44,7 +42,7 @@ const core = [
   ['setq', ([name, val], env) => [...env, [name, evaluate(['quote', val], env)]]],
   ['list', (args, ctx) => args.map((a) => evaluate(a, ctx))],
   ['print', (args, ctx) => {console.log(evaluate(args, ctx))}],
-  ['read', (args, ctx) => `${prompt(evaluate(args, ctx))}`],
+  // ['read', (args, ctx) => `${prompt(evaluate(args, ctx))}`],
   // ['import', (args, ctx) => {
   //   try {
   //     const result = [];

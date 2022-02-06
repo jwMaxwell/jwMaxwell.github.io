@@ -1,5 +1,3 @@
-const { F } = require("ramda");
-
 const elmnt = document.getElementById('myCanvas');
 const page = {
   width: (elmnt.width = 900),
