@@ -5,17 +5,6 @@ canvas.height = window.innerHeight;
 
 const particles = [];
 
-const mouse = {
-  x: null,
-  y: null,
-  radius: (canvas.height / 80) * (canvas.width / 80),
-};
-
-window.addEventListener('mousemove', (e) => {
-  mouse.x = e.x;
-  mouse.y = e.y;
-});
-
 class Particle {
   constructor(x, y, dirX, dirY, size, color) {
     this.x = x;
@@ -47,26 +36,6 @@ class Particle {
     if (this.y > canvas.height || this.y < 0) {
       this.dirY = -this.dirY;
     }
-
-   /*
-    const dx = mouse.x - this.x;
-    const dy = mouse.y - this.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < mouse.radius + this.size) {
-      if (mouse.x < this.x && this.x < canvas.width - this.size * 10) {
-        this.x += 10;
-      }
-      if (mouse.x > this.x && this.x > this.size * 10) {
-        this.x -= 10;
-      }
-      if (mouse.y < this.y && this.y < canvas.height - this.size * 10) {
-        this.y += 10;
-      }
-      if (mouse.y > this.y && this.y > this.size * 10) {
-        this.y -= 10;
-      }
-    }
-    */
 
     this.x += this.dirX;
     this.y += this.dirY;
