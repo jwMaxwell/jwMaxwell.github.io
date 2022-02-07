@@ -72,11 +72,14 @@ const connect = () => {
   }
 };
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const draw = () => {
   requestAnimationFrame(draw);
   ctx.clearRect(0, 0, innerWidth, innerHeight);
   connect();
   particles.map((t) => t.update());
+  await sleep(10);
 };
 
 const main = (() => {
