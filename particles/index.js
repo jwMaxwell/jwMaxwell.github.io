@@ -3,6 +3,8 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+const particles = [];
+
 class Particle {
   constructor(x, y, dirX, dirY, size, color) {
     this.x = x;
@@ -35,7 +37,6 @@ class Particle {
 }
 
 const init = () => {
-  const particles = [];
   const particleCount = (canvas.height * canvas.width) / 9000;
   for (let i = 0; i < particleCount; ++i) {
     const size = Math.random() * 5 + 1;
@@ -49,11 +50,9 @@ const init = () => {
       )
     );
   }
-
-  return particles;
 };
 
-const connect = (particles) => {
+const connect = () => {
   for (let i = 0; i < particles.length; ++i) {
     for (let j = i; j < particles.length; ++j) {
       const dist =
@@ -73,14 +72,14 @@ const connect = (particles) => {
   }
 };
 
-const draw = (particles) => {
+const draw = () => {
   requestAnimationFrame(draw);
   ctx.clearRect(0, 0, innerWidth, innerHeight);
-  connect(particles);
+  connect();
   particles.map((t) => t.update());
 };
 
 const main = (() => {
-  const particles = init();
-  draw(particles);
+  init();
+  draw();
 })();
