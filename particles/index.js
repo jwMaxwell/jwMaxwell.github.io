@@ -79,7 +79,6 @@ const draw = () => {
   ctx.clearRect(0, 0, innerWidth, innerHeight);
   connect();
   particles.map((t) => t.update());
-  sleep(10);
 };
 
 const main = (() => {
