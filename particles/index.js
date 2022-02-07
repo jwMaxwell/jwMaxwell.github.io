@@ -6,7 +6,7 @@ canvas.height = window.innerHeight;
 const particles = [];
 
 class Particle {
-  constructor(x, y, dirX, dirY, size, color) {
+  constructor(x, y, dirX, dirY, size) {
     this.x = x;
     this.y = y;
     this.dirX = dirX;
