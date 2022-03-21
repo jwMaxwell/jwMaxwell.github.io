@@ -1,6 +1,6 @@
 (async () => {
-  document.querySelector('.container').innerHTML =
-    (await (await fetch('./home/dat.json')).json())
+  document.querySelector(".container").innerHTML =
+    (await (await fetch("./home/dat.json")).json())
       .map(
         (p) =>
           `
@@ -12,13 +12,13 @@
               </div>
               <div class="window-body">
                 <a href="${p.filePath}"><img src="${p.filePath}/image.png"/></a>
-                <div class="desc">${p.desc}</div>
+                <p>${p.desc}</p>
               </div>
             </div>
           </div>
           `
       )
-      .join('') +
+      .join("") +
     `
     <span class="item break"></span>
     <span class="item break"></span>
