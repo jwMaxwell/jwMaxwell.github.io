@@ -1,0 +1,14 @@
+baseURL = 'http://jwMaxwell.github.com/home'
+languageCode = 'en-us'
+title = 'Code-Quirks'
+theme = 'hello-friend-ng'
+paginate = 10
+
+[params.logo]
+  logoText = "Code-Quirks"
+  logoHomeLink = '/home'
+
+#[[menu.main]]
+#  identifier = "blog"
+#  name       = "Blog"
+#  url        = "/posts"
