@@ -1,7 +1,7 @@
 ---
 title: "Function Pointers"
 date: 2022-07-23T23:21:13-05:00
-draft: true
+draft: false
 ---
 
 C is one of my favorite weekend langauges due to its extreme simplicity and complexity. For proficiency in C programming, the user must first have a functional understanding of memory and assembly language. Without this understanding, some concepts, such as pointers, will only be used in a very limited capacity.
