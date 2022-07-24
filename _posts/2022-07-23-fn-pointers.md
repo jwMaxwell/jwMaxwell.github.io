@@ -1,6 +1,7 @@
 ---
 title: "Function Pointers"
 date: 2022-07-23T23:21:13-05:00
+layout: page
 permalink: /fn-pointers/
 ---
 
