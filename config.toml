@@ -2,7 +2,7 @@ baseURL = "https://jwmaxwell.github.io/"
 languageCode = 'en-us'
 title = 'Code-Quirks'
 theme = 'hermit'
-paginate = 10
+paginate = 12
 
 [params.logo]
   logoText = "Code-Quirks"
