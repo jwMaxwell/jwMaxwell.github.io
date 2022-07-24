@@ -1,7 +1,8 @@
 ---
 title: "Type Coercion"
 date: 2022-07-21T19:49:37-05:00
-draft: false
+layout: page
+permalink: /type-coercion/
 ---
 
 In Javascript, variables are not restricted to a certain datatype. Instead, a variable containing an integer can later be reassigned to the value of a string. This feature, in most cases, goes unnoticed or unappreciated by most programmers. In fact, many programmers see type coercion as a downside due to its inconsistencies.
