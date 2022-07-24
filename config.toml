@@ -1,7 +1,7 @@
 baseURL = "https://jwmaxwell.github.io/"
 languageCode = 'en-us'
 title = 'Code-Quirks'
-theme = 'hermit'
+theme = 'hello-friend-ng'
 paginate = 12
 
 [params.logo]
