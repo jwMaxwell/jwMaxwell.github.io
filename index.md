@@ -1,7 +1,7 @@
 ---
-layout: page
-title: Welcome
-order: 1
+title: "Post Directory"
+date: 2022-07-21T21:18:55-05:00
 ---
 
-This is the landing page
+## [C : Function Pointers](./fn-pointers/)
+## [JS : Type Coersion](./type-coercion/)
