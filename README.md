@@ -1,2 +1,0 @@
-# jwMaxwell.github.io
-WIP
