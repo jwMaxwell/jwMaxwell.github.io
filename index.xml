@@ -7,22 +7,12 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language><atom:link href="https://jwMaxwell.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Function Pointers</title>
-      <link>https://jwMaxwell.github.io/fn-pointers/</link>
-      <pubDate>Sat, 23 Jul 2022 23:21:13 -0500</pubDate>
+      <title>Home</title>
+      <link>https://jwMaxwell.github.io/</link>
+      <pubDate>Thu, 21 Jul 2022 21:18:55 -0500</pubDate>
       
-      <guid>https://jwMaxwell.github.io/fn-pointers/</guid>
-      <description>C is one of my favorite weekend langauges due to its extreme simplicity and complexity. For proficiency in C programming, the user must first have a functional understanding of memory and assembly language. Without this understanding, some concepts, such as pointers, will only be used in a very limited capacity. In assembly language, every part of a program operates on and interacts with memory. The variables are stored in memory, the function definitions are stored in memory, and most importantly, instructions are stored in memory.</description>
-    </item>
-    
-    <item>
-      <title>Type Coercion</title>
-      <link>https://jwMaxwell.github.io/type-coercion/</link>
-      <pubDate>Thu, 21 Jul 2022 19:49:37 -0500</pubDate>
-      
-      <guid>https://jwMaxwell.github.io/type-coercion/</guid>
-      <description>In Javascript, variables are not restricted to a certain datatype. Instead, a variable containing an integer can later be reassigned to the value of a string. This feature, in most cases, goes unnoticed or unappreciated by most programmers. In fact, many programmers see type coercion as a downside due to its inconsistencies.
-In this post, I will not discuss whether type coercion is a positive or a negative feature. Instead, I will be exploring the clever/magical/terrible uses for it.</description>
+      <guid>https://jwMaxwell.github.io/</guid>
+      <description>C : Function Pointers JS : Type Coersion </description>
     </item>
     
   </channel>
