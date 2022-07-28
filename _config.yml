@@ -21,9 +21,9 @@ footer-links:
   email: joshmax00@gmail.com
   facebook:
   flickr:
-  github: https://github.com/jwMaxwell
+  github: jwMaxwell
   instagram:
-  linkedin: https://www.linkedin.com/in/joshua-maxwell-6b3a20204/
+  linkedin: joshua-maxwell-6b3a20204/
   pinterest:
   rss: # just type anything here for a working RSS icon
   twitter: 
@@ -41,7 +41,7 @@ google_analytics:
 
 # Your website URL (e.g. http://barryclark.github.io or http://www.barryclark.co)
 # Used for Sitemap.xml and your RSS feed
-url:
+url: "https://jwMaxwell.github.io"
 
 # If you're hosting your site at a Project repository on GitHub pages
 # (http://yourusername.github.io/repository-name)
@@ -85,4 +85,4 @@ exclude:
   - README.md
   - CNAME
 
-theme: jekyll-theme-midnight
+theme: minima
