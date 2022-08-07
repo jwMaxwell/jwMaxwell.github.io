@@ -2,16 +2,16 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Code Quirks</title>
-    <link>https://jwMaxwell.github.io/</link>
+    <link>https://jwmaxwell.github.io/</link>
     <description>Recent content on Code Quirks</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language><atom:link href="https://jwMaxwell.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-us</language><atom:link href="https://jwmaxwell.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Home</title>
-      <link>https://jwMaxwell.github.io/</link>
+      <link>https://jwmaxwell.github.io/</link>
       <pubDate>Thu, 21 Jul 2022 21:18:55 -0500</pubDate>
       
-      <guid>https://jwMaxwell.github.io/</guid>
+      <guid>https://jwmaxwell.github.io/</guid>
       <description>C/C++ : Array Indecies C : Function Pointers JS : Type Coersion </description>
     </item>
     
