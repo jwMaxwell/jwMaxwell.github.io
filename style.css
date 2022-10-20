@@ -6,6 +6,7 @@
   border: 1px solid #b8b8b8;
   border-radius: 15px;
   font-size: 16px;
+  background-color: #ebe9e9;
 }
 
 .code {
@@ -20,6 +21,7 @@ textarea {
   border: 1px solid #b8b8b8;
   border-radius: 15px;
   font-size: 16px;
+  background-color: #ebe9e9;
 }
 
 button {
@@ -80,8 +82,4 @@ button:active {
 
 .option:hover {
   background-color: #bdbdbd;
-}
-
-body {
-  background-color: #797979;
 }
