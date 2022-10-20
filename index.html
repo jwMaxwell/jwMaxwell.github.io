@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Parsons JMEdit</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <style></style>
+
+    <textarea class="code" id="code"></textarea>
+
+    <div class="island">
+      <button id="run" onclick="run()">Run</button>
+      <div class="dropdown">
+        <button class="dropbtn">Dropdown</button>
+        <div class="dropdown-content">
+          <p class="option" onclick="setLang('js', '1.16.2')">JavaScript</p>
+          <p
+            class="option"
+            onclick="setLang('py', '3.10.0'); console.log('hi :)');"
+          >
+            Python
+          </p>
+          <p class="option" onclick="setLang('java', '15.0.2')">Java</p>
+        </div>
+      </div>
+      <p id="output" class="code"></p>
+    </div>
+
+    <script src="./index.js"></script>
+  </body>
+</html>
