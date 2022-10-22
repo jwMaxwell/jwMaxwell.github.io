@@ -53,8 +53,8 @@ const setLang = (lang, version) => {
 document.getElementById("code").addEventListener("keydown", function (e) {
   if (e.key == "Tab") {
     e.preventDefault();
-    var start = this.selectionStart;
-    var end = this.selectionEnd;
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
 
     // set textarea value to: text before caret + tab + text after caret
     this.value =
