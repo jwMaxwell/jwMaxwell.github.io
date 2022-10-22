@@ -65,8 +65,8 @@ document.getElementById("code").addEventListener("keydown", function (e) {
   }
 });
 
-addEventListener(
-  "load",
+document.getElementById("code").addEventListener(
+  "Keyboard",
   function (event) {
     PR.prettyPrint();
   },
