@@ -64,3 +64,11 @@ document.getElementById("code").addEventListener("keydown", function (e) {
     this.selectionStart = this.selectionEnd = start + 4;
   }
 });
+
+addEventListener(
+  "load",
+  function (event) {
+    PR.prettyPrint();
+  },
+  false
+);
