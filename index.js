@@ -50,25 +50,25 @@ const setLang = (lang, version) => {
   options.body = JSON.stringify(code);
 };
 
-document.getElementById("code").addEventListener("keydown", function (e) {
-  if (e.key == "Tab") {
-    e.preventDefault();
-    const start = this.selectionStart;
-    const end = this.selectionEnd;
+// document.getElementById("code").addEventListener("keydown", function (e) {
+//   if (e.key == "Tab") {
+//     e.preventDefault();
+//     const start = this.selectionStart;
+//     const end = this.selectionEnd;
 
-    // set textarea value to: text before caret + tab + text after caret
-    this.value =
-      this.value.substring(0, start) + "    " + this.value.substring(end);
+//     // set textarea value to: text before caret + tab + text after caret
+//     this.value =
+//       this.value.substring(0, start) + "    " + this.value.substring(end);
 
-    // put caret at right position again
-    this.selectionStart = this.selectionEnd = start + 4;
-  }
-});
+//     // put caret at right position again
+//     this.selectionStart = this.selectionEnd = start + 4;
+//   }
+// });
 
-document.getElementById("code").addEventListener(
-  "Keyboard",
-  function (event) {
-    PR.prettyPrint();
-  },
-  false
-);
+// document.getElementById("code").addEventListener(
+//   "Keyboard",
+//   function (event) {
+//     PR.prettyPrint();
+//   },
+//   false
+// );

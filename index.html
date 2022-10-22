@@ -3,12 +3,13 @@
   <head>
     <title>Parsons JMEdit</title>
     <link rel="stylesheet" href="./style.css" />
+    <link
+      rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/default.min.css"
+    />
   </head>
   <body>
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js?lang=css&amp;skin=sunburst"></script>
-    <div class="island">
-      <pre class="prettyprint linenums" id="code" contenteditable="true"></pre>
-    </div>
+    <pre class="island"><code id="code" class="code">print()</code></pre>
 
     <div class="island">
       <button id="run" onclick="run()">Run</button>
@@ -23,6 +24,10 @@
       <p id="output" class="code"></p>
     </div>
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
     <script src="./index.js"></script>
   </body>
 </html>
