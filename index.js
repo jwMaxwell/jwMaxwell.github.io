@@ -32,7 +32,7 @@ let options = {
 
 // send POST request
 const run = () => {
-  code.files[0].content = document.getElementById("code").value;
+  code.files[0].content = document.getElementById("code").innerText;
   options.body = JSON.stringify(code);
   fetch(url, options)
     .then((res) => res.json())
