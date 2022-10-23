@@ -19,11 +19,13 @@
       </div>
       <input
         type="text"
-        list="lang"
+        list="lst"
+        id="lang"
         value="javaScript"
         onclick="this.value=''"
+        onsubmit="console.log('hi')"
       />
-      <datalist id="lang"></datalist>
+      <datalist id="lst"></datalist>
 
       <p id="output" class="code"></p>
     </div>
