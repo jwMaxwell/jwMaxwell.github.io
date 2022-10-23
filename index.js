@@ -68,7 +68,9 @@ const setLang = (lang, version) => {
 document.getElementById("code").addEventListener(
   "Keyboard",
   function (event) {
-    hljs.highlightElement(document.getElementById("code"));
+    document.getElementById("code").innerHTML = hljs.highlightAuto(
+      document.getElementById("code").innerHTML
+    ).value;
   },
   false
 );
