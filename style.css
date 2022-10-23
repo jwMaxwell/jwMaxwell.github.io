@@ -13,7 +13,7 @@
   font-family: monospace;
 }
 
-textarea {
+/* textarea {
   width: 95%;
   height: 45vh;
   padding: 12px 20px;
@@ -22,7 +22,7 @@ textarea {
   border-radius: 15px;
   font-size: 16px;
   background-color: #ebe9e9;
-}
+} */
 
 button {
   background-color: #4caf50;
