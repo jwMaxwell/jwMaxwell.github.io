@@ -69,6 +69,7 @@ document.getElementById("code").addEventListener(
   "keyup",
   function (_) {
     hljs.highlightAll(document.getElementById("code").innerHTML);
+    this.selectionStart = this.selectionEnd;
   },
   false
 );
