@@ -3,8 +3,8 @@ fetch("https://emkc.org/api/v2/piston/runtimes")
   .then((res) => {
     for (const n of res)
       document.getElementById(
-        "dropdown"
-      ).innerHTML += `<div class="option" onclick="setLang('${n.language}', '${n.version}')">${n.language}</div>`;
+        "lang"
+      ).innerHTML += `<option onclick="setLang('${n.language}', '${n.version}')" value="${n.language}"/>`;
   });
 
 // post body data
