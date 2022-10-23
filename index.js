@@ -1,6 +1,12 @@
-fetch("https://emkc.org/api/v2/piston/runtimes").then((res) =>
-  console.log(res.json())
-);
+fetch("https://emkc.org/api/v2/piston/runtimes")
+  .then((res) => res.json())
+  .then((res) => {
+    for (const n of res)
+      document.getElementById(
+        "dropdown"
+      ).innerHTML += `<button class="option" onclick="setLang('${n.language}', '${n.version}')">${n.language}</button>`;
+  });
+
 const url = "https://emkc.org/api/v2/piston/execute";
 
 // post body data
@@ -50,24 +56,9 @@ const setLang = (lang, version) => {
   options.body = JSON.stringify(code);
 };
 
-// document.getElementById("code").addEventListener("keydown", function (e) {
-//   if (e.key == "Tab") {
-//     e.preventDefault();
-//     const start = this.selectionStart;
-//     const end = this.selectionEnd;
-
-//     // set textarea value to: text before caret + tab + text after caret
-//     this.value =
-//       this.value.substring(0, start) + "    " + this.value.substring(end);
-
-//     // put caret at right position again
-//     this.selectionStart = this.selectionEnd = start + 4;
-//   }
-// });
-
 document.getElementById("code").addEventListener(
   "keyup",
-  function (_) {
+  (_) => {
     const text = document.getElementById("code");
     hljs.highlightAll(text.innerText);
 
