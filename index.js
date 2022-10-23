@@ -54,15 +54,9 @@ const setLang = (lang, version) => {
   options.body = JSON.stringify(code);
 };
 
-const caretToEnd = (element) => {
-  let range, selection;
-  if (document.createRange) {
-    //Firefox, Chrome, Opera, Safari, IE 9+
-    range = document.createRange(); //Create a range (a range is a like the selection but invisible)
-    range.selectNodeContents(element); //Select the entire contents of the element with the range
-    range.collapse(false); //collapse the range to the end point. false means collapse to end rather than the start
-    selection = window.getSelection(); //get the selection object (allows you to change selection)
-    selection.removeAllRanges(); //remove any selections already made
-    selection.addRange(range); //make the range you have just created the visible selection
+document.getElementById("code").addEventListener("keydown", (e) => {
+  if (e.keycode === 9) {
+    this.value += "    ";
+    if (e.preventDefault) e.preventDefault();
   }
-};
+});
