@@ -6,7 +6,7 @@ const url = "https://emkc.org/api/v2/piston/execute";
 // post body data
 let code = {
   language: "js",
-  version: "16.3.0",
+  version: "1.16.2",
   files: [
     {
       name: "code.js",
@@ -39,7 +39,7 @@ const run = () => {
     .then(
       (res) =>
         (document.getElementById("output").innerHTML = JSON.stringify(
-          res.run.stdout
+          res
         ).replace(/\\n/g, "<br>"))
     );
 };
