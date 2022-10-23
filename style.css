@@ -89,4 +89,9 @@ button:active {
 
 .option:hover {
   background-color: #bdbdbd;
+  color: black;
+}
+
+.option:active {
+  background-color: #a1a1a1;
 }
