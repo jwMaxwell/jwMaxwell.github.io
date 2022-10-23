@@ -43,7 +43,7 @@ const run = () => {
     .then(
       (res) =>
         (document.getElementById("output").innerHTML = JSON.stringify(
-          res
+          res.run.stdout
         ).replace(/\\n/g, "<br>"))
     );
 };
