@@ -68,11 +68,12 @@ const setLang = (lang, version) => {
 document.getElementById("code").addEventListener(
   "keyup",
   function (_) {
-    hljs.highlightAll(document.getElementById("code").innerHTML);
+    const text = document.getElementById("code");
+    hljs.highlightAll(text.innerText);
 
-    const end = this.value.length;
-    this.setSelectionRange(end, end);
-    this.focus();
+    const end = text.value.length;
+    text.setSelectionRange(end, end);
+    text.focus();
   },
   false
 );
