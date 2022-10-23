@@ -65,10 +65,10 @@ const setLang = (lang, version) => {
 //   }
 // });
 
-// document.getElementById("code").addEventListener(
-//   "Keyboard",
-//   function (event) {
-//     PR.prettyPrint();
-//   },
-//   false
-// );
+document.getElementById("code").addEventListener(
+  "Keyboard",
+  function (event) {
+    hljs.highlightElement(document.getElementById("code"));
+  },
+  false
+);
