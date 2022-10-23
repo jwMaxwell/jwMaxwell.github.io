@@ -54,9 +54,13 @@ const setLang = (lang, version) => {
   options.body = JSON.stringify(code);
 };
 
-document.getElementById("code").addEventListener("keydown", (e) => {
-  if (e.keycode === 9) {
-    this.value += "    ";
-    if (e.preventDefault) e.preventDefault();
-  }
-});
+document.getElementById("myInput").addEventListener(
+  "keydown",
+  function (e) {
+    if (e.keyCode === 9) {
+      this.value += "    ";
+      e.preventDefault();
+    }
+  },
+  false
+);
