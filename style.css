@@ -87,9 +87,12 @@ button:active {
   background-color: #3e8e41;
 }
 
+.option {
+  color: black;
+}
+
 .option:hover {
   background-color: #bdbdbd;
-  color: black;
 }
 
 .option:active {
