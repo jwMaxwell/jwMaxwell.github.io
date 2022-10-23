@@ -54,7 +54,7 @@ const setLang = (lang, version) => {
   options.body = JSON.stringify(code);
 };
 
-document.getElementById("myInput").addEventListener(
+document.getElementById("code").addEventListener(
   "keydown",
   function (e) {
     if (e.keyCode === 9) {
