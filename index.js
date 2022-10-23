@@ -68,9 +68,7 @@ const setLang = (lang, version) => {
 document.getElementById("code").addEventListener(
   "keyup",
   function (_) {
-    document.getElementById("code").innerHTML = hljs.highlightAuto(
-      document.getElementById("code").innerHTML
-    ).value;
+    hljs.highlightAll(document.getElementById("code").innerHTML);
   },
   false
 );
