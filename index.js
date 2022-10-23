@@ -7,8 +7,6 @@ fetch("https://emkc.org/api/v2/piston/runtimes")
       ).innerHTML += `<button class="option" onclick="setLang('${n.language}', '${n.version}')">${n.language}</button>`;
   });
 
-const url = "https://emkc.org/api/v2/piston/execute";
-
 // post body data
 let code = {
   language: "js",
@@ -40,7 +38,7 @@ let options = {
 const run = () => {
   code.files[0].content = document.getElementById("code").innerText;
   options.body = JSON.stringify(code);
-  fetch(url, options)
+  fetch("https://emkc.org/api/v2/piston/execute", options)
     .then((res) => res.json())
     .then(
       (res) =>
