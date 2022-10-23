@@ -36,7 +36,7 @@ let options = {
 
 // send POST request
 const run = () => {
-  code.files[0].content = document.getElementById("code").innerText;
+  code.files[0].content = document.getElementById("code").value;
   options.body = JSON.stringify(code);
   fetch("https://emkc.org/api/v2/piston/execute", options)
     .then((res) => res.json())
@@ -53,18 +53,6 @@ const setLang = (lang, version) => {
   code.files[0].name = code.files[0].name.replace(/[^.]+$/g, lang);
   options.body = JSON.stringify(code);
 };
-
-document.getElementById("code").addEventListener(
-  "keyup",
-  (_) => {
-    const text = document.getElementById("code");
-    hljs.highlightAll(text.innerText);
-
-    caretToEnd(text);
-    text.focus();
-  },
-  false
-);
 
 const caretToEnd = (element) => {
   let range, selection;
