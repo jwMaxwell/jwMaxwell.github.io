@@ -4,7 +4,7 @@ fetch("https://emkc.org/api/v2/piston/runtimes")
     for (const n of res)
       document.getElementById(
         "lst"
-      ).innerHTML += `<option onclick="setLang('${n.language}', '${n.version}')" value="${n.language}"/>`;
+      ).innerHTML += `<option value="${n.language} ${n.version}"/>`;
   });
 
 // post body data
