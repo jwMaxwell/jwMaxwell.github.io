@@ -71,7 +71,7 @@ document.getElementById("code").addEventListener(
     const text = document.getElementById("code");
     hljs.highlightAll(text.innerText);
 
-    const end = text.value.length;
+    const end = text.innerText.length;
     text.setSelectionRange(end, end);
     text.focus();
   },
