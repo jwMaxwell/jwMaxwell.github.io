@@ -48,6 +48,10 @@ body {
   border-radius: 5px;
 }
 
+#run:disabled {
+  background-color: #646464;
+}
+
 #run:active {
   background-color: #3b8a3e;
 }
