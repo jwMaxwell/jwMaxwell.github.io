@@ -1,5 +1,5 @@
 body {
-  background-color: black;
+  background-color: rgb(37, 37, 37);
 }
 
 .island {
@@ -14,11 +14,7 @@ body {
   color: #f1f1f1;
 }
 
-.output {
-  font-family: monospace;
-}
-
-textarea {
+#code {
   width: 95%;
   height: 45vh;
   padding: 12px 20px;
@@ -29,6 +25,10 @@ textarea {
   background-color: #424141;
   color: #f1f1f1;
   text-decoration: none;
+}
+
+.output {
+  font-family: monospace;
 }
 
 button {
