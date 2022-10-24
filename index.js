@@ -36,7 +36,7 @@ const prepareData = () => {
       files: [
         {
           name: `code.${langData[0]}`,
-          content: code.innerText.replace(/[1-9]\n/g, ""),
+          content: code.innerText.replace(/\ufffd|[1-9]\n/g, ""),
         },
       ],
       stdin: "",
