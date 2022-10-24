@@ -2,8 +2,9 @@
 fetch("https://emkc.org/api/v2/piston/runtimes")
   .then((res) => res.json())
   .then((res) => {
-    for (const n of res)
-      langlist.innerHTML += `<option value="${n.language} ${n.version}"/>`;
+    langlist.innerHTML = res
+      .map((n) => `<option value="${n.language} ${n.version}" />`)
+      .join("");
   });
 
 require.config({
@@ -27,15 +28,15 @@ lang.addEventListener("change", () => {
 
 // prepare data for POST request
 const prepareData = () => {
-  const langData = lang.value.split(" ");
+  const [language, version] = lang.value.split(" ");
   return {
     method: "POST",
     body: JSON.stringify({
-      language: langData[0],
-      version: langData[1],
+      language: language,
+      version: version,
       files: [
         {
-          name: `code.${langData[0]}`,
+          name: `code.${language}`,
           content: editor.getValue(),
         },
       ],
@@ -62,8 +63,6 @@ run.addEventListener("click", () => {
     .then((res) => {
       run.disabled = false;
       bufferWheel.hidden = true;
-      output.innerHTML = res.run.stdout
-        ? res.run.stdout.replace(/\\n/g, "<br>")
-        : res.run.stderr.replace(/\\n/g, "<br>");
+      output.innerHTML = res.run.stdout || res.run.stderr;
     });
 });
