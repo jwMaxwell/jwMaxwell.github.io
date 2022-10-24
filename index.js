@@ -63,6 +63,6 @@ run.addEventListener("click", () => {
     .then((res) => {
       run.disabled = false;
       bufferWheel.style.visibility = "hidden";
-      output.innerHTML = res.run.stdout || res.run.stderr;
+      output.innerText = res.run.stdout || res.run.stderr;
     });
 });
