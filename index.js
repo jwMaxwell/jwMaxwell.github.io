@@ -10,6 +10,7 @@ fetch("https://emkc.org/api/v2/piston/runtimes")
       ).innerHTML += `<option value="${n.language} ${n.version}"/>`;
   });
 
+// prepare data for POST request
 const prepareData = () => {
   return {
     method: "POST",
@@ -48,25 +49,20 @@ const run = () => {
     );
 };
 
-const setLang = (lang, version) => {
-  [code.language, code.version] = [lang, version];
-  code.files[0].name = code.files[0].name.replace(/[^.]+$/g, lang);
-  options.body = JSON.stringify(code);
-};
+// inject data into string
+const inject = (str, pos, val) =>
+  [str.slice(0, pos), val, str.slice(pos, str.length)].join("");
 
 // Tab makes tabs
 query("#code").addEventListener(
   "keydown",
   function (e) {
-    const cursor = query("#code").selectionStart;
+    const position = query("#code").selectionStart;
     if (e.keyCode === 9) {
-      this.value = inject(this.value, cursor, "    ");
+      this.value = inject(this.value, position, "    ");
       e.preventDefault();
-      query("#code").selectionEnd = cursor + 4;
+      query("#code").selectionEnd = position + 4;
     }
   },
   false
 );
-
-const inject = (str, pos, val) =>
-  [str.slice(0, pos), val, str.slice(pos, str.length)].join("");

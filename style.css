@@ -14,11 +14,11 @@ body {
   color: #f1f1f1;
 }
 
-.code {
+.output {
   font-family: monospace;
 }
 
-textarea {
+.code {
   width: 95%;
   height: 45vh;
   padding: 12px 20px;
