@@ -3,8 +3,8 @@ body {
 }
 
 .island {
-  width: 95%;
-  height: 45vh;
+  width: 45vh;
+  height: 95vh;
   padding-left: 10px;
   padding-right: 10px;
   border: 1px solid #b8b8b8;
@@ -15,8 +15,8 @@ body {
 }
 
 #code {
-  width: 95%;
-  height: 45vh;
+  width: 45vh;
+  height: 95vh;
   padding: 12px 20px;
   box-sizing: border-box;
   border: 1px solid #b8b8b8;
