@@ -13,14 +13,8 @@
 
     <div class="island">
       <button id="run" onclick="run()">Run</button>
-      <input
-        type="text"
-        list="lst"
-        id="lang"
-        placeholder="language"
-        onkeydown="if (event.key === 'Enter') setLang(this.value.split(' ')[0], this.value.split(' ')[1])"
-      />
-      <datalist id="lst"></datalist>
+      <input type="text" list="langlist" id="lang" placeholder="language" />
+      <datalist id="langlist"></datalist>
 
       <p id="output" class="code"></p>
     </div>

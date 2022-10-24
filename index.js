@@ -1,9 +1,12 @@
+const query = (e) => document.querySelector(e);
+
+// Get languages and populate language list
 fetch("https://emkc.org/api/v2/piston/runtimes")
   .then((res) => res.json())
   .then((res) => {
     for (const n of res)
-      document.getElementById(
-        "lst"
+      query(
+        "#langlist"
       ).innerHTML += `<option value="${n.language} ${n.version}"/>`;
   });
 
@@ -34,20 +37,23 @@ let options = {
   },
 };
 
+const prepareData = () => {};
+
 // send POST request
 const run = () => {
-  const elem = document.getElementById("lang");
+  const elem = query("#lang");
   setLang(elem.value.split(" ")[0], elem.value.split(" ")[1]);
 
-  code.files[0].content = document.getElementById("code").value;
+  code.files[0].content = query("#code").value;
   options.body = JSON.stringify(code);
   fetch("https://emkc.org/api/v2/piston/execute", options)
     .then((res) => res.json())
     .then(
       (res) =>
-        (document.getElementById("output").innerHTML = JSON.stringify(
-          res.run.stdout
-        ).replace(/\\n/g, "<br>"))
+        (query("#output").innerHTML = JSON.stringify(res.run.stdout).replace(
+          /\\n/g,
+          "<br>"
+        ))
     );
 };
 
@@ -58,14 +64,14 @@ const setLang = (lang, version) => {
 };
 
 // Tab makes tabs
-document.getElementById("code").addEventListener(
+query("#code").addEventListener(
   "keydown",
   function (e) {
-    const cursor = document.getElementById("code").selectionStart;
+    const cursor = query("#code").selectionStart;
     if (e.keyCode === 9) {
       this.value = inject(this.value, cursor, "    ");
       e.preventDefault();
-      document.getElementById("code").selectionEnd = cursor + 4;
+      query("#code").selectionEnd = cursor + 4;
     }
   },
   false
