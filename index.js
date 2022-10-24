@@ -57,12 +57,12 @@ const prepareData = () => {
 run.addEventListener("click", () => {
   run.disabled = true;
   const bufferWheel = document.querySelector(".buffer-wheel");
-  bufferWheel.hidden = false;
+  bufferWheel.style.visibility = "visible";
   fetch("https://emkc.org/api/v2/piston/execute", prepareData())
     .then((res) => res.json())
     .then((res) => {
       run.disabled = false;
-      bufferWheel.hidden = true;
+      bufferWheel.style.visibility = "hidden";
       output.innerHTML = res.run.stdout || res.run.stderr;
     });
 });
