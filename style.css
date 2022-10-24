@@ -59,6 +59,7 @@ body {
 #lang {
   padding: 5px 5px;
   border-radius: 5px;
+  display: inline-block;
 }
 
 .buffer-wheel {
@@ -69,6 +70,7 @@ body {
   height: 12px;
   -webkit-animation: spin 2s linear infinite; /* Safari */
   animation: spin 2s linear infinite;
+  display: inline-block;
 }
 
 /* Safari */
