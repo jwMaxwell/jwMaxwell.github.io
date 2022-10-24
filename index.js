@@ -1,18 +1,14 @@
-const query = (e) => document.querySelector(e);
-
 // Get languages and populate language list
 fetch("https://emkc.org/api/v2/piston/runtimes")
   .then((res) => res.json())
   .then((res) => {
     for (const n of res)
-      query(
-        "#langlist"
-      ).innerHTML += `<option value="${n.language} ${n.version}"/>`;
+      langlist.innerHTML += `<option value="${n.language} ${n.version}"/>`;
   });
 
 // prepare data for POST request
 const prepareData = () => {
-  const langData = query("#lang").value.split(" ");
+  const langData = lang.value.split(" ");
   return {
     method: "POST",
     body: JSON.stringify({
@@ -21,7 +17,7 @@ const prepareData = () => {
       files: [
         {
           name: `code.${langData[0]}`,
-          content: query("#code").value,
+          content: code.value,
         },
       ],
       stdin: "",
@@ -41,25 +37,22 @@ const prepareData = () => {
 run.addEventListener("click", () => {
   fetch("https://emkc.org/api/v2/piston/execute", prepareData())
     .then((res) => res.json())
-    .then(
-      (res) =>
-        (query("#output").innerHTML = res.run.stdout.replace(/\\n/g, "<br>"))
-    );
+    .then((res) => (output.innerHTML = res.run.stdout.replace(/\\n/g, "<br>")));
 });
 
 // inject data into string
 const inject = (str, pos, val) =>
-  [str.slice(0, pos), val, str.slice(pos, str.length)].join("");
+  [str.slice(0, pos), val, str.slice(pos)].join("");
 
 // Tab makes tabs
-query("#code").addEventListener(
+code.addEventListener(
   "keydown",
   function (e) {
-    const position = query("#code").selectionStart;
+    const position = code.selectionStart;
     if (e.keyCode === 9) {
       this.value = inject(this.value, position, "    ");
       e.preventDefault();
-      query("#code").selectionEnd = position + 4;
+      code.selectionEnd = position + 4;
     }
   },
   false
