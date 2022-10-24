@@ -37,11 +37,9 @@ const prepareData = () => {
         {
           name: `code.${langData[0]}`,
           content: code.innerText
-            .replace(/[1-9]\n/g, "")
-            .split("")
-            .map((t) => t.charCodeAt())
-            .map((t) => (t === 160 ? 32 : t))
-            .map((t) => String.fromCharCode(t))
+            .replace(/[1-9]\n/g, "") // remove line numbers
+            .split("") // the rest of this is to remove some unicode silliness
+            .map((t) => (t.charCodeAt() === 160 ? String.fromCharCode(32) : t))
             .join(""),
         },
       ],
