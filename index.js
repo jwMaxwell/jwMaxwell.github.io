@@ -6,6 +6,20 @@ fetch("https://emkc.org/api/v2/piston/runtimes")
       langlist.innerHTML += `<option value="${n.language} ${n.version}"/>`;
   });
 
+require.config({
+  paths: {
+    vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs",
+  },
+});
+
+require(["vs/editor/editor.main"], () => {
+  monaco.editor.create(document.getElementById("code"), {
+    value: `// Your code here...`,
+    language: "javascript",
+    theme: "vs-dark",
+  });
+});
+
 // prepare data for POST request
 const prepareData = () => {
   const langData = lang.value.split(" ");
