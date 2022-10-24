@@ -58,12 +58,13 @@ const prepareData = () => {
 
 // send POST request
 run.addEventListener("click", () => {
+  run.disabled = true;
   fetch("https://emkc.org/api/v2/piston/execute", prepareData())
     .then((res) => res.json())
-    .then(
-      (res) =>
-        (output.innerHTML = res.run.stdout
-          ? res.run.stdout.replace(/\\n/g, "<br>")
-          : res.run.stderr.replace(/\\n/g, "<br>"))
-    );
+    .then((res) => {
+      run.disabled = false;
+      output.innerHTML = res.run.stdout
+        ? res.run.stdout.replace(/\\n/g, "<br>")
+        : res.run.stderr.replace(/\\n/g, "<br>");
+    });
 });
