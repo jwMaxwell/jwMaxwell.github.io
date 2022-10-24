@@ -22,9 +22,7 @@
         });
         require(["vs/editor/editor.main"], () => {
           monaco.editor.create(document.getElementById("code"), {
-            value: `function x() {
-  console.log("Hello world!");
-}`,
+            value: `// Your code here...`,
             language: "javascript",
             theme: "vs-dark",
           });
@@ -38,7 +36,7 @@
       ></textarea> -->
 
       <div class="island">
-        <button id="run" onclick="run()">Run</button>
+        <button id="run">Run</button>
         <input type="text" list="langlist" id="lang" placeholder="language" />
         <datalist id="langlist"></datalist>
 
