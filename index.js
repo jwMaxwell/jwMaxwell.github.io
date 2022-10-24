@@ -36,6 +36,9 @@ let options = {
 
 // send POST request
 const run = () => {
+  const elem = document.getElementById("lang");
+  setLang(elem.value.split(" ")[0], elem.value.split(" ")[1]);
+
   code.files[0].content = document.getElementById("code").value;
   options.body = JSON.stringify(code);
   fetch("https://emkc.org/api/v2/piston/execute", options)
