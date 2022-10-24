@@ -54,9 +54,9 @@ run.addEventListener("click", () => {
     .then((res) => res.json())
     .then(
       (res) =>
-        (output.innerHTML =
-          res.run.stdout.replace(/\\n/g, "<br>") ??
-          res.run.stderr.replace(/\\n/g, "<br>"))
+        (output.innerHTML = res.run.stdout
+          ? res.run.stdout.replace(/\\n/g, "<br>")
+          : res.run.stderr.replace(/\\n/g, "<br>"))
     );
 });
 
