@@ -31,7 +31,7 @@ body {
   font-family: monospace;
 }
 
-button {
+#run {
   background-color: #4caf50;
   border: none;
   color: white;
@@ -45,7 +45,7 @@ button {
   border-radius: 5px;
 }
 
-button:active {
+#run:active {
   background-color: #3b8a3e;
 }
 
