@@ -13,7 +13,7 @@ require.config({
 });
 
 require(["vs/editor/editor.main"], () => {
-  monaco.editor.create(document.getElementById("code"), {
+  const editor = monaco.editor.create(document.getElementById("code"), {
     value: `// Your code here...`,
     language: "javascript",
     theme: "vs-dark",
