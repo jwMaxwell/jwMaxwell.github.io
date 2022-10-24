@@ -44,6 +44,11 @@ button {
   cursor: pointer;
   border-radius: 5px;
 }
+
 button:active {
   background-color: #3b8a3e;
+}
+
+#lang {
+  padding: 5px 5px;
 }
