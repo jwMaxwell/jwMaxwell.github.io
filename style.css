@@ -13,6 +13,7 @@ body {
   background-color: #424141;
   color: #f1f1f1;
   display: inline;
+  position: relative;
 }
 
 #code {
@@ -27,6 +28,7 @@ body {
   color: #f1f1f1;
   text-decoration: none;
   display: inline;
+  position: relative;
 }
 
 .output {
