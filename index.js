@@ -21,6 +21,10 @@ require(["vs/editor/editor.main"], () => {
   });
 });
 
+lang.addEventListener("change", () => {
+  monaco.editor.setModelLanguage(editor.getModel(), lang.value.split(" ")[0]);
+});
+
 // prepare data for POST request
 const prepareData = () => {
   const langData = lang.value.split(" ");
@@ -59,21 +63,3 @@ run.addEventListener("click", () => {
           : res.run.stderr.replace(/\\n/g, "<br>"))
     );
 });
-
-// // inject data into string
-// const inject = (str, pos, val) =>
-//   [str.slice(0, pos), val, str.slice(pos)].join("");
-
-// // Tab makes tabs
-// code.addEventListener(
-//   "keydown",
-//   function (e) {
-//     const position = code.selectionStart;
-//     if (e.keyCode === 9) {
-//       this.value = inject(this.value, position, "    ");
-//       e.preventDefault();
-//       code.selectionEnd = position + 4;
-//     }
-//   },
-//   false
-// );
