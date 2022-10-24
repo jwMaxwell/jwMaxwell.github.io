@@ -18,7 +18,7 @@ body {
   font-family: monospace;
 }
 
-.code {
+textarea {
   width: 95%;
   height: 45vh;
   padding: 12px 20px;
