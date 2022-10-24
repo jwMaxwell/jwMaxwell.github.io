@@ -10,43 +10,34 @@ fetch("https://emkc.org/api/v2/piston/runtimes")
       ).innerHTML += `<option value="${n.language} ${n.version}"/>`;
   });
 
-// post body data
-let code = {
-  language: "js",
-  version: "1.16.2",
-  files: [
-    {
-      name: "code.js",
-      content: "console.log('hello world')",
+const prepareData = () => {
+  return {
+    method: "POST",
+    body: JSON.stringify({
+      language: query("#lang").value.split(" ")[0],
+      version: query("#lang").value.split(" ")[1],
+      files: [
+        {
+          name: `code.${query("#lang").value.split(" ")[0]}`,
+          content: query("#code").value,
+        },
+      ],
+      stdin: "",
+      args: [],
+      compile_timeout: 10000,
+      run_timeout: 30000,
+      compile_memory_limit: -1,
+      run_memory_limit: -1,
+    }),
+    headers: {
+      "Content-Type": "application/json",
     },
-  ],
-  stdin: "",
-  args: [],
-  compile_timeout: 10000,
-  run_timeout: 3000,
-  compile_memory_limit: -1,
-  run_memory_limit: -1,
+  };
 };
-
-// request options
-let options = {
-  method: "POST",
-  body: JSON.stringify(code),
-  headers: {
-    "Content-Type": "application/json",
-  },
-};
-
-const prepareData = () => {};
 
 // send POST request
 const run = () => {
-  const elem = query("#lang");
-  setLang(elem.value.split(" ")[0], elem.value.split(" ")[1]);
-
-  code.files[0].content = query("#code").value;
-  options.body = JSON.stringify(code);
-  fetch("https://emkc.org/api/v2/piston/execute", options)
+  fetch("https://emkc.org/api/v2/piston/execute", prepareData())
     .then((res) => res.json())
     .then(
       (res) =>
