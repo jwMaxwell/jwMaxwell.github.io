@@ -5,20 +5,20 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <div class="island">
-      <!-- <textarea
+    <div class="container">
+      <textarea
         id="code"
         spellcheck="false"
         placeholder="// Your code here..."
-      ></textarea> -->
-    </div>
+      ></textarea>
 
-    <div class="island">
-      <button id="run" onclick="run()">Run</button>
-      <input type="text" list="langlist" id="lang" placeholder="language" />
-      <datalist id="langlist"></datalist>
+      <div class="island">
+        <button id="run" onclick="run()">Run</button>
+        <input type="text" list="langlist" id="lang" placeholder="language" />
+        <datalist id="langlist"></datalist>
 
-      <p id="output" class="output"></p>
+        <p id="output" class="output"></p>
+      </div>
     </div>
 
     <script src="./index.js"></script>

@@ -2,9 +2,14 @@ body {
   background-color: rgb(37, 37, 37);
 }
 
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
 .island {
-  width: 45vh;
-  height: 95vh;
+  /* width: 45vh;
+  height: 95vh; */
   padding-left: 10px;
   padding-right: 10px;
   border: 1px solid #b8b8b8;
@@ -17,8 +22,8 @@ body {
 }
 
 #code {
-  width: 45vh;
-  height: 95vh;
+  /* width: 45vh;
+  height: 95vh; */
   padding: 12px 20px;
   box-sizing: border-box;
   border: 1px solid #b8b8b8;
