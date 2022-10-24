@@ -12,14 +12,15 @@ fetch("https://emkc.org/api/v2/piston/runtimes")
 
 // prepare data for POST request
 const prepareData = () => {
+  const langData = query("#lang").value.split(" ");
   return {
     method: "POST",
     body: JSON.stringify({
-      language: query("#lang").value.split(" ")[0],
-      version: query("#lang").value.split(" ")[1],
+      language: langData[0],
+      version: langData[1],
       files: [
         {
-          name: `code.${query("#lang").value.split(" ")[0]}`,
+          name: `code.${langData[0]}`,
           content: query("#code").value,
         },
       ],
@@ -37,17 +38,14 @@ const prepareData = () => {
 };
 
 // send POST request
-const run = () => {
+run.addEventListener("click", () => {
   fetch("https://emkc.org/api/v2/piston/execute", prepareData())
     .then((res) => res.json())
     .then(
       (res) =>
-        (query("#output").innerHTML = JSON.stringify(res.run.stdout).replace(
-          /\\n/g,
-          "<br>"
-        ))
+        (query("#output").innerHTML = res.run.stdout.replace(/\\n/g, "<br>"))
     );
-};
+});
 
 // inject data into string
 const inject = (str, pos, val) =>
