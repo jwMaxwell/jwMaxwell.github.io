@@ -12,6 +12,7 @@ body {
   font-size: 16px;
   background-color: #424141;
   color: #f1f1f1;
+  display: inline-block;
 }
 
 #code {
@@ -25,6 +26,7 @@ body {
   background-color: #424141;
   color: #f1f1f1;
   text-decoration: none;
+  display: inline-block;
 }
 
 .output {
