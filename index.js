@@ -55,20 +55,20 @@ run.addEventListener("click", () => {
     .then((res) => (output.innerHTML = res.run.stdout.replace(/\\n/g, "<br>")));
 });
 
-// inject data into string
-const inject = (str, pos, val) =>
-  [str.slice(0, pos), val, str.slice(pos)].join("");
+// // inject data into string
+// const inject = (str, pos, val) =>
+//   [str.slice(0, pos), val, str.slice(pos)].join("");
 
-// Tab makes tabs
-code.addEventListener(
-  "keydown",
-  function (e) {
-    const position = code.selectionStart;
-    if (e.keyCode === 9) {
-      this.value = inject(this.value, position, "    ");
-      e.preventDefault();
-      code.selectionEnd = position + 4;
-    }
-  },
-  false
-);
+// // Tab makes tabs
+// code.addEventListener(
+//   "keydown",
+//   function (e) {
+//     const position = code.selectionStart;
+//     if (e.keyCode === 9) {
+//       this.value = inject(this.value, position, "    ");
+//       e.preventDefault();
+//       code.selectionEnd = position + 4;
+//     }
+//   },
+//   false
+// );
