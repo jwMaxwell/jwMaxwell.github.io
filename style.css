@@ -34,7 +34,7 @@ body {
 }
 
 #run {
-  background-color: #4caf50;
+  background-color: #51bb54;
   border: none;
   color: white;
   padding: 5px 5px;
@@ -94,10 +94,10 @@ body {
 }
 
 .dropbtn {
-  background-color: #04aa6d;
+  background-color: #51bb54;
   color: white;
-  padding: 16px;
-  font-size: 16px;
+  padding: 5px;
+  font-size: 5px;
   border: none;
 }
 
