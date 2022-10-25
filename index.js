@@ -23,12 +23,12 @@ require(["vs/editor/editor.main"], () => {
 });
 
 lang.addEventListener("change", () => {
-  monaco.editor.setModelLanguage(editor.getModel(), lang.value.split(" ")[0]);
+  monaco.editor.setModelLanguage(editor.getModel(), lang.value.split(/\s+/)[0]);
 });
 
 // prepare data for POST request
 const prepareData = () => {
-  const [language, version] = lang.value.split(" ");
+  const [language, version] = lang.value.split(/\s+/);
   return {
     method: "POST",
     body: JSON.stringify({
@@ -40,10 +40,10 @@ const prepareData = () => {
           content: editor.getValue(),
         },
       ],
-      stdin: "",
-      args: [],
-      compile_timeout: 10000,
-      run_timeout: 30000,
+      stdin: stdinput.value,
+      args: args.value.split(/\s+/),
+      compile_timeout: Number(timeout.value),
+      run_timeout: Number(timeout.value),
       compile_memory_limit: -1,
       run_memory_limit: -1,
     }),
