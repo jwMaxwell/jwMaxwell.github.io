@@ -19,6 +19,7 @@ require(["vs/editor/editor.main"], () => {
     value: `// Your code here...`,
     language: "javascript",
     theme: "vs-dark",
+    bracketPairColorization: true,
   });
 });
 
