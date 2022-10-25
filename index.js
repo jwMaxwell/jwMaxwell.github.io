@@ -53,16 +53,20 @@ const prepareData = () => {
   };
 };
 
+const bufferState = (bool) => {
+  run.disabled = bool ? true : false;
+  document.querySelector(".buffer-wheel").style.visibility = bool
+    ? "visible"
+    : "hidden";
+};
+
 // send POST request
 run.addEventListener("click", () => {
-  run.disabled = true;
-  const bufferWheel = document.querySelector(".buffer-wheel");
-  bufferWheel.style.visibility = "visible";
+  bufferState(true);
   fetch("https://emkc.org/api/v2/piston/execute", prepareData())
     .then((res) => res.json())
     .then((res) => {
-      run.disabled = false;
-      bufferWheel.style.visibility = "hidden";
+      bufferState(false);
       output.innerText = res.run.stdout || res.run.stderr;
     });
 });
