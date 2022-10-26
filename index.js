@@ -73,13 +73,16 @@ run.addEventListener("click", () => {
 });
 
 // get themes
-const themejson = JSON.parse(require("./themes.json"));
-for (title of Object.keys(themejson)) {
-  themes.innerHTML += `<option value="${title}" />`;
-  Monaco.defineTheme(title, themejson[`${title}`]);
-}
+fetch("./theme.json")
+  .then((res) => res.json())
+  .then((res) => {
+    const titles = Object.keys(res);
+    themes.innerHTML = titles.map((n) => `<option value="${n}" />`).join("");
+
+    for (title of res) Monaco.defineTheme(title, titles[`${title}`]);
+  });
 
 // set themes
 theme.addEventListener("change", () => {
-  Monaco.setTheme(this.value in themejson ? this.value : "vs-dark");
+  Monaco.setTheme(this.value ?? "vs-dark");
 });
