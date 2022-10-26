@@ -82,7 +82,7 @@ fetch("themes.json")
       .join("");
 
     for (title of Object.keys(res))
-      Monaco.defineTheme(title, titles[`${title.replace(".json", "")}`]);
+      monaco.editor.defineTheme(title, titles[`${title.replace(".json", "")}`]);
   });
 
 // set themes
