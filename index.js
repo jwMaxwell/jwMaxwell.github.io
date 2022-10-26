@@ -73,7 +73,7 @@ run.addEventListener("click", () => {
 });
 
 // get themes
-fetch("./theme.json")
+fetch("themes.json")
   .then((res) => res.json())
   .then((res) => {
     const titles = Object.keys(res);
