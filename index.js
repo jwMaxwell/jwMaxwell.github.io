@@ -77,12 +77,15 @@ fetch("themes.json")
   .then((res) => res.json())
   .then((res) => {
     const titles = Object.keys(res);
-    themes.innerHTML = titles.map((n) => `<option value="${n}" />`).join("");
+    themes.innerHTML = titles
+      .map((n) => `<option value="${n.replace(".json", "")}" />`)
+      .join("");
 
-    for (title of res) Monaco.defineTheme(title, titles[`${title}`]);
+    for (title of res)
+      Monaco.defineTheme(title, titles[`${title.replace(".json", "")}`]);
   });
 
 // set themes
 theme.addEventListener("change", () => {
-  Monaco.setTheme(this.value ?? "vs-dark");
+  monaco.editor.setTheme(this.value ?? "vs-dark");
 });
