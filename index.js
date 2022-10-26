@@ -81,7 +81,7 @@ fetch("themes.json")
       .map((n) => `<option value="${n.replace(".json", "")}" />`)
       .join("");
 
-    for (title of res)
+    for (title of Object.keys(res))
       Monaco.defineTheme(title, titles[`${title.replace(".json", "")}`]);
   });
 
