@@ -87,8 +87,11 @@ fetch("themes.json")
       .map((n) => `<option value="${n}" />`)
       .join("");
 
-    for (title of Object.keys(res))
-      monaco.editor.defineTheme(titles[title], res[title]);
+    for (title of Object.keys(res)) {
+      require(["vs/editor/editor.main"], () => {
+        monaco.editor.defineTheme(titles[title], res[title]);
+      });
+    }
   });
 
 // set themes
