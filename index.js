@@ -71,3 +71,15 @@ run.addEventListener("click", () => {
       output.innerText = res.run.stdout || res.run.stderr;
     });
 });
+
+// get themes
+const themejson = JSON.parse(require("./themes.json"));
+for (title of Object.keys(themejson)) {
+  themes.innerHTML += `<option value="${title}" />`;
+  Monaco.defineTheme(title, themejson[`${title}`]);
+}
+
+// set themes
+theme.addEventListener("change", () => {
+  Monaco.setTheme(this.value in themejson ? this.value : "vs-dark");
+});
