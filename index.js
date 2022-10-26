@@ -76,14 +76,25 @@ run.addEventListener("click", () => {
 fetch("themes.json")
   .then((res) => res.json())
   .then((res) => {
-    const titles = Object.keys(res);
-    themes.innerHTML = titles
-      .map((n) => `<option value="${n.replace(".json", "")}" />`)
+    const titles = {};
+    for (n of Object.keys(res))
+      titles[n] = n
+        .replace(".json", "")
+        .replace(/\s+|_/g, "-")
+        .replace(/\(.*?\)/g, "");
+
+    themes.innerHTML = Object.values(titles)
+      .map((n) => `<option value="${n}" />`)
       .join("");
 
     for (title of Object.keys(res))
-      monaco.editor.defineTheme(title, titles[`${title.replace(".json", "")}`]);
+      monaco.editor.defineTheme(titles[title], res[title]);
   });
+
+title
+  .replace(".json", "")
+  .replace(/\s+|_/g, "-")
+  .replace(/\(.*?\)/g, "");
 
 // set themes
 theme.addEventListener("change", () => {
