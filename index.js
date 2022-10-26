@@ -91,11 +91,6 @@ fetch("themes.json")
       monaco.editor.defineTheme(titles[title], res[title]);
   });
 
-title
-  .replace(".json", "")
-  .replace(/\s+|_/g, "-")
-  .replace(/\(.*?\)/g, "");
-
 // set themes
 theme.addEventListener("change", () => {
   monaco.editor.setTheme(this.value ?? "vs-dark");
