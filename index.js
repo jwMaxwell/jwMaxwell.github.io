@@ -91,5 +91,5 @@ fetch("themes.json")
 
 // set themes
 theme.addEventListener("change", () => {
-  monaco.editor.setTheme(this.value);
+  monaco.editor.setTheme(theme.value);
 });
