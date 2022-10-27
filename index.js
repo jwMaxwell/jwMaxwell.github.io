@@ -88,6 +88,8 @@ fetch("themes.json")
       .join("");
 
     for (n of Object.keys(res)) {
+      console.log(titles[n]);
+      console.log(res[n]);
       require(["vs/editor/editor.main"], () => {
         monaco.editor.defineTheme(titles[n], res[n]);
       });
