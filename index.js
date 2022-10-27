@@ -76,24 +76,17 @@ run.addEventListener("click", () => {
 fetch("themes.json")
   .then((res) => res.json())
   .then((res) => {
-    const titles = {};
-    for (n of Object.keys(res))
-      titles[n] = n
-        .replace(".json", "")
-        .replace(/\s+|_/g, "-")
-        .replace(/\(.*?\)/g, "");
-
-    themes.innerHTML = Object.values(titles)
+    themes.innerHTML = Object.keys(res)
       .map((n) => `<option value="${n}" />`)
       .join("");
 
-    for (n of Object.keys(res)) {
-      console.log(titles[n]);
-      console.log(res[n]);
-      require(["vs/editor/editor.main"], () => {
-        monaco.editor.defineTheme(titles[n], res[n]);
-      });
-    }
+    require(["vs/editor/editor.main"], () => {
+      for (n of Object.keys(res)) {
+        console.log(n);
+        console.log(res[n]);
+        monaco.editor.defineTheme(n, res[n]);
+      }
+    });
   });
 
 // set themes
