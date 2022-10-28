@@ -37,7 +37,7 @@ const prepareData = () => {
       version: version,
       files: [
         {
-          name: `code.${language}`,
+          name: `code`,
           content: editor.getValue(),
         },
       ],
