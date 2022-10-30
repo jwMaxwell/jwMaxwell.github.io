@@ -128,18 +128,11 @@ body {
   display: block;
 }
 
-.advspace {
-  padding: 12px 42px;
-  text-decoration: none;
-  display: block;
-  background-color: #ffffff00;
-}
-
 .dropdown-content a:hover {
   background-color: #ddd;
 }
 
-.dropdown:hover .dropdown-content {
+.dropdown:hover .dropdown-content option:hover {
   display: block;
 }
 
