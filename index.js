@@ -82,8 +82,6 @@ fetch("themes.json")
 
     require(["vs/editor/editor.main"], () => {
       for (n of Object.keys(res)) {
-        console.log(n);
-        console.log(res[n]);
         monaco.editor.defineTheme(n, res[n]);
       }
     });
@@ -96,6 +94,5 @@ theme.addEventListener("change", () => {
 
 // dropdown toggle
 dropdown.addEventListener("click", () => {
-  this.classList.toggle("show-dropdwn");
-  console.log("clicky click");
+  dropdown.classList.toggle("show-dropdwn");
 });
