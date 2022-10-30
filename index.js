@@ -41,7 +41,7 @@ const prepareData = () => {
           content: editor.getValue(),
         },
       ],
-      stdin: stdinput.value,
+      stdin: stdinput.value ?? "",
       args: args.value.split(/\s+/) ?? "",
       compile_timeout: parseInt(timeout.value) ?? "",
       run_timeout: parseInt(timeout.value) ?? "",
