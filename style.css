@@ -132,14 +132,10 @@ body {
   background-color: #ddd;
 }
 
-.show-dropdwn {
-  display: inline-block;
-}
-
 .show-content {
   display: block;
 }
 
-.dropdown:hover .dropbtn {
+.dropbtn:hover {
   background-color: #3e8e41;
 }

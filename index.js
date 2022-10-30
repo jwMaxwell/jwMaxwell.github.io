@@ -94,6 +94,5 @@ theme.addEventListener("change", () => {
 
 // dropdown toggle
 document.querySelector(".dropbtn").addEventListener("click", () => {
-  // dropdown.classList.toggle("show-dropdwn");
-  dropdwncontent.classList.toggle("show-content");
+  document.querySelector(".dropdown-content").classList.toggle("show-content");
 });
