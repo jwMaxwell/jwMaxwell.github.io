@@ -97,4 +97,5 @@ theme.addEventListener("change", () => {
 // dropdown toggle
 dropdown.addEventListener("click", () => {
   this.classList.toggle("show-dropdwn");
+  console.log("clicky click");
 });
