@@ -1,12 +1,3 @@
-// Get languages and populate language list
-fetch("https://emkc.org/api/v2/piston/runtimes")
-  .then((res) => res.json())
-  .then((res) => {
-    langlist.innerHTML = res
-      .map((n) => `<option value="${n.language} ${n.version}" />`)
-      .join("");
-  });
-
 require.config({
   paths: {
     vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs",
@@ -54,6 +45,30 @@ const prepareData = () => {
   };
 };
 
+// Get languages and populate language list
+fetch("https://emkc.org/api/v2/piston/runtimes")
+  .then((res) => res.json())
+  .then((res) => {
+    langlist.innerHTML = res
+      .map((n) => `<option value="${n.language} ${n.version}" />`)
+      .join("");
+  });
+
+// get themes
+fetch("themes.json")
+  .then((res) => res.json())
+  .then((res) => {
+    themes.innerHTML = Object.keys(res)
+      .map((n) => `<option value="${n}" />`)
+      .join("");
+
+    require(["vs/editor/editor.main"], () => {
+      for (n of Object.keys(res)) {
+        monaco.editor.defineTheme(n, res[n]);
+      }
+    });
+  });
+
 const bufferState = (bool) => {
   run.disabled = bool ? true : false;
   document.querySelector(".buffer-wheel").style.visibility = bool
@@ -71,21 +86,6 @@ run.addEventListener("click", () => {
       output.innerText = res.run.stdout || res.run.stderr;
     });
 });
-
-// get themes
-fetch("themes.json")
-  .then((res) => res.json())
-  .then((res) => {
-    themes.innerHTML = Object.keys(res)
-      .map((n) => `<option value="${n}" />`)
-      .join("");
-
-    require(["vs/editor/editor.main"], () => {
-      for (n of Object.keys(res)) {
-        monaco.editor.defineTheme(n, res[n]);
-      }
-    });
-  });
 
 // set themes
 theme.addEventListener("change", () => {
