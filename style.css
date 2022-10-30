@@ -136,6 +136,10 @@ body {
   display: block;
 }
 
+.show-content {
+  display: inline-block;
+}
+
 .dropdown:hover .dropbtn {
   background-color: #3e8e41;
 }
