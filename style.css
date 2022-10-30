@@ -133,11 +133,11 @@ body {
 }
 
 .show-dropdwn {
-  display: block;
+  display: inline-block;
 }
 
 .show-content {
-  display: inline-block;
+  display: block;
 }
 
 .dropdown:hover .dropbtn {
