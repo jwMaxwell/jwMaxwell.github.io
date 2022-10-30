@@ -128,11 +128,11 @@ body {
   display: block;
 }
 
-.dropdown-content a:hover {
+.dropdown-content {
   background-color: #ddd;
 }
 
-.dropdown:hover .dropdown-content option:hover {
+.show-dropdwn {
   display: block;
 }
 

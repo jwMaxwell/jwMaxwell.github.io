@@ -93,3 +93,8 @@ fetch("themes.json")
 theme.addEventListener("change", () => {
   monaco.editor.setTheme(theme.value);
 });
+
+// dropdown toggle
+dropdown.addEventListener("click", () => {
+  this.classList.toggle("show-dropdwn");
+});
