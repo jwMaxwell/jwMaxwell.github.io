@@ -7,7 +7,9 @@ require.config({
 let editor;
 require(["vs/editor/editor.main"], () => {
   editor = monaco.editor.create(document.getElementById("code"), {
-    value: `// Your code here...`,
+    value: location.hash
+      ? atob(location.hash.slice(1))
+      : `// Your code here...`,
     language: "javascript",
     theme: "vs-dark",
     bracketPairColorization: true,
@@ -78,6 +80,7 @@ const bufferState = (bool) => {
 
 // send POST request
 run.addEventListener("click", () => {
+  location.hash = btoa(editor.getValue());
   bufferState(true);
   fetch("https://emkc.org/api/v2/piston/execute", prepareData())
     .then((res) => res.json())
