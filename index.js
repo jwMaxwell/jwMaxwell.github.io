@@ -83,7 +83,7 @@ run.addEventListener("click", () => {
     .then((res) => res.json())
     .then((res) => {
       bufferState(false);
-      output.innerText = res.run.stdout || res.run.stderr;
+      output.innerText = res.compile.stderr || res.run.output;
     });
 });
 
