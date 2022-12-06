@@ -4,14 +4,15 @@ require.config({
   },
 });
 
+const urlOptions = atob(location.hash);
 let editor;
 require(["vs/editor/editor.main"], () => {
   editor = monaco.editor.create(document.getElementById("code"), {
     value: location.hash
-      ? atob(location.hash.slice(str.indexOf("^") + 1))
+      ? urlOptions.slice(urlOptions.indexOf("^") + 1)
       : `// Your code here...`,
     language: location.hash
-      ? location.hash.slice(1, str.indexOf("^"))
+      ? urlOptions.slice(1, urlOptions.indexOf("^"))
       : "javascript",
     theme: "vs-dark",
     bracketPairColorization: true,
