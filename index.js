@@ -8,9 +8,11 @@ let editor;
 require(["vs/editor/editor.main"], () => {
   editor = monaco.editor.create(document.getElementById("code"), {
     value: location.hash
-      ? atob(location.hash.slice(1))
+      ? atob(location.hash.slice(str.indexOf("^") + 1))
       : `// Your code here...`,
-    language: "javascript",
+    language: location.hash
+      ? location.hash.slice(1, str.indexOf("^"))
+      : "javascript",
     theme: "vs-dark",
     bracketPairColorization: true,
   });
@@ -80,7 +82,7 @@ const bufferState = (bool) => {
 
 // send POST request
 run.addEventListener("click", () => {
-  location.hash = btoa(editor.getValue());
+  location.hash = btoa(`${lang.value}^${editor.getValue()}`);
   bufferState(true);
   fetch("https://emkc.org/api/v2/piston/execute", prepareData())
     .then((res) => res.json())
