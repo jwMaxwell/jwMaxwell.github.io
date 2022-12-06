@@ -12,7 +12,7 @@ require(["vs/editor/editor.main"], () => {
       ? urlOptions.slice(urlOptions.indexOf("^") + 1)
       : `// Your code here...`,
     language: location.hash
-      ? urlOptions.slice(0, urlOptions.indexOf("^"))
+      ? urlOptions.slice(0, urlOptions.indexOf("^")).slice(/\s+/)[0]
       : "javascript",
     theme: "vs-dark",
     bracketPairColorization: true,
@@ -57,6 +57,8 @@ fetch("https://emkc.org/api/v2/piston/runtimes")
     langlist.innerHTML = res
       .map((n) => `<option value="${n.language} ${n.version}" />`)
       .join("");
+    if (location.hash)
+      lang.value = urlOptions.slice(0, urlOptions.indexOf("^"));
   });
 
 // get themes
