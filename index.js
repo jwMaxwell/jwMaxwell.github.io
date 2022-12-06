@@ -12,7 +12,7 @@ require(["vs/editor/editor.main"], () => {
       ? urlOptions.slice(urlOptions.indexOf("^") + 1)
       : `// Your code here...`,
     language: location.hash
-      ? urlOptions.slice(0, urlOptions.indexOf("^")).slice(/\s+/)[0]
+      ? urlOptions.slice(0, urlOptions.indexOf("^")).split(/\s+/)[0]
       : "javascript",
     theme: "vs-dark",
     bracketPairColorization: true,
