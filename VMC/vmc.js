@@ -94,6 +94,6 @@ asm.addEventListener("keyup", (e) => {
     const line = code[memory[0]];
     console.debug(`DEBUG: ${line}`);
     const bytes = line.match(/.{1,8}/g);
-    instructions[bytes[0]](...bytes.slice(1).map((t) => parseInt(t, 2)));
+    cmds[bytes[0]](...bytes.slice(1).map((t) => parseInt(t, 2)));
   }
 });
