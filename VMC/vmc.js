@@ -55,6 +55,7 @@ const cmds = {
   "01010000": (_, loc, dest) => (memory[dest] = memory[loc]), //move
 
   "01100000": (op, x, y) => {
+    console.log(`${op} ${x} ${y}`);
     if (op === 0) {
       let i = y;
       let res = "";
