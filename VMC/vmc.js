@@ -1,4 +1,4 @@
-let mem = [0];
+let memory = [0];
 
 const binop = (a, op, b) => {
   const opRgx = new RegExp(
@@ -17,7 +17,7 @@ const branch = (op, x, y, z) => {
   y = parseInt(y, 2);
   z = parseInt(z, 2);
 
-  if (binop(mem[x], op, mem[y])) mem[0] += z;
+  if (binop(memory[x], op, memory[y])) memory[0] += z;
 };
 
 const $toBin = (x) => x.toString(2).padStart(8, "0");
@@ -31,28 +31,35 @@ const instructions = {
   "00010100": (x, y, z) => branch("<=", x, y, z),
   "00010101": (x, y, z) => branch(">=", x, y, z),
 
-  "00100000": (_, x, y) => mem.push(binop(parseInt(x, 2), "+", parseInt(y, 2))),
-  "00100001": (_, x, y) => mem.push(binop(parseInt(x, 2), "-", parseInt(y, 2))),
-  "00100010": (_, x, y) => mem.push(binop(parseInt(x, 2), "*", parseInt(y, 2))),
-  "00100011": (_, x, y) => mem.push(binop(parseInt(x, 2), "/", parseInt(y, 2))),
-  "00100100": (_, x, y) => mem.push(binop(parseInt(x, 2), "%", parseInt(y, 2))),
+  "00100000": (_, x, y) =>
+    memory.push(binop(parseInt(x, 2), "+", parseInt(y, 2))),
+  "00100001": (_, x, y) =>
+    memory.push(binop(parseInt(x, 2), "-", parseInt(y, 2))),
+  "00100010": (_, x, y) =>
+    memory.push(binop(parseInt(x, 2), "*", parseInt(y, 2))),
+  "00100011": (_, x, y) =>
+    memory.push(binop(parseInt(x, 2), "/", parseInt(y, 2))),
+  "00100100": (_, x, y) =>
+    memory.push(binop(parseInt(x, 2), "%", parseInt(y, 2))),
 
-  "00110000": (_, x, y) => mem.push(binop(parseInt(x, 2), "&", parseInt(y, 2))),
-  "00110001": (_, x, y) => mem.push(binop(parseInt(x, 2), "|", parseInt(y, 2))),
+  "00110000": (_, x, y) =>
+    memory.push(binop(parseInt(x, 2), "&", parseInt(y, 2))),
+  "00110001": (_, x, y) =>
+    memory.push(binop(parseInt(x, 2), "|", parseInt(y, 2))),
   "00110010": (_, x, y) =>
-    mem.push(binop(parseInt(x, 2), ">>", parseInt(y, 2))),
+    memory.push(binop(parseInt(x, 2), ">>", parseInt(y, 2))),
   "00110011": (_, x, y) =>
-    mem.push(binop(parseInt(x, 2), "<<", parseInt(y, 2))),
+    memory.push(binop(parseInt(x, 2), "<<", parseInt(y, 2))),
 
-  "01000000": (addr, x1, x2) => (mem[addr] = bind(x1, x2)), //store
-  "01010000": (_, loc, dest) => (mem[dest] = mem[loc]), //move
+  "01000000": (addr, x1, x2) => (memory[addr] = bind(x1, x2)), //store
+  "01010000": (_, loc, dest) => (memory[dest] = memory[loc]), //move
 
   "01100000": (op, x, y) => {
     if (op === 0) {
       let i = y;
       let res = "";
-      while (mem[i] !== 0) {
-        res += String.fromCharCode(mem[i]);
+      while (memory[i] !== 0) {
+        res += String.fromCharCode(memory[i]);
         ++i;
       }
       output.innerText += res;
@@ -60,10 +67,10 @@ const instructions = {
     }
   }, //system
 
-  "01110000": (x1, x2, x3) => mem.push(bind(x1, x2, x3)), //push
-  10000000: (_1, _2, _3) => mem.pop(), //pop
-  10010000: (x1, x2, x3) => (mem[0] += bind(x1, x2, x3)), //jump
-  10100000: (_1, _2, _3) => (mem = [0]), //clean
+  "01110000": (x1, x2, x3) => memory.push(bind(x1, x2, x3)), //push
+  10000000: (_1, _2, _3) => memory.pop(), //pop
+  10010000: (x1, x2, x3) => (memory[0] += bind(x1, x2, x3)), //jump
+  10100000: (_1, _2, _3) => (memory = [0]), //clean
 };
 
 const decode = (dat) =>
@@ -83,21 +90,10 @@ asm.addEventListener("keyup", (e) => {
   output.innerText = "";
   const code = decode(encode(vmc.innerText)).match(/.{1,32}/g);
 
-  for (mem[0]; mem[0] < code.length; ++mem[0]) {
-    const line = code[mem[0]];
+  for (memory[0]; memory[0] < code.length; ++memory[0]) {
+    const line = code[memory[0]];
     console.debug(`DEBUG: ${line}`);
     const bytes = line.match(/.{1,8}/g);
     instructions[bytes[0]](...bytes.slice(1).map((t) => parseInt(t, 2)));
   }
 });
-
-// const main = (() => {
-//   const code = decode(encode(data)).match(/.{1,32}/g);
-
-//   for (mem[0]; mem[0] < code.length; ++mem[0]) {
-//     const line = code[mem[0]];
-//     console.debug(`DEBUG: ${line}`);
-//     const bytes = line.match(/.{1,8}/g);
-//     instructions[bytes[0]](...bytes.slice(1).map((t) => parseInt(t, 2)));
-//   }
-// })();
