@@ -20,8 +20,8 @@ const branch = (op, x, y, z) => {
   if (binop(mem[x], op, mem[y])) mem[0] += z;
 };
 
-const toBin = (x) => x.toString(2).padStart(8, "0");
-const bind = (...x) => parseInt(x.map(toBin).join(""), 2);
+const $toBin = (x) => x.toString(2).padStart(8, "0");
+const bind = (...x) => parseInt(x.map($toBin).join(""), 2);
 
 const instructions = {
   "00010000": (x, y, z) => branch("===", x, y, z),
@@ -72,7 +72,7 @@ const instructions = {
 const decode = (dat) =>
   dat
     .split("")
-    .map((t) => toBin(t.charCodeAt(0)))
+    .map((t) => $toBin(t.charCodeAt(0)))
     .join("");
 
 const encode = (dat) =>
