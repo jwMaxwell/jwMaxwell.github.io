@@ -71,12 +71,7 @@ asm.addEventListener("keyup", (e) => {
   }
   vmc.innerText = res
     .split("\n")
-    .map((t) =>
-      t
-        .replace(/ /g, "")
-        .match(/.{1,8}/g)
-        .join(" ")
-    )
+    .map((t) => t.replace(/\s+/g, ""))
     .join("\n");
 });
 
