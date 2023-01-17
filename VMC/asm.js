@@ -66,6 +66,7 @@ asm.addEventListener("keyup", (e) => {
   const lines = escapeChars(asm.value).split("\n");
   let res = "";
   for (const line of lines) {
+    if (line === "") continue;
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
     res += `${instructions[args[0]](...args.slice(1))}\n`;
   }
@@ -74,33 +75,3 @@ asm.addEventListener("keyup", (e) => {
     .map((t) => t.replace(/\s+/g, ""))
     .join("\n");
 });
-
-// const main = (() => {
-//   code = `PUSH 0x48
-// PUSH 0x65
-// PUSH 0x6c
-// PUSH 0x6c
-// PUSH 0x6f
-// PUSH 0x2c
-// PUSH 0x20
-// PUSH 0x57
-// PUSH 0x6f
-// PUSH 0x72
-// PUSH 0x6c
-// PUSH 0x64
-// PUSH 0x21
-// PUSH 0x00
-// SYSTEM PRINT 0x01`;
-
-//   code2 = `PUSH "Hello, World!"
-// SYSTEM PRINT 0x01`;
-
-//   const lines = code2.split("\n");
-//   let res = "";
-//   for (const line of lines) {
-//     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
-//     res += `${instructions[args[0]](...args.slice(1))}\n`;
-//   }
-
-//   console.log(res);
-// })();
