@@ -23,7 +23,7 @@ const branch = (op, x, y, z) => {
 const $toBin = (x) => x.toString(2).padStart(8, "0");
 const bind = (...x) => parseInt(x.map($toBin).join(""), 2);
 
-const instructions = {
+const cmds = {
   "00010000": (x, y, z) => branch("===", x, y, z),
   "00010001": (x, y, z) => branch("!==", x, y, z),
   "00010010": (x, y, z) => branch("<", x, y, z),
