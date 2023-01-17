@@ -56,6 +56,7 @@ const instructions = {
         ++i;
       }
       output.innerText += res;
+      console.log(res);
     }
   }, //system
 
