@@ -55,7 +55,7 @@ const instructions = {
         res += String.fromCharCode(mem[i]);
         ++i;
       }
-      console.log(res);
+      output.innerText += res;
     }
   }, //system
 
@@ -81,7 +81,8 @@ const encode = (dat) =>
     .map((t) => String.fromCharCode(parseInt(t, 2)))
     .join("");
 
-const main = (() => {
+vmc.addEventListener("change", (e) => {
+  output.innerText = "";
   const code = decode(encode(data)).match(/.{1,32}/g);
 
   for (mem[0]; mem[0] < code.length; ++mem[0]) {
@@ -90,4 +91,15 @@ const main = (() => {
     const bytes = line.match(/.{1,8}/g);
     instructions[bytes[0]](...bytes.slice(1).map((t) => parseInt(t, 2)));
   }
-})();
+});
+
+// const main = (() => {
+//   const code = decode(encode(data)).match(/.{1,32}/g);
+
+//   for (mem[0]; mem[0] < code.length; ++mem[0]) {
+//     const line = code[mem[0]];
+//     console.debug(`DEBUG: ${line}`);
+//     const bytes = line.match(/.{1,8}/g);
+//     instructions[bytes[0]](...bytes.slice(1).map((t) => parseInt(t, 2)));
+//   }
+// })();

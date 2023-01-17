@@ -63,7 +63,7 @@ const instructions = {
 };
 
 asm.addEventListener("keyup", (e) => {
-  const lines = asm.value.split("\n");
+  const lines = escapeChars(asm.value).split("\n");
   let res = "";
   for (const line of lines) {
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
