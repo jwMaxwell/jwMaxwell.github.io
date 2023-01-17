@@ -69,16 +69,15 @@ asm.addEventListener("keyup", (e) => {
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
     res += `${instructions[args[0]](...args.slice(1))}\n`;
   }
-  res
+  vmc.innerText = res
     .split("\n")
     .map((t) =>
       t
-        .replace(/\s+/g, "")
+        .replace(/ /g, "")
         .match(/.{1,8}/g)
         .join(" ")
     )
     .join("\n");
-  vmc.innerText = res;
 });
 
 // const main = (() => {
