@@ -63,7 +63,7 @@ const cmds = {
         res += String.fromCharCode(memory[i]);
         ++i;
       }
-      output.innerText += res;
+      document.getElementById("output").innerText += res;
       console.log(res);
     }
   }, //system
