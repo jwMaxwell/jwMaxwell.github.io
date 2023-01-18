@@ -88,7 +88,7 @@ const encode = (dat) =>
     .join("");
 
 asm.addEventListener("keyup", (e) => {
-  output.innerText = "";
+  // output.innerText = "";
   const code = decode(encode(vmc.innerText)).match(/.{1,32}/g);
 
   for (memory[0]; memory[0] < code.length; ++memory[0]) {
