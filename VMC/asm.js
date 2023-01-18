@@ -62,16 +62,30 @@ const instructions = {
   CLEAN: () => "10100000 00000000 00000000 00000000",
 };
 
-asm.addEventListener("keyup", (e) => {
-  const lines = escapeChars(asm.value).split("\n");
+export const runASM = (str) => {
+  const lines = escapeChars(str).split("\n");
   let res = "";
   for (const line of lines) {
     if (line === "") continue;
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
     res += `${instructions[args[0]](...args.slice(1))}\n`;
   }
-  vmc.innerText = res
+  return res
     .split("\n")
     .map((t) => t.replace(/\s+/g, ""))
     .join("\n");
-});
+};
+
+// asm.addEventListener("keyup", (e) => {
+//   const lines = escapeChars(asm.value).split("\n");
+//   let res = "";
+//   for (const line of lines) {
+//     if (line === "") continue;
+//     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
+//     res += `${instructions[args[0]](...args.slice(1))}\n`;
+//   }
+//   vmc.innerText = res
+//     .split("\n")
+//     .map((t) => t.replace(/\s+/g, ""))
+//     .join("\n");
+// });

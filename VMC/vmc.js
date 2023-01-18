@@ -1,4 +1,5 @@
 let memory = [0];
+let vmcOutput = "";
 
 const binop = (a, op, b) => {
   const opRgx = new RegExp(
@@ -63,7 +64,7 @@ const cmds = {
         res += String.fromCharCode(memory[i]);
         ++i;
       }
-      document.getElementById("output").innerText += res;
+      vmcOutput += `${res}\n`;
       console.log(res);
     }
   }, //system
@@ -87,9 +88,8 @@ const encode = (dat) =>
     .map((t) => String.fromCharCode(parseInt(t, 2)))
     .join("");
 
-asm.addEventListener("keyup", (e) => {
-  // output.innerText = "";
-  const code = decode(encode(vmc.innerText)).match(/.{1,32}/g);
+export const runVMC = (str) => {
+  const code = decode(encode(str)).match(/.{1,32}/g);
 
   for (memory[0]; memory[0] < code.length; ++memory[0]) {
     const line = code[memory[0]];
@@ -97,4 +97,18 @@ asm.addEventListener("keyup", (e) => {
     const bytes = line.match(/.{1,8}/g);
     cmds[bytes[0]](...bytes.slice(1).map((t) => parseInt(t, 2)));
   }
-});
+
+  return vmcOutput;
+};
+
+// asm.addEventListener("keyup", (e) => {
+//   // output.innerText = "";
+//   const code = decode(encode(vmc.innerText)).match(/.{1,32}/g);
+
+//   for (memory[0]; memory[0] < code.length; ++memory[0]) {
+//     const line = code[memory[0]];
+//     console.debug(`DEBUG: ${line}`);
+//     const bytes = line.match(/.{1,8}/g);
+//     cmds[bytes[0]](...bytes.slice(1).map((t) => parseInt(t, 2)));
+//   }
+// });
