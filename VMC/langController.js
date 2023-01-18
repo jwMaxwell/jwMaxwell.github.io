@@ -1,5 +1,5 @@
-import { runASM } from "./asm";
-import { runVMC } from "./vmc";
+import { runASM } from "./asm.js";
+import { runVMC } from "./vmc.js";
 
 asm.addEventListener("keyup", (e) => {
   vmc.innerText = runASM(asm.value);
