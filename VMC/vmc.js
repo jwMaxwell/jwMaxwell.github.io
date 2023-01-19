@@ -99,7 +99,7 @@ export const runVMC = (str) => {
       ...bytes
         .slice(1)
         .map((t) =>
-          t[0] === 0 ? parseInt(t, 2) : parseInt(t.slice(1), 2) * -1
+          t[0] === "0" ? parseInt(t, 2) : parseInt(t.slice(1), 2) * -1
         )
     );
   }
