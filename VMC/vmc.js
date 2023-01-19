@@ -22,7 +22,10 @@ const branch = (op, x, y, z) => {
 };
 
 const btoi = (val) => (val[0] === 1 ? parseInt(val, 2) * 8 : parseInt(val, 2));
-const $toBin = (x) => x.toString(2).padStart(8, "0");
+const $toBin = (x) => {
+  const res = parseInt(Math.abs(x)).toString(2).padStart(8, "0");
+  return x < 0 ? [1, ...res.slice(1)].join("") : res;
+};
 const bind = (...x) => btoi(x.map($toBin).join(""));
 
 const cmds = {
