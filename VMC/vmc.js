@@ -95,7 +95,13 @@ export const runVMC = (str) => {
     const line = code[memory[0]];
     console.debug(`DEBUG: ${line}`);
     const bytes = line.match(/.{1,8}/g);
-    cmds[bytes[0]](...bytes.slice(1).map((t) => parseInt(t, 2)));
+    cmds[bytes[0]](
+      ...bytes
+        .slice(1)
+        .map((t) =>
+          t[0] === 0 ? parseInt(t, 2) : parseInt(t.slice(1), 2) * -1
+        )
+    );
   }
 
   return vmcOutput;

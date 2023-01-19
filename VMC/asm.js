@@ -6,7 +6,10 @@ const escapeChars = (str) => {
     .replace(/\\r/g, "\r");
 };
 
-const toBin = (x, padding) => parseInt(x).toString(2).padStart(padding, "0");
+const toBin = (x, padding) => {
+  const res = parseInt(Math.abs(x)).toString(2).padStart(padding, "0");
+  return x < 0 ? [1, ...res.slice(1)].join("") : res;
+};
 
 const instructions = {
   STORE: (addr, x) => `01000000 ${toBin(addr, 8)} ${toBin(x, 16)}}`,
