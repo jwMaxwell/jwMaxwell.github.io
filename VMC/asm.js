@@ -25,8 +25,8 @@ const instructions = {
   },
   MOVE: (x, y) => `01010000 00000000 ${toBin(x, 8)} ${toBin(y, 8)}`,
   POP: (x) => {
-    const str = "10000000 00000000 00000000 00000000";
-    return isNaN(parseInt(x)) ? str : str.repeat(x);
+    const str = "10000000 00000000 00000000 00000000\n";
+    return isNaN(parseInt(x)) ? str.slice(0, -1) : str.repeat(x).slice(0, -1);
   },
   MATH: (op, x, y) => {
     const operators = {
@@ -39,7 +39,10 @@ const instructions = {
     return `${operators[op]} 00000000 ${toBin(x, 8)} ${toBin(y, 8)}`;
   },
   SYSTEM: (op, ...x) => {
-    if (op === "PRINT") return `01100000 00000000 00000000 ${toBin(x[0], 8)}`;
+    if (op === "PRINT" && x[0] === "STRING")
+      return `01100000 00000000 00000000 ${toBin(x[1], 8)}`;
+    if (op === "PRINT" && x[0] === "INT")
+      return `01100000 00000001 00000000 ${toBin(x[1], 8)}`;
   },
   BRANCH: (op, x, y, z) => {
     const operators = {

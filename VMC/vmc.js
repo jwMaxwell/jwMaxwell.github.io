@@ -56,8 +56,8 @@ const cmds = {
   "01010000": (_, loc, dest) => (memory[dest] = memory[loc]), //move
 
   "01100000": (op, x, y) => {
-    console.log(`${op} ${x} ${y}`);
     if (op === 0) {
+      //print string
       let i = y;
       let res = "";
       while (memory[i] !== 0) {
@@ -65,6 +65,10 @@ const cmds = {
         ++i;
       }
       vmcOutput += `${res}\n`;
+      console.log(res);
+    } else if (op === 1) {
+      //print int
+      vmcOutput += `${y}\n`;
       console.log(res);
     }
   }, //system
