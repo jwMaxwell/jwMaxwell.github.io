@@ -69,7 +69,7 @@ const cmds = {
     } else if (op === 1) {
       //print int
       vmcOutput += `${memory[y]}\n`;
-      console.log(res);
+      console.log(memory[y]);
     }
   }, //system
 
