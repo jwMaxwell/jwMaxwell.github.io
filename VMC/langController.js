@@ -3,5 +3,5 @@ import { runVMC } from "./vmc.js";
 
 asm.addEventListener("keyup", (e) => {
   vmc.innerText = runASM(asm.value);
-  output.innerText = runVMC(vmc.innerText);
+  output.innerText = runVMC(runASM(asm.value));
 });
