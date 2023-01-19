@@ -21,8 +21,9 @@ const branch = (op, x, y, z) => {
   if (binop(memory[x], op, memory[y])) memory[0] += z;
 };
 
+const btoi = (val) => (val[0] === 1 ? parseInt(val, 2) * 8 : parseInt(val, 2));
 const $toBin = (x) => x.toString(2).padStart(8, "0");
-const bind = (...x) => parseInt(x.map($toBin).join(""), 2);
+const bind = (...x) => btoi(x.map($toBin).join(""));
 
 const cmds = {
   "00010000": (x, y, z) => branch("===", x, y, z),
@@ -110,15 +111,3 @@ export const runVMC = (str) => {
 
   return vmcOutput;
 };
-
-// asm.addEventListener("keyup", (e) => {
-//   // output.innerText = "";
-//   const code = decode(encode(vmc.innerText)).match(/.{1,32}/g);
-
-//   for (memory[0]; memory[0] < code.length; ++memory[0]) {
-//     const line = code[memory[0]];
-//     console.debug(`DEBUG: ${line}`);
-//     const bytes = line.match(/.{1,8}/g);
-//     cmds[bytes[0]](...bytes.slice(1).map((t) => parseInt(t, 2)));
-//   }
-// });
