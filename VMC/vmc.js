@@ -21,7 +21,8 @@ const branch = (op, x, y, z) => {
   if (binop(memory[x], op, memory[y])) memory[0] += z;
 };
 
-const btoi = (val) => (val[0] === 1 ? parseInt(val, 2) * 8 : parseInt(val, 2));
+const btoi = (t) =>
+  t[0] === "0" ? parseInt(t, 2) : parseInt(t.slice(1), 2) * -1;
 const $toBin = (x) => {
   const res = parseInt(Math.abs(x)).toString(2).padStart(8, "0");
   return x < 0 ? [1, ...res.slice(1)].join("") : res;
@@ -103,13 +104,7 @@ export const runVMC = (str) => {
     const line = code[memory[0]];
     console.debug(`DEBUG: ${line}`);
     const bytes = line.match(/.{1,8}/g);
-    cmds[bytes[0]](
-      ...bytes
-        .slice(1)
-        .map((t) =>
-          t[0] === "0" ? parseInt(t, 2) : parseInt(t.slice(1), 2) * -1
-        )
-    );
+    cmds[bytes[0]](...bytes.slice(1).map(btoi));
   }
 
   return vmcOutput;
