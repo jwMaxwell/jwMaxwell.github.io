@@ -78,7 +78,10 @@ const cmds = {
     }
   }, //system
 
-  "01110000": (x1, x2, x3) => memory.push(bind(x1, x2, x3)), //push
+  "01110000": (x1, x2, x3) => {
+    memory.push(bind(x1, x2, x3));
+    console.log(bind(x1, x2, x3));
+  }, //push
   10000000: (_1, _2, _3) => memory.pop(), //pop
   10010000: (x1, x2, x3) => (memory[0] += bind(x1, x2, x3)), //jump
   10100000: (_1, _2, _3) => (memory = [0]), //clean
