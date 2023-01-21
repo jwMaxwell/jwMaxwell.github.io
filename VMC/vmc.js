@@ -25,7 +25,9 @@ const btoi = (t) =>
   t[0] === "0" ? parseInt(t, 2) : parseInt(t.slice(1), 2) * -1;
 const $toBin = (x) => {
   const res = parseInt(Math.abs(x)).toString(2).padStart(8, "0");
-  return x < 0 ? [1, ...res.slice(1)].join("") : res;
+  return x < 0 || (x === 0 && !Object.is(0, x))
+    ? [1, ...res.slice(1)].join("")
+    : res;
 };
 const bind = (...x) => btoi(x.map($toBin).join(""));
 
@@ -78,10 +80,7 @@ const cmds = {
     }
   }, //system
 
-  "01110000": (x1, x2, x3) => {
-    memory.push(bind(x1, x2, x3));
-    console.log(bind(x1, x2, x3));
-  }, //push
+  "01110000": (x1, x2, x3) => memory.push(bind(x1, x2, x3)), //push
   10000000: (_1, _2, _3) => memory.pop(), //pop
   10010000: (x1, x2, x3) => (memory[0] += bind(x1, x2, x3)), //jump
   10100000: (_1, _2, _3) => (memory = [0]), //clean
