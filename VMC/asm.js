@@ -69,7 +69,7 @@ const instructions = {
 };
 
 export const runASM = (str) => {
-  const lines = escapeChars(str).split("\n");
+  const lines = str.split("\n").map(escapeChars);
   let res = "";
   for (const line of lines) {
     if (line === "") continue;
