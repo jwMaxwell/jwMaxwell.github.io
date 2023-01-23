@@ -97,12 +97,13 @@ const encode = (dat) =>
 export const runVMC = (str) => {
   const code = decode(encode(str)).match(/.{1,32}/g);
 
-  console.debug(`code ->\n${decode(encode(str))}\n<-`);
+  // console.debug(`code ->\n${decode(encode(str))}\n<-`);
 
   for (memory[0]; memory[0] < code.length; ++memory[0]) {
     const line = code[memory[0]];
     console.debug(`DEBUG: ${line}`);
     const bytes = line.match(/.{1,8}/g);
+    console.debug(`bytes: ${bytes}`);
     cmds[bytes[0]](...bytes.slice(1).map(btoi));
   }
 
