@@ -58,16 +58,16 @@ const cmds = {
   "00010100": (x, y, z) => branch("<=", x, y, z),
   "00010101": (x, y, z) => branch(">=", x, y, z),
 
-  "00100000": (_, x, y) => memory.push(binop(x, "+", y)),
-  "00100001": (_, x, y) => memory.push(binop(x, "-", y)),
-  "00100010": (_, x, y) => memory.push(binop(x, "*", y)),
-  "00100011": (_, x, y) => memory.push(binop(x, "/", y)),
-  "00100100": (_, x, y) => memory.push(binop(x, "%", y)),
+  "00100000": (_, x, y) => memory.push(binop(memory[x], "+", memory[y])),
+  "00100001": (_, x, y) => memory.push(binop(memory[x], "-", memory[y])),
+  "00100010": (_, x, y) => memory.push(binop(memory[x], "*", memory[y])),
+  "00100011": (_, x, y) => memory.push(binop(memory[x], "/", memory[y])),
+  "00100100": (_, x, y) => memory.push(binop(memory[x], "%", memory[y])),
 
-  "00110000": (_, x, y) => memory.push(binop(x, "&", y)),
-  "00110001": (_, x, y) => memory.push(binop(x, "|", y)),
-  "00110010": (_, x, y) => memory.push(binop(x, ">>", y)),
-  "00110011": (_, x, y) => memory.push(binop(x, "<<", y)),
+  "00110000": (_, x, y) => memory.push(binop(memory[x], "&", memory[y])),
+  "00110001": (_, x, y) => memory.push(binop(memory[x], "|", memory[y])),
+  "00110010": (_, x, y) => memory.push(binop(memory[x], ">>", memory[y])),
+  "00110011": (_, x, y) => memory.push(binop(memory[x], "<<", memory[y])),
 
   "01000000": (addr, x1, x2) => (memory[addr] = bind(x1, x2)), //store
   "01010000": (_, loc, dest) => (memory[dest] = memory[loc]), //move
