@@ -16,7 +16,7 @@ const binop = (a, op, b) => {
 const btoi = (t) => {
   console.log(`btoi: ${t}`);
   if (t === undefined) return;
-  t[0] === "0" ? parseInt(t, 2) : parseInt(t.slice(1), 2) * -1;
+  return t[0] === "0" ? parseInt(t, 2) : parseInt(t.slice(1), 2) * -1;
 };
 
 const $toBin = (x) => {
@@ -30,9 +30,9 @@ const bind = (...x) => btoi(x.map($toBin).join(""));
 
 const branch = (op, x, y, z) => {
   console.log("BRANCH args: ", op, x, y, z);
-  x = parseInt(x, 2);
-  y = parseInt(y, 2);
-  z = btoi(z, 2);
+  // x = parseInt(x, 2);
+  // y = parseInt(y, 2);
+  // z = btoi(z, 2);
 
   if (binop(memory[x], op, memory[y])) memory[0] += z;
   if (binop(memory[x], op, memory[y])) {
