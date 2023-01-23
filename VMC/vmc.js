@@ -14,7 +14,7 @@ const binop = (a, op, b) => {
 };
 
 const btoi = (t) => {
-  console.log(t);
+  console.log(`btoi: ${t}`);
   t[0] === "0" ? parseInt(t, 2) : parseInt(t.slice(1), 2) * -1;
 };
 
