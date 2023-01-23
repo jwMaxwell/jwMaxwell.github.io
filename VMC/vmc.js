@@ -13,23 +13,25 @@ const binop = (a, op, b) => {
     );
 };
 
-const branch = (op, x, y, z) => {
-  x = parseInt(x, 2);
-  y = parseInt(y, 2);
-  z = parseInt(z, 2);
-
-  if (binop(memory[x], op, memory[y])) memory[0] += z;
-};
-
 const btoi = (t) =>
   t[0] === "0" ? parseInt(t, 2) : parseInt(t.slice(1), 2) * -1;
+
 const $toBin = (x) => {
   const res = parseInt(Math.abs(x)).toString(2).padStart(8, "0");
   return x < 0 || (x === 0 && !Object.is(0, x))
     ? [1, ...res.slice(1)].join("")
     : res;
 };
+
 const bind = (...x) => btoi(x.map($toBin).join(""));
+
+const branch = (op, x, y, z) => {
+  x = parseInt(x, 2);
+  y = parseInt(y, 2);
+  z = btoi(z, 2);
+
+  if (binop(memory[x], op, memory[y])) memory[0] += z;
+};
 
 const cmds = {
   "00010000": (x, y, z) => branch("===", x, y, z),
@@ -39,25 +41,16 @@ const cmds = {
   "00010100": (x, y, z) => branch("<=", x, y, z),
   "00010101": (x, y, z) => branch(">=", x, y, z),
 
-  "00100000": (_, x, y) =>
-    memory.push(binop(parseInt(x, 2), "+", parseInt(y, 2))),
-  "00100001": (_, x, y) =>
-    memory.push(binop(parseInt(x, 2), "-", parseInt(y, 2))),
-  "00100010": (_, x, y) =>
-    memory.push(binop(parseInt(x, 2), "*", parseInt(y, 2))),
-  "00100011": (_, x, y) =>
-    memory.push(binop(parseInt(x, 2), "/", parseInt(y, 2))),
-  "00100100": (_, x, y) =>
-    memory.push(binop(parseInt(x, 2), "%", parseInt(y, 2))),
+  "00100000": (_, x, y) => memory.push(binop(btoi(x, 2), "+", btoi(y, 2))),
+  "00100001": (_, x, y) => memory.push(binop(btoi(x, 2), "-", btoi(y, 2))),
+  "00100010": (_, x, y) => memory.push(binop(btoi(x, 2), "*", btoi(y, 2))),
+  "00100011": (_, x, y) => memory.push(binop(btoi(x, 2), "/", btoi(y, 2))),
+  "00100100": (_, x, y) => memory.push(binop(btoi(x, 2), "%", btoi(y, 2))),
 
-  "00110000": (_, x, y) =>
-    memory.push(binop(parseInt(x, 2), "&", parseInt(y, 2))),
-  "00110001": (_, x, y) =>
-    memory.push(binop(parseInt(x, 2), "|", parseInt(y, 2))),
-  "00110010": (_, x, y) =>
-    memory.push(binop(parseInt(x, 2), ">>", parseInt(y, 2))),
-  "00110011": (_, x, y) =>
-    memory.push(binop(parseInt(x, 2), "<<", parseInt(y, 2))),
+  "00110000": (_, x, y) => memory.push(binop(btoi(x, 2), "&", btoi(y, 2))),
+  "00110001": (_, x, y) => memory.push(binop(btoi(x, 2), "|", btoi(y, 2))),
+  "00110010": (_, x, y) => memory.push(binop(btoi(x, 2), ">>", btoi(y, 2))),
+  "00110011": (_, x, y) => memory.push(binop(btoi(x, 2), "<<", btoi(y, 2))),
 
   "01000000": (addr, x1, x2) => (memory[addr] = bind(x1, x2)), //store
   "01010000": (_, loc, dest) => (memory[dest] = memory[loc]), //move
@@ -101,6 +94,8 @@ const encode = (dat) =>
 
 export const runVMC = (str) => {
   const code = decode(encode(str)).match(/.{1,32}/g);
+
+  console.debug(`code ->\n${decode(encode(str))}\n<-`);
 
   for (memory[0]; memory[0] < code.length; ++memory[0]) {
     const line = code[memory[0]];
