@@ -29,6 +29,7 @@ const $toBin = (x) => {
 const bind = (...x) => btoi(x.map($toBin).join(""));
 
 const branch = (op, x, y, z) => {
+  console.log("BRANCH args: ", op, x, y, z);
   x = parseInt(x, 2);
   y = parseInt(y, 2);
   z = btoi(z, 2);
@@ -48,7 +49,10 @@ const branch = (op, x, y, z) => {
 
 const cmds = {
   "00010000": (x, y, z) => branch("===", x, y, z),
-  "00010001": (x, y, z) => branch("!==", x, y, z),
+  "00010001": (x, y, z) => {
+    console.log("BRANCH pre-args:", x, y, z);
+    branch("!==", x, y, z);
+  },
   "00010010": (x, y, z) => branch("<", x, y, z),
   "00010011": (x, y, z) => branch(">", x, y, z),
   "00010100": (x, y, z) => branch("<=", x, y, z),
