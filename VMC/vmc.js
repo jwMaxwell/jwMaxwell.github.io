@@ -115,6 +115,7 @@ export const runVMC = (str) => {
   // console.debug(`code ->\n${decode(encode(str))}\n<-`);
 
   for (memory[0]; memory[0] < code.length; ++memory[0]) {
+    console.log(`stack: ${memory}`);
     const line = code[memory[0]];
     console.debug(`DEBUG: ${line}`);
     const bytes = line.match(/.{1,8}/g);
