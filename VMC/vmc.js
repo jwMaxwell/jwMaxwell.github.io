@@ -34,6 +34,16 @@ const branch = (op, x, y, z) => {
   z = btoi(z, 2);
 
   if (binop(memory[x], op, memory[y])) memory[0] += z;
+  if (binop(memory[x], op, memory[y])) {
+    //DEBUG
+    console.log(
+      `BRANCHING : ${memory[x]} ${op} ${memory[y]} : ${binop(
+        memory[x],
+        op,
+        memory[y]
+      )} : memory[0] = ${memory[0]}`
+    );
+  }
 };
 
 const cmds = {
