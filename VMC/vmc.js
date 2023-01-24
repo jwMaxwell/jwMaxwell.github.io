@@ -121,11 +121,12 @@ const encode = (dat) =>
 
 export const runVMC = (str) => {
   const code = decode(encode(str)).match(/.{1,32}/g);
-
+  vmcMemory = [0];
+  vmcOutput = "";
   // console.debug(`code ->\n${decode(encode(str))}\n<-`);
 
   for (vmcMemory[0]; vmcMemory[0] < code.length; ++vmcMemory[0]) {
-    console.log(`stack: ${vmcMemory}`);
+    console.debug(`stack: ${vmcMemory}`);
     const line = code[vmcMemory[0]];
     console.debug(`DEBUG: ${line}`);
     const bytes = line.match(/.{1,8}/g);
