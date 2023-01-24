@@ -44,9 +44,13 @@ intermediary.value = defaultCode;
 // asm.value = defaultCode;
 // vmc.innerText = runASM(defaultCode);
 // output.innerText = runVMC(runASM(defaultCode));
+const pipe =
+  (...fns) =>
+  (x) =>
+    fns.reduce((v, f) => f(v), x);
 
 intermediary.addEventListener("keyup", (e) => {
   asm.innerText = runIntermediary(intermediary.value);
-  vmc.innerText = runASM(asm.innerText);
-  output.innerText = runVMC(runASM(asm.value));
+  vmc.innerText = pipe(runIntermediary, runASM)(intermediary.value);
+  output.innerText = pipe(runIntermediary, runASM, runVMC)(intermediary.value);
 });
