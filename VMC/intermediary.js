@@ -1,7 +1,7 @@
-/*export*/ const runIntermediary = (str) => {
-  const variables = { _i: 0, zero: 0 };
+export const runIntermediary = (str) => {
+  let variables = { _i: 0 };
   const labels = { _s: 0 };
-  const vStack = [];
+  let vStack = [];
   let vLine = 0;
 
   const arith = (op, x, y, z) => {
@@ -13,12 +13,12 @@
     }
     vLine += 5;
     return `PUSH ${z}\nMATH ${op} ${variables[y]} ${variables._i + 1}\nMOVE ${
-      variables._i + 1
+      variables._i + 2
     } ${variables[x]}\nPOP 2`;
   };
 
   const cond = (op, x, y, z) => {
-    vLine += 1;
+    vLine++;
     return `BRANCH ${op} ${variables[x]} ${variables[y]} ${labels[z] - vLine}`;
   };
 
@@ -59,6 +59,16 @@
       return `JUMP ${labels[title] - vLine}`;
     },
     LET: (title, val) => {
+      if (val && val.includes('"')) {
+        variables[title] = vStack.length + 1;
+        for (const n of val.slice(1).split("")) {
+          vStack.push(n);
+          vLine++;
+          variables._i++;
+        }
+        return `PUSH ${val}`;
+      }
+
       vStack.push(title);
       variables[title] = vStack.length;
       vLine++;
@@ -66,37 +76,87 @@
       return `PUSH ${val}`;
     },
     INC: (x) => {
-      vLine += 4;
+      vLine += 5;
       return `PUSH 1\nMATH + ${variables[x]} ${variables._i + 1}\nMOVE ${
-        variables._i + 1
-      } ${variables[x]}\nPOP`;
+        variables._i + 2
+      } ${variables[x]}\nPOP 2`;
     },
     DEC: (x) => {
-      vLine += 4;
+      vLine += 5;
       return `PUSH 1\nMATH - ${variables[x]} ${variables._i + 1}\nMOVE ${
-        variables._i + 1
-      } ${variables[x]}\nPOP`;
+        variables._i + 2
+      } ${variables[x]}\nPOP 2`;
     },
     "#": (title) => {
-      labels[title] = vLine + 1;
+      labels[title] = vLine;
     },
     "//": () => {},
   };
 
-  const lines = str.split("\n");
-  let res = "";
+  const lines = str.split("\n").filter((t) => t !== "");
+  // get labels
+  for (const line of lines) {
+    if (line[0] === "#") {
+      const args = line.split(" ");
+      labels[args[1]] = 0;
+    }
+  }
+
+  // get label values
   for (const line of lines) {
     if (line === "") continue;
+    const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
+    intermediateInstructions[args[0]](...args.slice(1));
+  }
+
+  variables = { _i: 0, zero: 0 };
+  vStack = [];
+  vLine = 0;
+
+  // generate code
+  let res = "";
+  for (const line of lines) {
+    if (line === "" || line[0] === "#") continue;
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
     res += `${intermediateInstructions[args[0]](...args.slice(1))}\n`;
   }
   return res.split("undefined\n").join("");
 };
 
-const txt = `LET i 0
-LET max 100
-# start
-PRINTI i
-ADD i i 1
-BLT i max start`;
-console.log(runIntermediary(txt));
+// const txt = `LET index 1
+// LET result 0
+// LET zero 0
+// LET max 100
+// LET fizz "Fizz"
+// LET buzz "Buzz"
+// LET fizzbuzz "FizzBuzz"
+
+// # Start
+// MOD result index 15
+// BEQ result zero FizzBuzz
+
+// MOD result index 5
+// BEQ result zero Buzz
+
+// MOD result index 3
+// BEQ result zero Fizz
+
+// PRINTI index
+// JUMP ReLoop
+
+// # FizzBuzz
+// PRINTS fizzbuzz
+// JUMP ReLoop
+
+// # Fizz
+// PRINTS fizz
+// JUMP ReLoop
+
+// # Buzz
+// PRINTS buzz
+
+// # ReLoop
+// INC index
+// BLTE index max Start
+// `;
+// console.log(runIntermediary(txt));
