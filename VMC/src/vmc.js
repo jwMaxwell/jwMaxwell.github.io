@@ -3,17 +3,17 @@ import { binop, toBin } from "./util.js";
 let vmcMemory = [0];
 let vmcOutput = "";
 
-const binop = (a, op, b) => {
-  const opRgx = new RegExp(
-    /^(\+|-|\*|\*\*|\/|==|===|!=|!==|>|>>|<<|<|>=|<=|&|\||%|!|\^)$/
-  );
+// const binop = (a, op, b) => {
+//   const opRgx = new RegExp(
+//     /^(\+|-|\*|\*\*|\/|==|===|!=|!==|>|>>|<<|<|>=|<=|&|\||%|!|\^)$/
+//   );
 
-  if (opRgx.test(op))
-    return new Function("a", "b", `return a ${op} b`)(
-      Number(`${a}`),
-      Number(`${b}`)
-    );
-};
+//   if (opRgx.test(op))
+//     return new Function("a", "b", `return a ${op} b`)(
+//       Number(`${a}`),
+//       Number(`${b}`)
+//     );
+// };
 
 const btoi = (t) => {
   if (t === undefined) return;
