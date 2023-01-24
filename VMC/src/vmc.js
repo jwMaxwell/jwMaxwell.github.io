@@ -1,3 +1,5 @@
+import { binop, toBin } from "./util.js";
+
 let vmcMemory = [0];
 let vmcOutput = "";
 
@@ -14,42 +16,19 @@ const binop = (a, op, b) => {
 };
 
 const btoi = (t) => {
-  console.log(`btoi: ${t}`);
   if (t === undefined) return;
   return t[0] === "0" ? parseInt(t, 2) : parseInt(t.slice(1), 2) * -1;
 };
 
-const $toBin = (x) => {
-  const res = parseInt(Math.abs(x)).toString(2).padStart(8, "0");
-  return x < 0 || (x === 0 && !Object.is(0, x))
-    ? [1, ...res.slice(1)].join("")
-    : res;
-};
-
-const bind = (...x) => btoi(x.map($toBin).join(""));
+const bind = (...x) => btoi(x.map((t) => toBin(t, 8)).join(""));
 
 const branch = (op, x, y, z) => {
-  console.log("BRANCH args: ", op, x, y, z);
-
   if (binop(vmcMemory[x], op, vmcMemory[y])) vmcMemory[0] += z;
-  if (binop(vmcMemory[x], op, vmcMemory[y])) {
-    //DEBUG
-    console.log(
-      `BRANCHING : ${vmcMemory[x]} ${op} ${vmcMemory[y]} : ${binop(
-        vmcMemory[x],
-        op,
-        vmcMemory[y]
-      )} : vmcMemory[0] = ${vmcMemory[0]}`
-    );
-  }
 };
 
 const binInstructions = {
   "00010000": (x, y, z) => branch("===", x, y, z),
-  "00010001": (x, y, z) => {
-    console.log("BRANCH pre-args:", x, y, z);
-    branch("!==", x, y, z);
-  },
+  "00010001": (x, y, z) => branch("!==", x, y, z),
   "00010010": (x, y, z) => branch("<", x, y, z),
   "00010011": (x, y, z) => branch(">", x, y, z),
   "00010100": (x, y, z) => branch("<=", x, y, z),
@@ -109,7 +88,7 @@ const binInstructions = {
 const decode = (dat) =>
   dat
     .split("")
-    .map((t) => $toBin(t.charCodeAt(0)))
+    .map((t) => toBin(t.charCodeAt(0), 8))
     .join("");
 
 const encode = (dat) =>
@@ -123,14 +102,10 @@ export const runVMC = (str) => {
   const code = decode(encode(str)).match(/.{1,32}/g);
   vmcMemory = [0];
   vmcOutput = "";
-  // console.debug(`code ->\n${decode(encode(str))}\n<-`);
 
   for (vmcMemory[0]; vmcMemory[0] < code.length; ++vmcMemory[0]) {
-    console.debug(`stack: ${vmcMemory}`);
     const line = code[vmcMemory[0]];
-    console.debug(`DEBUG: ${line}`);
     const bytes = line.match(/.{1,8}/g);
-    console.debug(`bytes: ${bytes}`);
     binInstructions[bytes[0]](...bytes.slice(1).map(btoi));
   }
 
