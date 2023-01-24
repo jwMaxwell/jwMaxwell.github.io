@@ -22,7 +22,7 @@ export const runIntermediary = (str) => {
     return `BRANCH ${op} ${variables[x]} ${variables[y]} ${labels[z] - vLine}`;
   };
 
-  const intermediateInstructions = {
+  const instructions = {
     BEQ: (x, y, z) => cond("=", x, y, z),
     BNEQ: (x, y, z) => cond("!", x, y, z),
     BGT: (x, y, z) => cond(">", x, y, z),
@@ -106,7 +106,7 @@ export const runIntermediary = (str) => {
   for (const line of lines) {
     if (line === "") continue;
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
-    intermediateInstructions[args[0]](...args.slice(1));
+    instructions[args[0]](...args.slice(1));
   }
 
   variables = { _i: 0, zero: 0 };
@@ -118,7 +118,7 @@ export const runIntermediary = (str) => {
   for (const line of lines) {
     if (line === "" || line[0] === "#") continue;
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
-    res += `${intermediateInstructions[args[0]](...args.slice(1))}\n`;
+    res += `${instructions[args[0]](...args.slice(1))}\n`;
   }
   return res.split("undefined\n").join("");
 };
