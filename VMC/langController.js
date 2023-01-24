@@ -32,8 +32,8 @@ BRANCH > 0x01 0x04 64
 JUMP -21`;
 
 asm.value = defaultCode;
-vmc.innerText = runASM(defaultCode);
-output.innerText = runVMC(runASM(defaultCode));
+// vmc.innerText = runASM(defaultCode);
+// output.innerText = runVMC(runASM(defaultCode));
 
 asm.addEventListener("keyup", (e) => {
   vmc.innerText = runASM(asm.value);
