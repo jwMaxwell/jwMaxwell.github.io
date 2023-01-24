@@ -1,4 +1,4 @@
-const binop = (a, op, b) => {
+export const binop = (a, op, b) => {
   const opRgx = new RegExp(
     /^(\+|-|\*|\*\*|\/|==|===|!=|!==|>|>>|<<|<|>=|<=|&|\||%|!|\^)$/
   );
@@ -10,7 +10,7 @@ const binop = (a, op, b) => {
     );
 };
 
-const toBin = (x, padding) => {
+export const toBin = (x, padding) => {
   const res = parseInt(Math.abs(x)).toString(2).padStart(padding, "0");
   return x < 0 || (x === 0 && !Object.is(0, x))
     ? [1, ...res.slice(1)].join("")
