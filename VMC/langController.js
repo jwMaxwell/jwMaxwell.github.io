@@ -36,7 +36,9 @@ PRINTS buzz
 
 # ReLoop
 INC index
-BLTE index max Start`;
+BLTE index max Start
+
+`;
 
 intermediary.value = defaultCode;
 // asm.value = defaultCode;
@@ -45,6 +47,6 @@ intermediary.value = defaultCode;
 
 intermediary.addEventListener("keyup", (e) => {
   asm.innerText = runIntermediary(intermediary.value);
-  vmc.innerText = runASM(asm.value);
+  vmc.innerText = runASM(asm.innerText);
   output.innerText = runVMC(runASM(asm.value));
 });
