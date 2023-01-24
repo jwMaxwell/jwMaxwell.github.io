@@ -3,18 +3,6 @@ import { binop, toBin } from "./util.js";
 let vmcMemory = [0];
 let vmcOutput = "";
 
-// const binop = (a, op, b) => {
-//   const opRgx = new RegExp(
-//     /^(\+|-|\*|\*\*|\/|==|===|!=|!==|>|>>|<<|<|>=|<=|&|\||%|!|\^)$/
-//   );
-
-//   if (opRgx.test(op))
-//     return new Function("a", "b", `return a ${op} b`)(
-//       Number(`${a}`),
-//       Number(`${b}`)
-//     );
-// };
-
 const btoi = (t) => {
   if (t === undefined) return;
   return t[0] === "0" ? parseInt(t, 2) : parseInt(t.slice(1), 2) * -1;
@@ -85,21 +73,8 @@ const binInstructions = {
   10100000: (_1, _2, _3) => (vmcMemory = [0]), //clean
 };
 
-const decode = (dat) =>
-  dat
-    .split("")
-    .map((t) => toBin(t.charCodeAt(0), 8))
-    .join("");
-
-const encode = (dat) =>
-  dat
-    .replace(/\s+/g, "")
-    .match(/.{1,8}/g)
-    .map((t) => String.fromCharCode(parseInt(t, 2)))
-    .join("");
-
 export const runVMC = (str) => {
-  const code = decode(encode(str)).match(/.{1,32}/g);
+  const code = str.replace(/\s+/g, "").match(/.{1,32}/g);
   vmcMemory = [0];
   vmcOutput = "";
 

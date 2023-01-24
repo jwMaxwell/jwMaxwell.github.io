@@ -16,3 +16,16 @@ export const toBin = (x, padding) => {
     ? [1, ...res.slice(1)].join("")
     : res;
 };
+
+const decode = (dat) =>
+  dat
+    .split("")
+    .map((t) => toBin(t.charCodeAt(0), 8))
+    .join("");
+
+const encode = (dat) =>
+  dat
+    .replace(/\s+/g, "")
+    .match(/.{1,8}/g)
+    .map((t) => String.fromCharCode(parseInt(t, 2)))
+    .join("");
