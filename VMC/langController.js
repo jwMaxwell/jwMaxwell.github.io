@@ -1,8 +1,7 @@
 import { runASM } from "./asm.js";
 import { runVMC } from "./vmc.js";
 
-window.onload = () => {
-  const defaultCode = `PUSH 1 //index
+const defaultCode = `PUSH 1 //index
 PUSH 1 //increment 
 PUSH 0 //mod result 
 PUSH 100 //max
@@ -32,10 +31,9 @@ POP
 BRANCH > 0x01 0x04 64
 JUMP -21`;
 
-  asm.value = defaultCode;
-  vmc.innerText = runASM(defaultCode);
-  output.innerText = runVMC(runASM(defaultCode));
-};
+asm.value = defaultCode;
+vmc.innerText = runASM(defaultCode);
+output.innerText = runVMC(runASM(defaultCode));
 
 asm.addEventListener("keyup", (e) => {
   vmc.innerText = runASM(asm.value);

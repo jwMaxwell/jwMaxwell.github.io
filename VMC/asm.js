@@ -11,7 +11,7 @@ const toBin = (x, padding) => {
   return x < 0 ? [1, ...res.slice(1)].join("") : res;
 };
 
-const instructions = {
+const asmInstructions = {
   STORE: (addr, x) => `01000000 ${toBin(addr, 8)} ${toBin(x, 16)}}`,
   PUSH: (x) => {
     if (x.includes('"')) {
@@ -41,8 +41,10 @@ const instructions = {
   SYSTEM: (op, ...x) => {
     if (op === "PRINT" && x[0] === "STRING")
       return `01100000 00000000 00000000 ${toBin(x[1], 8)}`;
-    if (op === "PRINT" && x[0] === "INT")
+    else if (op === "PRINT" && x[0] === "INT")
       return `01100000 00000001 00000000 ${toBin(x[1], 8)}`;
+    else if (op === "PRINT" && x[0] === "CHAR")
+      return `01100000 00000010 00000000 ${toBin(x[1], 8)}`;
   },
   BRANCH: (op, x, y, z) => {
     const operators = {
@@ -74,7 +76,7 @@ export const runASM = (str) => {
   for (const line of lines) {
     if (line === "") continue;
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
-    res += `${instructions[args[0]](...args.slice(1))}\n`;
+    res += `${asmInstructions[args[0]](...args.slice(1))}\n`;
   }
   return res
     .split("\n")
