@@ -3,6 +3,7 @@ export const runIntermediary = (str) => {
   const labels = { _s: 0 };
   let vStack = [];
   let vLine = 0;
+  let nullVars = 0;
 
   const arith = (op, x, y, z) => {
     if (z in variables) {
@@ -23,6 +24,37 @@ export const runIntermediary = (str) => {
   };
 
   const instructions = {
+    DELINT: (x) => {
+      nullVars++;
+      variables[`_null_${nullVars}`] = variables[x];
+      delete variables[x];
+      vLine += 3;
+      return `PUSH 0\nMOVE ${variables._i + 1} ${variables[x]}\nPOP`;
+    },
+    DELSTR: (x) => {
+      // get next var on stack
+      const sorted = Object.fromEntries(
+        Object.entries(x).sort(([, a], [, b]) => a - b)
+      );
+      const first = Object.entries(sorted)
+        .map(JSON.stringify)
+        .indexOf(`["${x}",${sorted["x"]}]`);
+      const last = first + 1;
+
+      delete variables[x];
+
+      let res = "";
+      for (let i = first; i < last; ++i) {
+        nullVars++;
+        variables[`_null_${nullVars}`] = i;
+
+        vLine += 3;
+        res += `PUSH 0\nMOVE ${variables._i + 1} ${
+          variables[`_null_${nullVars}`]
+        }\nPOP`;
+      }
+    },
+
     BEQ: (x, y, z) => cond("=", x, y, z),
     BNEQ: (x, y, z) => cond("!", x, y, z),
     BGT: (x, y, z) => cond(">", x, y, z),
