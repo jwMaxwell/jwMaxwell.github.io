@@ -136,7 +136,7 @@ export const runIntermediary = (str) => {
 
   // get label values
   for (const line of lines) {
-    console.log(`${line}\t\t${variables}`);
+    console.log(`${line}\t\t${JSON.stringify(variables)}`);
 
     if (line === "") continue;
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
