@@ -26,12 +26,11 @@ export const runIntermediary = (str) => {
   const instructions = {
     DELINT: (x) => {
       nullVars++;
-      variables[`_null_${nullVars}`] = variables[x];
+      const temp = `_null_${nullVars}`;
+      variables[temp] = variables[x];
       delete variables[x];
       vLine += 3;
-      return `PUSH 0\nMOVE ${variables._i + 1} ${
-        variables[`_null_${nullVars}`]
-      }\nPOP`;
+      return `PUSH 0\nMOVE ${variables._i + 1} ${temp}\nPOP`;
     },
     DELSTR: (x) => {
       delete variables[x];
