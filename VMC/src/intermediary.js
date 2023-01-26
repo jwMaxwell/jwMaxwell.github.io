@@ -43,6 +43,8 @@ export const runIntermediary = (str) => {
           sorted.map(JSON.stringify).indexOf(`["${x}",${sorted["x"]}]`) + 1
         ][1];
 
+      console.log(`\nf: ${first} l: ${last}\n`);
+
       delete variables[x];
 
       let res = "";
