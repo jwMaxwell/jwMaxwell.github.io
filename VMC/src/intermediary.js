@@ -86,7 +86,7 @@ export const runIntermediary = (str) => {
     LET: (title, val) => {
       if (val && val.includes('"')) {
         variables[title] = vStack.length + 1;
-        for (const n of val.slice(1).split("")) {
+        for (const _ of val.slice(1).split("")) {
           vStack.push(title);
           vLine++;
           variables._i++;
@@ -94,6 +94,14 @@ export const runIntermediary = (str) => {
         return `PUSH ${val}`;
       }
 
+      if (nullVars) {
+        const temp = Object.keys(variables).find((x) => x.includes("_null_"));
+        variables[title] = variables[temp];
+        delete variables[temp];
+
+        vLine += 3;
+        return `PUSH ${val}\nMOVE ${variables._i + 1} ${variables[title]}\nPOP`;
+      }
       vStack.push(title);
       variables[title] = vStack.length;
       vLine++;
