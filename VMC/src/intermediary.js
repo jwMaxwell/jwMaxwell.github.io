@@ -30,7 +30,7 @@ export const runIntermediary = (str) => {
       variables[temp] = variables[x];
       delete variables[x];
       vLine += 3;
-      return `PUSH 0\nMOVE ${variables._i + 1} ${temp}\nPOP`;
+      return `PUSH 0\nMOVE ${variables._i + 1} ${variables[temp]}\nPOP`;
     },
     DELSTR: (x) => {
       delete variables[x];
