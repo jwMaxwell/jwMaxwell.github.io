@@ -34,22 +34,11 @@ export const runIntermediary = (str) => {
       }\nPOP`;
     },
     DELSTR: (x) => {
-      const first = variables[x];
-
-      // get next var on stack
-      const sorted = Object.entries(variables).sort(([, a], [, b]) => a - b);
-      const last =
-        sorted[
-          sorted.map(JSON.stringify).indexOf(`["${x}",${sorted["x"]}]`) + 1
-        ][1];
-
-      console.log(`\n${JSON.stringify(sorted)}`);
-      console.log(`f: ${first} l: ${last}\n`);
-
       delete variables[x];
 
       let res = "";
-      for (let i = first; i < last; ++i) {
+      for (let i = 0; i < vStack.length; ++i) {
+        if (vStack[i] !== x) continue;
         nullVars++;
         variables[`_null_${nullVars}`] = i;
 
@@ -100,7 +89,7 @@ export const runIntermediary = (str) => {
       if (val && val.includes('"')) {
         variables[title] = vStack.length + 1;
         for (const n of val.slice(1).split("")) {
-          vStack.push(n);
+          vStack.push(title);
           vLine++;
           variables._i++;
         }
