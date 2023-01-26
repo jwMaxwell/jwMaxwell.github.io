@@ -136,13 +136,14 @@ export const runIntermediary = (str) => {
 
   // get label values
   for (const line of lines) {
-    console.log(line);
+    console.log(`${line}\t\t${variables}`);
+
     if (line === "") continue;
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
     instructions[args[0]](...args.slice(1));
   }
 
-  variables = { _i: 0, zero: 0 };
+  variables = { _i: 0 };
   vStack = [];
   vLine = 0;
 
