@@ -29,7 +29,9 @@ export const runIntermediary = (str) => {
       variables[`_null_${nullVars}`] = variables[x];
       delete variables[x];
       vLine += 3;
-      return `PUSH 0\nMOVE ${variables._i + 1} ${variables[x]}\nPOP`;
+      return `PUSH 0\nMOVE ${variables._i + 1} ${
+        variables[`_null_${nullVars}`]
+      }\nPOP`;
     },
     DELSTR: (x) => {
       // get next var on stack
