@@ -37,7 +37,7 @@ export const runIntermediary = (str) => {
       const first = variables[x];
 
       // get next var on stack
-      const sorted = Object.entries(x).sort(([, a], [, b]) => a - b);
+      const sorted = Object.entries(variables).sort(([, a], [, b]) => a - b);
       const last =
         sorted[
           sorted.map(JSON.stringify).indexOf(`["${x}",${sorted["x"]}]`) + 1
