@@ -36,18 +36,16 @@ export const runIntermediary = (str) => {
     DELSTR: (x) => {
       delete variables[x];
 
-      let res = "";
+      let res = "PUSH 0\n";
       for (let i = 0; i < vStack.length; ++i) {
         if (vStack[i] !== x) continue;
         nullVars++;
         variables[`_null_${nullVars}`] = i;
 
         vLine += 3;
-        res += `PUSH 0\nMOVE ${variables._i + 1} ${
-          variables[`_null_${nullVars}`]
-        }\nPOP\n`;
+        res += `MOVE ${variables._i + 1} ${variables[`_null_${nullVars}`]}\n`;
       }
-      return res.slice(0, -1);
+      return `${res}POP`;
     },
 
     BEQ: (x, y, z) => cond("=", x, y, z),
