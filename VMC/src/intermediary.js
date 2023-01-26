@@ -55,6 +55,7 @@ export const runIntermediary = (str) => {
           variables[`_null_${nullVars}`]
         }\nPOP`;
       }
+      return res;
     },
 
     BEQ: (x, y, z) => cond("=", x, y, z),
