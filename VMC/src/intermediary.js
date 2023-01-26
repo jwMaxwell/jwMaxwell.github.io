@@ -136,6 +136,7 @@ export const runIntermediary = (str) => {
 
   // get label values
   for (const line of lines) {
+    console.log(line);
     if (line === "") continue;
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
     instructions[args[0]](...args.slice(1));
