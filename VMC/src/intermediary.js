@@ -45,9 +45,9 @@ export const runIntermediary = (str) => {
         vLine += 3;
         res += `PUSH 0\nMOVE ${variables._i + 1} ${
           variables[`_null_${nullVars}`]
-        }\nPOP`;
+        }\nPOP\n`;
       }
-      return res;
+      return res.slice(0, -1);
     },
 
     BEQ: (x, y, z) => cond("=", x, y, z),
