@@ -138,8 +138,6 @@ export const runIntermediary = (str) => {
 
   // get label values
   for (const line of lines) {
-    console.log(`${line}\t\t${JSON.stringify(variables)}`);
-
     if (line === "") continue;
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
     instructions[args[0]](...args.slice(1));
@@ -148,10 +146,13 @@ export const runIntermediary = (str) => {
   variables = { _i: 0 };
   vStack = [];
   vLine = 0;
+  nullVars = 0;
 
   // generate code
   let res = "";
   for (const line of lines) {
+    console.log(`${line}\t\t\t\t\t${JSON.stringify(variables)}`);
+
     if (line === "" || line[0] === "#") continue;
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
     res += `${instructions[args[0]](...args.slice(1))}\n`;
