@@ -95,7 +95,9 @@ export const runIntermediary = (str) => {
 
       if (nullVars) {
         const temp = Object.keys(variables).find((x) => x.includes("_null_"));
+        console.log(`\nnull: ${temp}\nnull var: ${variables[temp]}`);
         variables[title] = variables[temp];
+        console.log(`new var: ${variables[title]}\n`);
         delete variables[temp];
 
         vLine += 3;
