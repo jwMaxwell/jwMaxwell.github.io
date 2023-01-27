@@ -29,22 +29,22 @@ export const runIntermediary = (str) => {
       const temp = `_null_${nullVars}`;
       variables[temp] = variables[x];
       delete variables[x];
-      vLine += 3;
-      return `PUSH 0\nMOVE ${variables._i + 1} ${variables[temp]}\nPOP`;
+      // vLine += 3;
+      // return `PUSH 0\nMOVE ${variables._i + 1} ${variables[temp]}\nPOP`;
     },
     DELSTR: (x) => {
       delete variables[x];
 
-      let res = "PUSH 0\n";
+      // let res = "PUSH 0\n";
       for (let i = 0; i < vStack.length; ++i) {
         if (vStack[i] !== x) continue;
         nullVars++;
         variables[`_null_${nullVars}`] = i;
 
-        vLine += 3;
-        res += `MOVE ${variables._i + 1} ${variables[`_null_${nullVars}`]}\n`;
+        // vLine += 3;
+        // res += `MOVE ${variables._i + 1} ${variables[`_null_${nullVars}`]}\n`;
       }
-      return `${res}POP`;
+      // return `${res}POP`;
     },
 
     BEQ: (x, y, z) => cond("=", x, y, z),
