@@ -9,7 +9,7 @@ export const runIntermediary = (str) => {
 
   const arith = (op, x, y, z) => {
     if (x in variables && x[0] === "*") {
-      variables[x] = binop(variables[y], op, variables[z]);
+      variables[x.slice(1)] = binop(variables[y], op, variables[z]);
     }
 
     if (z in variables) {
