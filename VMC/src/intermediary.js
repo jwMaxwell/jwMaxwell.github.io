@@ -7,9 +7,14 @@ export const runIntermediary = (str) => {
   let vLine = 0;
   let nullVars = 0;
 
+  const isPtr = (x) => x.slice(1) in variables && x[0] === "*";
+
   const arith = (op, x, y, z) => {
-    if (x in variables && x[0] === "*") {
-      variables[x.slice(1)] = binop(variables[y], op, variables[z]);
+    if (isPtr(x)) {
+      const num1 = isPtr(y) ? variables[y.slice(1)] : y;
+      const num2 = isPtr(z) ? variables[z.slice(1)] : z;
+
+      variables[x.slice(1)] = binop(num1, op, num2);
     }
 
     if (z in variables) {
@@ -123,12 +128,22 @@ export const runIntermediary = (str) => {
       return `PUSH ${val}`;
     },
     INC: (x) => {
+      if (x.slice(1) in variables && x[0] === "*") {
+        variables[x]++;
+        return;
+      }
+
       vLine += 5;
       return `PUSH 1\nMATH + ${variables[x]} ${variables._i + 1}\nMOVE ${
         variables._i + 2
       } ${variables[x]}\nPOP 2`;
     },
     DEC: (x) => {
+      if (x.slice(1) in variables && x[0] === "*") {
+        variables[x]--;
+        return;
+      }
+
       vLine += 5;
       return `PUSH 1\nMATH - ${variables[x]} ${variables._i + 1}\nMOVE ${
         variables._i + 2
