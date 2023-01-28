@@ -75,6 +75,17 @@ export const runIntermediary = (str) => {
       vLine++;
       return `JUMP ${labels[title] - vLine}`;
     },
+    ARRAY: (title, ...vals) => {
+      let res = "";
+      for (let i = 0; i < vals.length; ++i) {
+        variables[`${title}.${i}`] = vStack.length + 1;
+        vStack.push(`${title}.${i}`);
+        vLine++;
+        variables._i++;
+        res += `PUSH ${vals[i]}\n`;
+      }
+      return res.slice(0, -1);
+    },
     LET: (title, val) => {
       if (val && val.includes('"')) {
         variables[title] = vStack.length + 1;

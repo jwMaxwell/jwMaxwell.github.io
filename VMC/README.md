@@ -6,10 +6,12 @@ As you write your code, you can watch it compile in real time, which is pretty n
 
 ### TODO:
 
+- Store new strings more efficiently
+- Add arrays
+- Add pointers
+- Add memory management for arrays and strings
 - Code clean up for vmc.js, asm.js, and intermediary.js
 - Create tests for the VMC, ASM, and intermediary
-- Create a tokenizer
-- Create a grammar and parser
 - Create a compiler, which use the tokenizer and parser
 - Implement the compiler in the web page
 - Add floating point numbers
