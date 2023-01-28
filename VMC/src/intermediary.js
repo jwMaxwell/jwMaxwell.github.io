@@ -1,3 +1,5 @@
+import { binop } from "./util";
+
 export const runIntermediary = (str) => {
   let variables = { _i: 0 };
   const labels = { _s: 0 };
@@ -6,6 +8,10 @@ export const runIntermediary = (str) => {
   let nullVars = 0;
 
   const arith = (op, x, y, z) => {
+    if (x in variables && x[0] === "*") {
+      variables[x] = binop(variables[y], op, variables[z]);
+    }
+
     if (z in variables) {
       vLine += 3;
       return `MATH ${op} ${variables[y]} ${variables[z]}\nMOVE ${
