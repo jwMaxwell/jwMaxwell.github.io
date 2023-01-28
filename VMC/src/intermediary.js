@@ -15,6 +15,7 @@ export const runIntermediary = (str) => {
       const num2 = isPtr(z) ? variables[z.slice(1)] : z;
 
       variables[x.slice(1)] = binop(num1, op, num2);
+      return;
     }
 
     if (z in variables) {
