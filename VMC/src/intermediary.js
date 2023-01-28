@@ -86,6 +86,9 @@ export const runIntermediary = (str) => {
       }
       return res.slice(0, -1);
     },
+    PTR: (title, val) => {
+      variables[title] = isNaN(Number(val)) ? variables[val] : val;
+    },
     LET: (title, val) => {
       if (val && val.includes('"')) {
         variables[title] = vStack.length + 1;
