@@ -1,4 +1,4 @@
-import { binop } from "./util";
+import { binop } from "./util.js";
 
 export const runIntermediary = (str) => {
   let variables = { _i: 0 };
