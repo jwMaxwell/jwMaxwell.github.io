@@ -129,8 +129,8 @@ export const runIntermediary = (str) => {
       return `PUSH ${val}`;
     },
     INC: (x) => {
-      if (x.slice(1) in variables && x[0] === "*") {
-        variables[x]++;
+      if (isPtr(x)) {
+        variables[x.slice(1)]++;
         return;
       }
 
@@ -140,8 +140,8 @@ export const runIntermediary = (str) => {
       } ${variables[x]}\nPOP 2`;
     },
     DEC: (x) => {
-      if (x.slice(1) in variables && x[0] === "*") {
-        variables[x]--;
+      if (isPtr(x)) {
+        variables[x.slice(1)]--;
         return;
       }
 
