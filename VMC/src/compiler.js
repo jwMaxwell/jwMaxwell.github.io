@@ -178,7 +178,7 @@ export const runIntermediary = (str) => {
     res += `${instructions[args[0]](...args.slice(1))}\n`;
   }
 
-  return res;
+  return res.split("undefined\n").join("");
   // optimize
 
   // // generate code
