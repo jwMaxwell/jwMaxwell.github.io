@@ -159,7 +159,7 @@ export const runIntermediary = (str) => {
   // get labels
   let lines = str.split("\n").filter((t) => t !== "");
   for (let i = 0; i < lines.length; ++i)
-    if (line.trim()[0] === "#") labels[line.split(" ")[1]] = i;
+    if (lines[i].trim()[0] === "#") labels[lines[i].split(" ")[1]] = i;
 
   lines = lines.filter((t) => !t.includes("#"));
 
