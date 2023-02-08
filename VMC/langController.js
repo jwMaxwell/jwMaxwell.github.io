@@ -1,6 +1,6 @@
 import { runASM } from "./src/asm.js";
-// import { runIntermediary } from "./src/intermediary.js";
-import { runIntermediary } from "./src/compiler.js";
+import { runIntermediary } from "./src/intermediary.js";
+// import { runIntermediary } from "./src/compiler.js";
 import { runVMC } from "./src/vmc.js";
 
 const defaultCode = `LET index 1

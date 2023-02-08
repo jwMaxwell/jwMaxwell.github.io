@@ -1,0 +1,25 @@
+body {
+  display: flex;
+  font-family: monospace;
+  color: white;
+  background: #111;
+}
+
+textarea {
+  border: 0;
+  padding: 1px 5px;
+  background: #333;
+  color: white;
+  font-size: inherit;
+  height: 92vh;
+}
+
+.col {
+  flex-grow: 1;
+}
+.col + .col {
+  margin-left: 25px;
+}
+.col > * {
+  width: 100%;
+}
