@@ -7,7 +7,7 @@ const { Layer } = require("./layer.js");
 const sigmoid = (x) => 1 / (1 + Math.exp(-x));
 
 class Network {
-  constructor(layersSize, learnRate, momentum, its) {
+  constructor(layersSize, learnRate, momentum) {
     this.layers = layersSize.map((len, i) => {
       const layer = new Layer(len);
       if (i !== 0) {
@@ -21,7 +21,6 @@ class Network {
 
     this.learnRate = learnRate ?? 0.3;
     this.momentum = momentum ?? 0.1;
-    this.its = its ?? 0;
     this.connect();
   }
 
@@ -31,10 +30,6 @@ class Network {
 
   setLearnRate(x) {
     this.learnRate = x;
-  }
-
-  setIts(x) {
-    this.its = x;
   }
 
   connect() {
@@ -55,15 +50,17 @@ class Network {
     }
   }
 
-  train(inp, out) {
-    this.activate(inp); // Set input data for first layer
-    this.runInptSig(); // Forward prop
+  train(data, iterations) {
+    for (let i = 0; i < iterations; i++) {
+      const item = data[Math.floor(Math.random() * data.length)];
 
-    // Back prop
-    this.calcDeltaSig(out);
-    this.adjust();
+      this.activate(item.input); // Set input data for first layer
+      this.runInptSig(); // Forward prop
 
-    this.setIts(this.its + 1);
+      // Back prop
+      this.calcDeltaSig(item.output);
+      this.adjust();
+    }
   }
 
   activate(vals) {
@@ -73,7 +70,8 @@ class Network {
     });
   }
 
-  run() {
+  run(vals) {
+    this.activate(vals);
     return this.runInptSig();
   }
 
@@ -117,8 +115,7 @@ class Network {
 
   adjust() {
     // we start adjusting weights from the output layer back to the input layer
-    for (let l = 1; l <= this.layers.length - 1; l++) {
-      const prevLayer = this.layers[l - 1];
+    for (let l = 0; l <= this.layers.length - 1; l++) {
       const currLayer = this.layers[l];
 
       for (let n = 0; n < currLayer.neurons.length; n++) {
@@ -143,7 +140,6 @@ class Network {
   toJSON() {
     return {
       learnRate: this.learnRate,
-      its: this.its,
       momentum: this.momentum,
       layers: this.layers.map((t) => t.toJSON()),
     };

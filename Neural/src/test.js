@@ -4,45 +4,30 @@ const { Network } = require("./network");
 const trainingData = [
   {
     input: [0, 0],
-    output: [1],
+    output: [0],
   },
   {
     input: [0, 1],
-    output: [0],
+    output: [1],
   },
   {
     input: [1, 0],
-    output: [0],
+    output: [1],
   },
   {
     input: [1, 1],
-    output: [1],
+    output: [0],
   },
 ];
 
-const percent = (x) => Number(`${x * 100}`.slice(0, 5));
+const print = (x, y) =>
+  console.log(`${x} -> result: ${Math.round(y)}, actual: ${y}`);
+const run = () => {
+  let network = new Network([2, 10, 10, 1]);
 
-const run = (...inpts) => {
-  for (n of inpts) {
-    let network = new Network([2, 10, 10, 1]);
+  network.train(trainingData, 20000);
 
-    network.setLearnRate(0.3);
-    network.setMomentum(0.1);
-    network.setIts(1);
-
-    for (let i = 0; i < 20000; ++i) {
-      const item =
-        trainingData[Math.floor(Math.random() * trainingData.length)];
-      network.train(item.input, item.output);
-    }
-
-    network.activate(n);
-    const result = network.run();
-    console.log(
-      `${n} -> result: ${Math.round(result)}, certainty: ${percent(result)}%`
-    );
-    // console.log(network.run());
-  }
+  for (const n of trainingData) print(n.input, network.run(n.input));
 };
 
-run([0, 0], [0, 1], [1, 0], [1, 1]);
+run();

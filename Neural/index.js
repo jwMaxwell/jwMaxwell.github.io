@@ -4,7 +4,6 @@ const params = {
   learningRate: 0.3,
   trainingIterations: 20000,
   momentum: 0.1,
-  internalIterations: 0,
   trainingChunks: 1000,
 };
 
@@ -30,4 +29,3 @@ const gui = new window.dat.GUI();
 gui.add(params, "learningRate").onChange(save);
 gui.add(params, "trainingIterations").onChange(save);
 gui.add(params, "momentum").onChange(save);
-gui.add(params, "internalIterations").onChange(save);
