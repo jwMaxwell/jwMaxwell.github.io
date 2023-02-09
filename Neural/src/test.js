@@ -24,25 +24,24 @@ const percent = (x) => Number(`${x * 100}`.slice(0, 5));
 
 const run = (...inpts) => {
   for (n of inpts) {
-    let network = new Network([2, 8, 1]);
+    let network = new Network([2, 10, 10, 1]);
 
-    network.setLearnRate(0.1);
+    network.setLearnRate(0.3);
     network.setMomentum(0.1);
-    network.setIts(0);
+    network.setIts(1);
 
-    for (let i = 0; i < 80000; ++i) {
+    for (let i = 0; i < 20000; ++i) {
       const item =
         trainingData[Math.floor(Math.random() * trainingData.length)];
       network.train(item.input, item.output);
     }
 
     network.activate(n);
-    const result = network.runInptSig();
+    const result = network.run();
     console.log(
-      `${n} -> result: ${Math.round(result[0])}, certainty: ${percent(
-        result[0]
-      )}%`
+      `${n} -> result: ${Math.round(result)}, certainty: ${percent(result)}%`
     );
+    // console.log(network.run());
   }
 };
 

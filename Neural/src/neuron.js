@@ -3,7 +3,7 @@ class Neuron {
     this.input = [];
     this.output = [];
     this.bias = 0;
-    this.delta = 0; // percentage of change in the weight
+    this.delta = 0;
     this.value = 0;
     this.error = 0;
   }
@@ -16,8 +16,8 @@ class Neuron {
     this.input.push(conn);
   }
 
-  setOutput(x) {
-    this.output = x;
+  setValue(x) {
+    this.value = x;
   }
 
   addOutput(conn) {

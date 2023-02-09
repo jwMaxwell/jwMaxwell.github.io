@@ -68,7 +68,7 @@ class Network {
 
   activate(vals) {
     this.layers[0].neurons = this.layers[0].neurons.map((n, i) => {
-      n.setOutput(vals[i]);
+      n.setValue(vals[i]);
       return n;
     });
   }
@@ -85,7 +85,7 @@ class Network {
           return prev + t.weight * t.from.value;
         }, 0);
 
-        this.layers[l].neurons[n].setValue(sigmoid(bias + connVal));
+        this.layers[l].neurons[n].setValue(sigmoid(connVal + bias));
       }
     }
 
@@ -118,19 +118,19 @@ class Network {
   adjust() {
     // we start adjusting weights from the output layer back to the input layer
     for (let l = 1; l <= this.layers.length - 1; l++) {
+      const prevLayer = this.layers[l - 1];
       const currLayer = this.layers[l];
 
       for (let n = 0; n < currLayer.neurons.length; n++) {
         const currNeuron = currLayer.neurons[n];
+
         let delta = currNeuron.delta;
 
         for (let i = 0; i < currNeuron.input.length; i++) {
           const currConn = currNeuron.input[i];
-
           let change =
             this.learnRate * delta * currConn.from.value +
             this.momentum * currConn.change;
-
           currConn.setChange(change);
           currConn.setWeight(currConn.weight + change);
         }
