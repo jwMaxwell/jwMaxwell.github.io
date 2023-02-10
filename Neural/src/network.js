@@ -12,7 +12,7 @@ class Network {
       const layer = new Layer(len);
       if (i !== 0) {
         layer.neurons = layer.neurons.map((n) => {
-          n.setBias(n.randBias());
+          n.bias = n.randBias();
           return n;
         });
       }
@@ -54,7 +54,7 @@ class Network {
     for (let i = 0; i < iterations; i++) {
       const item = data[Math.floor(Math.random() * data.length)];
 
-      this.activate(item.input); // Set input data for first layer
+      this.activate(item.input); // Set inputs data for first layer
       this.runInptSig(); // Forward prop
 
       // Back prop
@@ -65,7 +65,7 @@ class Network {
 
   activate(vals) {
     this.layers[0].neurons = this.layers[0].neurons.map((n, i) => {
-      n.setValue(vals[i]);
+      n.value = vals[i];
       return n;
     });
   }
@@ -79,11 +79,11 @@ class Network {
     for (let l = 1; l < this.layers.length; l++) {
       for (let n = 0; n < this.layers[l].neurons.length; n++) {
         const bias = this.layers[l].neurons[n].bias;
-        const connVal = this.layers[l].neurons[n].input.reduce((prev, t) => {
+        const connVal = this.layers[l].neurons[n].inputs.reduce((prev, t) => {
           return prev + t.weight * t.from.value;
         }, 0);
 
-        this.layers[l].neurons[n].setValue(sigmoid(connVal + bias));
+        this.layers[l].neurons[n].value = sigmoid(connVal + bias);
       }
     }
 
@@ -101,20 +101,20 @@ class Network {
         let err = 0;
         if (l === this.layers.length - 1) err = target[n] - value;
         else {
-          for (let k = 0; k < currNeuron.output.length; k++) {
-            const currentConn = currNeuron.output[k];
+          for (let k = 0; k < currNeuron.outputs.length; k++) {
+            const currentConn = currNeuron.outputs[k];
             err += currentConn.to.delta * currentConn.weight;
           }
         }
 
-        currNeuron.setError(err);
-        currNeuron.setDelta(err * value * (1 - value));
+        currNeuron.error = err;
+        currNeuron.delta = err * value * (1 - value);
       }
     }
   }
 
   adjust() {
-    // we start adjusting weights from the output layer back to the input layer
+    // we start adjusting weights from the outputs layer back to the inputs layer
     for (let l = 0; l <= this.layers.length - 1; l++) {
       const currLayer = this.layers[l];
 
@@ -123,16 +123,16 @@ class Network {
 
         let delta = currNeuron.delta;
 
-        for (let i = 0; i < currNeuron.input.length; i++) {
-          const currConn = currNeuron.input[i];
+        for (let i = 0; i < currNeuron.inputs.length; i++) {
+          const currConn = currNeuron.inputs[i];
           let change =
             this.learnRate * delta * currConn.from.value +
             this.momentum * currConn.change;
-          currConn.setChange(change);
-          currConn.setWeight(currConn.weight + change);
+          currConn.change = change;
+          currConn.weight += change;
         }
 
-        currNeuron.setBias(currNeuron.bias + this.learnRate * delta);
+        currNeuron.bias = currNeuron.bias + this.learnRate * delta;
       }
     }
   }

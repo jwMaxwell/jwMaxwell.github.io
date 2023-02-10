@@ -1,39 +1,19 @@
 class Neuron {
   constructor() {
-    this.input = [];
-    this.output = [];
+    this.inputs = [];
+    this.outputs = [];
     this.bias = 0;
     this.delta = 0;
     this.value = 0;
     this.error = 0;
   }
 
-  setError(err) {
-    this.error = err;
-  }
-
   addInput(conn) {
-    this.input.push(conn);
-  }
-
-  setValue(x) {
-    this.value = x;
+    this.inputs.push(conn);
   }
 
   addOutput(conn) {
-    this.output.push(conn);
-  }
-
-  setBias(x) {
-    this.bias = x;
-  }
-
-  setDelta(x) {
-    this.delta = x;
-  }
-
-  setValue(x) {
-    this.value = x;
+    this.outputs.push(conn);
   }
 
   randBias() {
@@ -42,8 +22,8 @@ class Neuron {
 
   toJSON() {
     return {
-      input: this.input,
-      output: this.output,
+      input: this.inputs,
+      output: this.outputs,
       bias: this.bias,
       delta: this.delta,
       value: this.value,

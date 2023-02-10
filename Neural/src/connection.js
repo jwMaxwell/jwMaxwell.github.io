@@ -6,14 +6,6 @@ class Connection {
     this.change = 0;
   }
 
-  setWeight(x) {
-    this.weight = x;
-  }
-
-  setChange(x) {
-    this.change = x;
-  }
-
   toJSON() {
     return {
       from: this.from,
