@@ -51,7 +51,9 @@ class Network {
   }
 
   train(data, iterations) {
+    const pnum = iterations / 100;
     for (let i = 0; i < iterations; i++) {
+      if (i % pnum === 0) console.log(`Training: ${i / pnum}%`);
       const item = data[Math.floor(Math.random() * data.length)];
 
       this.activate(item.input); // Set inputs data for first layer

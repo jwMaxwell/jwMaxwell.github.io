@@ -46,19 +46,19 @@ const trainingData = [
     output: [1],
   },
   {
-    input: [1, 0],
+    input: [0, 2],
     output: [1],
   },
   {
-    input: [1, 1],
-    output: [0],
+    input: [0, 3],
+    output: [1],
   },
 ];
 
 const print = (x, y) =>
   console.log(`${x} -> result: ${Math.round(y)}, actual: ${y}`);
 const run = () => {
-  let network = new Network([2, 10, 10, 1]);
+  let network = new Network([2, 15, 15, 1]);
 
   network.train(trainingData, 20000);
 
