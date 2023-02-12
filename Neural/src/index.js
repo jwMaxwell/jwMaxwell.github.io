@@ -14,7 +14,8 @@ const run = () => {
   const vocab = Array.from(new Set(text)).sort();
 
   const trainingData = text
-    .match(/.{1,901}/g)
+    .slice(0, 1001)
+    .match(/.{1,20}/g)
     .slice(0, -1)
     .map((s) => encode(s, vocab))
     .map((a) => {
@@ -30,8 +31,8 @@ const run = () => {
       };
     });
 
-  let network = new Network([trainingData[0].input.length, 15, 15, 15, 8]);
-  network.train(trainingData, 500000);
+  let network = new Network([trainingData[0].input.length, 16, 20, 8]);
+  network.train(trainingData, 1000000);
   // print(trainingData[0].input, network.run(trainingData[0].input));
 
   const translate = (out) => vocab[parseInt(out.map(Math.round).join(""), 2)];
