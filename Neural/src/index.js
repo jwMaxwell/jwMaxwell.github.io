@@ -11,12 +11,12 @@ const run = () => {
     encoding: "utf-8",
     flag: "r",
   });
-  const vocabulary = Array.from(new Set(text)).sort();
+  const vocab = Array.from(new Set(text)).sort();
 
   const trainingData = text
     .match(/.{1,901}/g)
     .slice(0, -1)
-    .map((s) => encode(s, vocabulary))
+    .map((s) => encode(s, vocab))
     .map((a) => {
       return {
         input: a.slice(0, -1),
@@ -30,28 +30,22 @@ const run = () => {
       };
     });
 
-  let network = new Network([trainingData[0].input.length, 15, 15, 8]);
-  network.train(trainingData, 60000);
+  let network = new Network([trainingData[0].input.length, 15, 15, 15, 8]);
+  network.train(trainingData, 500000);
   // print(trainingData[0].input, network.run(trainingData[0].input));
 
+  const translate = (out) => vocab[parseInt(out.map(Math.round).join(""), 2)];
+
+  // let res = '';
+  // for (let i = 0; i < 25; i++) {
+
+  // }
+  // console.log(res);
+
   console.log(
-    trainingData[0].input.map((i) => vocabulary[i]).join(""),
-    vocabulary[
-      parseInt(network.run(trainingData[0].input).map(Math.round).join(""), 2)
-    ]
+    trainingData[0].input.map((i) => vocab[i]).join(""),
+    translate(network.run(trainingData[0].input))
   );
-
-  // console.log(text);
-  // console.log(vocabulary);
-  // console.log(encode(text, vocabulary));
-  // console.log(trainingData[0]);
-
-  // console.log(
-  //   encode(text, vocabulary)
-  //     .map((i) => vocabulary[i])
-  //     .join("")
-  // );
-  // console.log(decode(encode(text, vocabulary)));
 };
 
 run();
