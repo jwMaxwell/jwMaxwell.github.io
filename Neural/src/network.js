@@ -6,13 +6,15 @@ const { Layer } = require("./layer.js");
 
 const sigmoid = (x) => 1 / (1 + Math.exp(-x));
 
+const randBias = () => Math.floor(Math.random() * 6 - 3);
+
 class Network {
   constructor(layersSize, learnRate, momentum) {
     this.layers = layersSize.map((len, i) => {
-      const layer = new Layer(len);
+      const layer = Layer(len);
       if (i !== 0) {
         layer.neurons = layer.neurons.map((n) => {
-          n.bias = n.randBias();
+          n.bias = randBias();
           return n;
         });
       }
@@ -38,13 +40,10 @@ class Network {
       const prevLayer = this.layers[l - 1];
       for (let n = 0; n < prevLayer.neurons.length; n++) {
         for (let i = 0; i < currLayer.neurons.length; i++) {
-          const conn = new Connection(
-            prevLayer.neurons[n],
-            currLayer.neurons[i]
-          );
+          const conn = Connection(prevLayer.neurons[n], currLayer.neurons[i]);
 
-          prevLayer.neurons[n].addOutput(conn);
-          currLayer.neurons[i].addInput(conn);
+          prevLayer.neurons[n].outputs.push(conn);
+          currLayer.neurons[i].inputs.push(conn);
         }
       }
     }
@@ -72,8 +71,8 @@ class Network {
     });
   }
 
-  run(vals) {
-    this.activate(vals);
+  run(input) {
+    this.activate(input);
     return this.runInptSig();
   }
 
