@@ -13,13 +13,7 @@ const Neuron = () => {
   };
 };
 
-const Layer = (x) => {
-  const neurons = [];
-  for (let i = 0; i < x; i++) {
-    neurons.push(Neuron());
-  }
-  return neurons;
-};
+const Layer = (x) => Array.from({ length: x }, Neuron);
 
 const Connection = (from, to) => {
   return { from: from, to: to, weight: Math.random(), change: 0 };
@@ -67,7 +61,6 @@ class Network {
   }
 
   train(data, iterations) {
-    if (iterations === undefined) iterations = data.input.length * 4000;
     const pnum = iterations / 100;
     for (let i = 0; i < iterations; i++) {
       if (i % pnum === 0) console.log(`Training: ${i / pnum}%`);
@@ -97,12 +90,12 @@ class Network {
   runInptSig() {
     for (let l = 1; l < this.layers.length; l++) {
       for (let n = 0; n < this.layers[l].length; n++) {
-        const bias = this.layers[l][n].bias;
-        const connVal = this.layers[l][n].inputs.reduce((prev, t) => {
+        const layer = this.layers[l][n];
+        const connVal = layer.inputs.reduce((prev, t) => {
           return prev + t.weight * t.from.value;
         }, 0);
 
-        this.layers[l][n].value = sigmoid(connVal + bias);
+        layer.value = sigmoid(connVal + layer.bias);
       }
     }
 
@@ -114,7 +107,6 @@ class Network {
       const currLayer = this.layers[l];
       for (let n = 0; n < currLayer.length; n++) {
         const currNeuron = currLayer[n];
-
         let value = currNeuron.value;
 
         let err = 0;
@@ -160,7 +152,7 @@ class Network {
     return {
       learnRate: this.learnRate,
       momentum: this.momentum,
-      layers: this.layers.map((t) => t.toJSON()),
+      layers: JSON.stringify(this.layers),
     };
   }
 }

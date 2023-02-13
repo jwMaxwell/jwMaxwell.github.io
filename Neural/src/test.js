@@ -60,7 +60,7 @@ const print = (x, y) =>
 const run = () => {
   let network = new Network([3, 15, 15, 1]);
 
-  network.train(trainingData, 2000000);
+  network.train(trainingData, 200000);
 
   for (const n of trainingData) print(n.input, network.run(n.input));
 };
