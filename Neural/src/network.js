@@ -1,19 +1,36 @@
-// import { Connection } from "./connection.js";
-// import { Layer } from "./layer.js";
-
-const { Connection } = require("./connection.js");
-const { Layer } = require("./layer.js");
-
 const sigmoid = (x) => 1 / (1 + Math.exp(-x));
 
 const randBias = () => Math.floor(Math.random() * 6 - 3);
 
+const Neuron = () => {
+  return {
+    inputs: [],
+    outputs: [],
+    bias: 0,
+    delta: 0,
+    value: 0,
+    error: 0,
+  };
+};
+
+const Layer = (x) => {
+  const neurons = [];
+  for (let i = 0; i < x; i++) {
+    neurons.push(Neuron());
+  }
+  return neurons;
+};
+
+const Connection = (from, to) => {
+  return { from: from, to: to, weight: Math.random(), change: 0 };
+};
+
 class Network {
   constructor(layersSize, learnRate, momentum) {
     this.layers = layersSize.map((len, i) => {
-      const layer = Layer(len);
+      let layer = Layer(len);
       if (i !== 0) {
-        layer.neurons = layer.neurons.map((n) => {
+        layer = layer.map((n) => {
           n.bias = randBias();
           return n;
         });
@@ -38,18 +55,19 @@ class Network {
     for (let l = 1; l < this.layers.length; l++) {
       const currLayer = this.layers[l];
       const prevLayer = this.layers[l - 1];
-      for (let n = 0; n < prevLayer.neurons.length; n++) {
-        for (let i = 0; i < currLayer.neurons.length; i++) {
-          const conn = Connection(prevLayer.neurons[n], currLayer.neurons[i]);
+      for (let n = 0; n < prevLayer.length; n++) {
+        for (let i = 0; i < currLayer.length; i++) {
+          const conn = Connection(prevLayer[n], currLayer[i]);
 
-          prevLayer.neurons[n].outputs.push(conn);
-          currLayer.neurons[i].inputs.push(conn);
+          prevLayer[n].outputs.push(conn);
+          currLayer[i].inputs.push(conn);
         }
       }
     }
   }
 
   train(data, iterations) {
+    if (iterations === undefined) iterations = data.input.length * 4000;
     const pnum = iterations / 100;
     for (let i = 0; i < iterations; i++) {
       if (i % pnum === 0) console.log(`Training: ${i / pnum}%`);
@@ -65,7 +83,7 @@ class Network {
   }
 
   activate(vals) {
-    this.layers[0].neurons = this.layers[0].neurons.map((n, i) => {
+    this.layers[0] = this.layers[0].map((n, i) => {
       n.value = vals[i];
       return n;
     });
@@ -78,24 +96,24 @@ class Network {
 
   runInptSig() {
     for (let l = 1; l < this.layers.length; l++) {
-      for (let n = 0; n < this.layers[l].neurons.length; n++) {
-        const bias = this.layers[l].neurons[n].bias;
-        const connVal = this.layers[l].neurons[n].inputs.reduce((prev, t) => {
+      for (let n = 0; n < this.layers[l].length; n++) {
+        const bias = this.layers[l][n].bias;
+        const connVal = this.layers[l][n].inputs.reduce((prev, t) => {
           return prev + t.weight * t.from.value;
         }, 0);
 
-        this.layers[l].neurons[n].value = sigmoid(connVal + bias);
+        this.layers[l][n].value = sigmoid(connVal + bias);
       }
     }
 
-    return this.layers[this.layers.length - 1].neurons.map((t) => t.value);
+    return this.layers[this.layers.length - 1].map((t) => t.value);
   }
 
   calcDeltaSig(target) {
     for (let l = this.layers.length - 1; l >= 0; --l) {
       const currLayer = this.layers[l];
-      for (let n = 0; n < currLayer.neurons.length; n++) {
-        const currNeuron = currLayer.neurons[n];
+      for (let n = 0; n < currLayer.length; n++) {
+        const currNeuron = currLayer[n];
 
         let value = currNeuron.value;
 
@@ -119,8 +137,8 @@ class Network {
     for (let l = 0; l <= this.layers.length - 1; l++) {
       const currLayer = this.layers[l];
 
-      for (let n = 0; n < currLayer.neurons.length; n++) {
-        const currNeuron = currLayer.neurons[n];
+      for (let n = 0; n < currLayer.length; n++) {
+        const currNeuron = currLayer[n];
 
         let delta = currNeuron.delta;
 
