@@ -90,12 +90,12 @@ class Network {
   runInptSig() {
     for (let l = 1; l < this.layers.length; l++) {
       for (let n = 0; n < this.layers[l].length; n++) {
-        const layer = this.layers[l][n];
-        const connVal = layer.inputs.reduce((prev, t) => {
+        const neuron = this.layers[l][n];
+        const connVal = neuron.inputs.reduce((prev, t) => {
           return prev + t.weight * t.from.value;
         }, 0);
 
-        layer.value = sigmoid(connVal + layer.bias);
+        neuron.value = sigmoid(connVal + neuron.bias);
       }
     }
 
@@ -111,12 +111,7 @@ class Network {
 
         let err = 0;
         if (l === this.layers.length - 1) err = target[n] - value;
-        else {
-          for (let k = 0; k < currNeuron.outputs.length; k++) {
-            const currentConn = currNeuron.outputs[k];
-            err += currentConn.to.delta * currentConn.weight;
-          }
-        }
+        else for (const i of currNeuron.outputs) err += i.to.delta * i.weight;
 
         currNeuron.error = err;
         currNeuron.delta = err * value * (1 - value);
@@ -143,7 +138,7 @@ class Network {
           currConn.weight += change;
         }
 
-        currNeuron.bias = currNeuron.bias + this.learnRate * delta;
+        currNeuron.bias += this.learnRate * delta;
       }
     }
   }
