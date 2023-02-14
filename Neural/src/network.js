@@ -1,4 +1,6 @@
-const sigmoid = (x) => 1 / (1 + Math.exp(-x));
+const sig1 = (x) => 1 / (1 + Math.exp(-x));
+const sig2 = (x) => x / (1 + Math.abs(x));
+const sigmoid = (x) => (sig1(x) === 1 ? sig2(x) : sig1(x));
 
 const randBias = () => Math.floor(Math.random() * 6 - 3);
 
@@ -73,6 +75,8 @@ class Network {
       this.calcDeltaSig(item.output);
       this.adjust();
     }
+
+    return this;
   }
 
   activate(vals) {
