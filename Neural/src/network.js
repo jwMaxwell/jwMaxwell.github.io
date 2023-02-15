@@ -1,6 +1,4 @@
-const sig1 = (x) => 1 / (1 + Math.exp(-x));
-const sig2 = (x) => x / (1 + Math.abs(x));
-const sigmoid = (x) => (sig1(x) === 1 ? sig2(x) : sig1(x));
+const sigmoid = (x) => 1 / (1 + Math.exp(-x));
 
 const randBias = () => Math.floor(Math.random() * 6 - 3);
 
@@ -23,16 +21,18 @@ const Connection = (from, to) => {
 
 class Network {
   constructor(layersSize, learnRate, momentum) {
-    this.layers = layersSize.map((len, i) => {
-      let layer = Layer(len);
-      if (i !== 0) {
-        layer = layer.map((n) => {
-          n.bias = randBias();
-          return n;
-        });
-      }
-      return layer;
-    });
+    this.layers = layersSize
+      ? layersSize.map((len, i) => {
+          let layer = Layer(len);
+          if (i !== 0) {
+            layer = layer.map((n) => {
+              n.bias = randBias();
+              return n;
+            });
+          }
+          return layer;
+        })
+      : [];
 
     this.learnRate = learnRate ?? 0.3;
     this.momentum = momentum ?? 0.1;
@@ -147,11 +147,47 @@ class Network {
     }
   }
 
+  from(net) {
+    this.learnRate = net.learnRate;
+    this.momentum = net.momentum;
+    this.layers = JSON.parse(net.layers);
+
+    for (let l = 1; l < this.layers.length; l++) {
+      const currLayer = this.layers[l];
+      const prevLayer = this.layers[l - 1];
+      for (let n = 0; n < prevLayer.length; n++) {
+        for (let i = 0; i < currLayer.length; i++) {
+          prevLayer[n].outputs[i].to = currLayer[i];
+          prevLayer[n].outputs[i].from = prevLayer[n];
+
+          currLayer[i].inputs[n].to = currLayer[i];
+          currLayer[i].inputs[n].from = prevLayer[n];
+        }
+      }
+    }
+    return this;
+  }
+
   toJSON() {
     return {
       learnRate: this.learnRate,
       momentum: this.momentum,
-      layers: JSON.stringify(this.layers),
+      layers: JSON.stringify(
+        this.layers.map((l) =>
+          l.map((n) => {
+            let temp = n;
+            temp.inputs = temp.inputs.map((i) => {
+              i.to = {};
+              return i;
+            });
+            temp.outputs = temp.outputs.map((o) => {
+              o.from = {};
+              return o;
+            });
+            return temp;
+          })
+        )
+      ),
     };
   }
 }

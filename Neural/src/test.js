@@ -58,9 +58,11 @@ const trainingData = [
 const print = (x, y) =>
   console.log(`${x} -> result: ${Math.round(y)}, actual: ${y}`);
 const run = () => {
-  let network = new Network([3, 15, 15, 1]).train(trainingData, 200000);
-
-  for (const n of trainingData) print(n.input, network.run(n.input));
+  let network1 = new Network([3, 15, 15, 1]).train(trainingData, 200000);
+  for (const n of trainingData) print(n.input, network1.run(n.input));
+  console.log();
+  let network2 = new Network().from(network1.toJSON());
+  for (const n of trainingData) print(n.input, network2.run(n.input));
 };
 
 run();
