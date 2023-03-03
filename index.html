@@ -14,8 +14,7 @@
 
   <!-- <script type="module" src="index.js"></script> -->
   <script>
-    const response = await fetch("./home-data.json");
-    const data = await response.json();
+    const data = await fetch("./home-data.json").then(t=>t.json());
 
     const projectStructure = "<section>"
     + '<a href="$1">$2</a> <br />'
