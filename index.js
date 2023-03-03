@@ -10,7 +10,7 @@ const blogStructure = `<a href="$1">$2</a> <br />`;
 
 // generate html for projects
 for (let i = 0; i < data.projects.paths.length; ++i)
-  projects.innerHtml += projectStructure
+  projects.innerHtml = projectStructure
     .replace("$1", data.projects.paths[i])
     .replace("$2", data.projects.details[i].title)
     .replace("$3", data.projects.details[i].description);
