@@ -23,7 +23,7 @@
       Below are some conversions, which will convert given values match the name
       of the given variable.
     </p>
-    <pre class="prettyprint lang-html">
+    <pre class="prettyprint lang-js">
         const True = [!![], !!{}. !'', !"", !``, !0];
         const False = [![], !{}, !!'', !!"", !!``, !1];
 
@@ -37,7 +37,7 @@
     </p>
 
     <p>First, I will start with a standard FizzBuzz</p>
-    <pre class="prettyprint lang-html">
+    <pre class="prettyprint lang-js">
         const fizzbuzz = (x) => {
             let res = '';
             if (x % 3 === 0) res = 'Fizz';
@@ -51,7 +51,7 @@
     <p>
       Now that we have a base, we can start sneaking in some of our conversions
     </p>
-    <pre class="prettyprint lang-html">
+    <pre class="prettyprint lang-js">
         const fizzbuzz = (x) => {
             let res = '';
             if (x % 3 === +false) res = 'Fizz';
