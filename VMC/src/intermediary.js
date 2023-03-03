@@ -169,6 +169,7 @@ export const runIntermediary = (str) => {
   for (const line of lines) {
     if (line === "") continue;
     const args = line.split(/ +(?=(?:(?:[^"]*"){2})*[^"]*$)/g);
+    console.log(args);
     instructions[args[0]](...args.slice(1));
   }
 
