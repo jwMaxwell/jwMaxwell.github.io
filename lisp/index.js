@@ -1,5 +1,5 @@
-import { tokenize, parse } from "./src/parse";
-import { execute } from "./src/eval";
+import { parse } from "./src/parse.js";
+import { execute } from "./src/eval.js";
 
 input.value = "";
 
