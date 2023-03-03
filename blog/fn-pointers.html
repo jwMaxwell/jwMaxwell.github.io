@@ -1,16 +1,29 @@
----
-title: "Function Pointers"
-date: 2022-07-23T23:21:13-05:00
-draft: false
----
-
-C is one of my favorite weekend langauges due to its extreme simplicity and complexity. For proficiency in C programming, the user must first have a functional understanding of memory and assembly language. Without this understanding, some concepts, such as pointers, will only be used in a very limited capacity.
-In assembly language, every part of a program operates on and interacts with memory. The variables are stored in memory, the function definitions are stored in memory, and most importantly, instructions are stored in memory. Assembly language doesn't have scopes and functions/procedures are instead jumped to with `goto` or `jump` instructions. This means that functions have addresses.
-Functions have addresses and pointers are vairables which point to addresses, which means that we can, in theory, store functions in variables.
-
-Below, we see how function pointers work in a standard C program
-```c
-#include <stdio.h>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Function Pointers</title>
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./code.css" />
+  </head>
+  <body>
+    <p>
+      C is one of my favorite weekend langauges due to its extreme simplicity
+      and complexity. For proficiency in C programming, the user must first have
+      a functional understanding of memory and assembly language. Without this
+      understanding, some concepts, such as pointers, will only be used in a
+      very limited capacity. In assembly language, every part of a program
+      operates on and interacts with memory. The variables are stored in memory,
+      the function definitions are stored in memory, and most importantly,
+      instructions are stored in memory. Assembly language doesn't have scopes
+      and functions/procedures are instead jumped to with `goto` or `jump`
+      instructions. This means that functions have addresses. Functions have
+      addresses and pointers are vairables which point to addresses, which means
+      that we can, in theory, store functions in variables.
+    </p>
+    <p>Below, we see how function pointers work in a standard C program</p>
+    <pre class="prettyprint lang-js">
+#include &lsaquo;stdio.h&rsaquo;>
 
 int add4(int x) {
     return x + 4;
@@ -21,11 +34,14 @@ int main() {
     printf("3 + 4 = %d", fn(3));
     return 0;
 }
-```
-This concept can lead to some very interesting and useful ideas such as functional map and pipe functions as well as callback functions. 
+    </pre>
+    <p>
+      This concept can lead to some very interesting and useful ideas such as
+      functional map and pipe functions as well as callback functions.
+    </p>
 
-```c
-#include <stdio.h>
+    <pre class="prettyprint lang-js">
+#include &lsaquo;stdio.h&rsaquo;>
 
 int int_map (int* arr, unsigned len, int (*fn)(int)) {
     unsigned i = 0;
@@ -51,5 +67,16 @@ int main() {
 
     return 0;
 }
-```
-For those who are unfamiliar with `map()` in functional programming, the function will take an array and apply a function to every element in the array. Tradionally, the function would return the array containing the new results, however, this would be much more complicated in C. With this knowledge in mind, the above code would output `3, 4, 5, 6, 7, 8, 9, 10, 11,`
+    </pre>
+    <p>
+      For those who are unfamiliar with `map()` in functional programming, the
+      function will take an array and apply a function to every element in the
+      array. Tradionally, the function would return the array containing the new
+      results, however, this would be much more complicated in C. With this
+      knowledge in mind, the above code would output `3, 4, 5, 6, 7, 8, 9, 10,
+      11,`
+    </p>
+
+    <script src="./index.js"></script>
+  </body>
+</html>

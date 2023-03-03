@@ -30,7 +30,8 @@ const False = [![], !{}, !!'', !!"", !!``, !1];
 
 const zero = [+[], +'', +"", +``, +false, +!{}];
 const one = [+!![], +!'', +!"", +!``, +true, +!!{}];
-    </pre>
+</pre
+    >
 
     <p>
       Using this information, we can now create some rediculous programs. My
@@ -40,15 +41,16 @@ const one = [+!![], +!'', +!"", +!``, +true, +!!{}];
     <p>First, I will start with a standard FizzBuzz</p>
     <pre class="prettyprint lang-js">
 const fizzbuzz = (x) => {
-    let res = '';
-    if (x % 3 === 0) res = 'Fizz';
-    if (x % 5 === 0) res += 'Buzz';
-    if (!res) res = x;
-    return res;
+let res = '';
+if (x % 3 === 0) res = 'Fizz';
+if (x % 5 === 0) res += 'Buzz';
+if (!res) res = x;
+return res;
 }
 
 console.log([...Array(100).keys()].map(t => t + 1).map(fizzbuzz));
-    </pre>
+</pre
+    >
     <p>
       Now that we have a base, we can start sneaking in some of our conversions
     </p>
