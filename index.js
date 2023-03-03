@@ -7,7 +7,7 @@ const blogStructure = `<a href="$1">$2</a> <br />`;
 
 const response = await fetch("./home-data.json").then(async (t) => {
   const data = t.json();
-  console.log(data);
+  console.log(data.projects.paths.length);
   // generate html for projects
   for (let i = 0; i < data.projects.paths.length; ++i)
     projects.innerHtml = projectStructure
