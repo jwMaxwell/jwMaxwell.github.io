@@ -5,7 +5,7 @@ const projectStructure = `<section>
 
 const blogStructure = `<a href="$1">$2</a> <br />`;
 
-const response = await fetch("./home-data.json").then((t) => {
+const response = await fetch("./home-data.json").then(async (t) => {
   const data = t.json();
 
   // generate html for projects
