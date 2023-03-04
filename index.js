@@ -1,26 +1,17 @@
-const response = await fetch("./home-data.json");
-const data = await response.json();
+const response = await fetch('./home-data.json');
+const {projects, blogs} = await response.json();
 
-const projectStructure = `<section>
-<a href="$1">$2</a> <br />
-<p>$3</p>
-</section>`;
+const projectSection = ({path, title, description}) => `
+  <section>
+    <a href="${path}">${title}</a> <br />
+    <p>${description}</p>
+  </section>`;
 
-const blogStructure = `<a href="$1">$2</a> <br />`;
+const blogSection = ({path, title}) => `<a href="${path}">${title}</a> <br />`;
 
-const populate = async () => {
-  // generate html for projects
-  for (let i = 0; i < data.projects.paths.length; ++i)
-    projects.innerHTML += projectStructure
-      .replace("$1", data.projects.paths[i])
-      .replace("$2", data.projects.details[i].title)
-      .replace("$3", data.projects.details[i].description);
+document.body.innerHTML += `
+<h2>Code projects:</h2>
+<div id="projects">${projects.map(projectSection).join('')}</div>
 
-  // generate html for blog entries
-  for (let i = 0; i < data.blogs.paths.length; ++i)
-    blogs.innerHTML += blogStructure
-      .replace("$1", data.blogs.paths[i])
-      .replace("$2", data.blogs.titles[i]);
-};
-
-populate();
+<h2>Code blog:</h2>
+<div id="blogs">${blogs.map(blogSection).join('')}</div>`;
