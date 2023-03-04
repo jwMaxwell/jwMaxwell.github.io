@@ -17,10 +17,10 @@ const populate = async () => {
       .replace("$3", data.projects.details[i].description);
 
   // generate html for blog entries
-  for (let i = 0; i < (await data.blogs.paths.length); ++i)
+  for (let i = 0; i < data.blogs.paths.length; ++i)
     blogs.innerHTML += blogStructure
-      .replace("$1", await data.blogs.paths[i])
-      .replace("$2", await data.blogs.titles);
+      .replace("$1", data.blogs.paths[i])
+      .replace("$2", data.blogs.titles[i]);
 };
 
 populate();
