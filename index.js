@@ -10,14 +10,11 @@ const blogStructure = `<a href="$1">$2</a> <br />`;
 
 const populate = async () => {
   // generate html for projects
-  for (let i = 0; i < data.projects.paths.length; ++i) {
-    projects.innerHTML = projectStructure
+  for (let i = 0; i < data.projects.paths.length; ++i)
+    projects.innerHTML += projectStructure
       .replace("$1", data.projects.paths[i])
       .replace("$2", data.projects.details[i].title)
       .replace("$3", data.projects.details[i].description);
-
-    console.log(data.projects.paths[i]);
-  }
 
   // generate html for blog entries
   for (let i = 0; i < data.blogs.paths.length; ++i)
