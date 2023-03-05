@@ -48,19 +48,19 @@
       [line#]
     </p>
     <pre class="prettyprint lang-basic">
-60  IF FB=0 THEN 100
-70  IF B=0 THEN 120
-80  IF F=0 THEN 140</pre
+60  IF FB=0 THEN 110
+70  IF B=0 THEN 130
+80  IF F=0 THEN 150</pre
     >
 
     <p>We're almost done. Now we need to print our results</p>
     <pre class="prettyprint lang-basic">
 90  PRINT I
-100 GOTO 150
+100 GOTO 160
 110 PRINT "FIZZBUZZ"
-120 GOTO 150
+120 GOTO 160
 130 PRINT "BUZZ"
-140 GOTO 150
+140 GOTO 160
 150 PRINT "FIZZ"</pre
     >
 
@@ -77,15 +77,15 @@
 30  FB=((I/15)-INT(I/15))
 40  B=((I/5)-INT(I/5))
 50  F=((I/3)-INT(I/3))
-60  IF FB=0 THEN 100
-70  IF B=0 THEN 120
-80  IF F=0 THEN 140
+60  IF FB=0 THEN 110
+70  IF B=0 THEN 130
+80  IF F=0 THEN 150
 90  PRINT I
-100 GOTO 150
+100 GOTO 160
 110 PRINT "FIZZBUZZ"
-120 GOTO 150
+120 GOTO 160
 130 PRINT "BUZZ"
-140 GOTO 150
+140 GOTO 160
 150 PRINT "FIZZ"
 160 NEXT I
 170 END</pre
