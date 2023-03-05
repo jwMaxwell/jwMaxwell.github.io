@@ -10,50 +10,53 @@
     <h1>TI99/4a Basic p1</h1>
     <h2>Joshua Maxwell</h2>
     <p>
-      I'm pretty new to Basic and I'm especially new to the TI99/4A variant. 
-      I refuse to let that limit my ability to create silly and over the top 
-      programs though. When I am learning a new language, my first program
-      is always the traditional "Hello, World!". My second program is my
-      favorite program: FizzBuzz.
+      I'm pretty new to Basic and I'm especially new to the TI99/4A variant. I
+      refuse to let that limit my ability to create silly and over the top
+      programs though. When I am learning a new language, my first program is
+      always the traditional "Hello, World!". My second program is my favorite
+      program: FizzBuzz.
     </p>
     <p>
-      This program was an interesting challenge in TI99/4A basic Because
-      there doesn't seem to be any built-in modulo or remainder 
-      operator/function. Instead, you have to use math.
+      This program was an interesting challenge in TI99/4A basic Because there
+      doesn't seem to be any built-in modulo or remainder operator/function.
+      Instead, you have to use math.
     </p>
     <p>To start, it's always a good idea to clear the screen</p>
     <pre class="prettyprint lang-basic">
 10 CALL CLEAR
-    <pre>
-
-    <p>Then we will need to make a loop, which provides us the numbers from 1 to 100</p>
-    <pre class="prettyprint lang-basic">
-20 FOR I=1 TO 100
-    <pre>
+    </pre>
 
     <p>
-      Now we can calculate whether or not I % 3, I % 5, or I % 15 have 
-      remainders. We will do this by dividing I by X (which returns a float)
-      and then subtracting I / X type-casted to an integer 
-      (JS equivalent: Math.floor(y))
+      Then we will need to make a loop, which provides us the numbers from 1 to
+      100
+    </p>
+    <pre class="prettyprint lang-basic">
+20 FOR I=1 TO 100
+    </pre>
+
+    <p>
+      Now we can calculate whether or not I % 3, I % 5, or I % 15 have
+      remainders. We will do this by dividing I by X (which returns a float) and
+      then subtracting I / X type-casted to an integer (JS equivalent:
+      Math.floor(y))
     </p>
     <pre class="prettyprint lang-basic">
 30  FB=((I/15)-INT(I/15))
 40  B=((I/5)-INT(I/5))
 50  F=((I/3)-INT(I/3))
-    <pre>
+    </pre>
 
     <p>
       Next, we can take care of the conditional statements. In this version of
-      basic, conditional statements operates as follows: 
-      IF [condition] THEN [line#]
+      basic, conditional statements operates as follows: IF [condition] THEN
+      [line#]
     </p>
     <pre class="prettyprint lang-basic">
 60  IF FB=0 THEN 100
 70  IF B=0 THEN 120
 80  IF F=0 THEN 140
-    <pre>
-    
+    </pre>
+
     <p>We're almost done. Now we need to print our results</p>
     <pre class="prettyprint lang-basic">
 90  PRINT I
@@ -64,7 +67,7 @@
 140 GOTO 150
 150 PRINT "FIZZ"
     </pre>
-    
+
     <p>Finally, we can continue the loop and end the program</p>
     <pre class="prettyprint lang-basic">
 160 NEXT I
@@ -91,11 +94,11 @@
 160 NEXT I
 170 END
     </pre>
-    
+
     <p>
-      This is not the best, cleanest, or most efficient FizzBuzz, however, it
-      is my FizzBuzz. That might not mean much to you, but to me it also 
-      doesn't all that much. It'll get better eventually. So shush.
+      This is not the best, cleanest, or most efficient FizzBuzz, however, it is
+      my FizzBuzz. That might not mean much to you, but to me it also doesn't
+      all that much. It'll get better eventually. So shush.
     </p>
     <script src="./index.js"></script>
   </body>
