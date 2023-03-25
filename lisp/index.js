@@ -3,7 +3,7 @@ import { execute } from "./src/eval.js";
 
 input.value = "";
 
-input.addEventListener("keydown", () => {
+input.addEventListener("keyup", () => {
   try {
     output.innerText = execute(parse(input.value));
     console.log(execute(parse(input.value)));
