@@ -7,6 +7,8 @@ input.addEventListener("keyup", () => {
   try {
     output.innerText = execute(parse(input.value));
     console.log(execute(parse(input.value)));
-  } catch (e) {}
+  } catch (e) {
+    console.log(e);
+  }
 });
 // execute(parse());
