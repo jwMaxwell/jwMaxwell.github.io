@@ -6,7 +6,7 @@ const getAllMatches = (regex, str) => {
 };
 
 export const tokenize = (str) =>
-  `${str}\n`
+  `( ${str}\n )`
     .replace(/;(.*?)\n/g, "") // remove comments
     .split("\n")
     .flatMap((line, lineNum) =>
