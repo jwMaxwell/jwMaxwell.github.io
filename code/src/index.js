@@ -62,7 +62,7 @@ fetch("https://emkc.org/api/v2/piston/runtimes")
   });
 
 // get themes
-fetch("themes.json")
+fetch("../resources/themes.json")
   .then((res) => res.json())
   .then((res) => {
     themes.innerHTML = Object.keys(res)
