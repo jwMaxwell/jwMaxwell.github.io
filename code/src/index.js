@@ -1,10 +1,12 @@
+import { compress, decompress } from "./url-crunch.js";
+
 require.config({
   paths: {
     vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs",
   },
 });
 
-const urlOptions = atob(location.hash.slice(1));
+const urlOptions = decompress(atob(location.hash.slice(1)));
 let editor;
 require(["vs/editor/editor.main"], () => {
   editor = monaco.editor.create(document.getElementById("code"), {
@@ -85,7 +87,7 @@ const bufferState = (bool) => {
 
 // send POST request
 run.addEventListener("click", () => {
-  location.hash = btoa(`${lang.value}^${editor.getValue()}`);
+  location.hash = btoa(compress(`${lang.value}^${editor.getValue()}`));
   bufferState(true);
   fetch("https://emkc.org/api/v2/piston/execute", prepareData())
     .then((res) => res.json())
