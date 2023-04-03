@@ -72,7 +72,7 @@ fetch("resources/themes.json")
       .join("");
 
     require(["vs/editor/editor.main"], () => {
-      for (n of Object.keys(res)) {
+      for (const n of Object.keys(res)) {
         monaco.editor.defineTheme(n, res[n]);
       }
     });
