@@ -1,49 +1,52 @@
+const appendChar = (charCode) => {
+  let res = "";
+  if (charCode < 32 || charCode == 127) {
+    res += "`";
+    charCode = (charCode + 34) & 127;
+  } else if (charCode == 96) {
+    res += "`";
+  }
+  res += String.fromCharCode(charCode);
+  return res;
+};
+
 export const compress = (str) => {
   let result = "";
   let index = 0;
   let chunkSize = 0;
   let numLastMatchChars = 0;
-  let h = 0;
-  let charCode, numMatchedChars;
+  let numMatchingChars = 0;
+  let charCode;
 
-  function appendChar(charCode) {
-    if (charCode < 32 || charCode == 127) {
-      result += "`";
-      charCode = (charCode + 34) & 127;
-    } else if (charCode == 96) {
-      result += "`";
-    }
-    result += String.fromCharCode(charCode);
-  }
-
-  function appendChunk() {
-    if (h) {
-      index += h;
-      chunkSize -= h;
+  const appendChunk = () => {
+    if (numMatchingChars) {
+      index += numMatchingChars;
+      chunkSize -= numMatchingChars;
       result += "`";
       numLastMatchChars -= 5;
-      h -= 5;
-      h += 66;
-      if (h >= 96) {
-        h += 1;
+      numMatchingChars -= 5;
+      numMatchingChars += 66;
+      if (numMatchingChars >= 96) {
+        numMatchingChars += 1;
       }
-      result += String.fromCharCode(h);
+      result += String.fromCharCode(numMatchingChars);
       charCode = numLastMatchChars % 94;
       numLastMatchChars = (numLastMatchChars - charCode) / 94;
-      result += String.fromCharCode(charCode + 33);
-      result += String.fromCharCode(numLastMatchChars + 33);
-      h = 0;
+      result +=
+        String.fromCharCode(charCode + 33) +
+        String.fromCharCode(numLastMatchChars + 33);
+      numMatchingChars = 0;
     }
-  }
+  };
 
   while (index < str.length) {
     chunkSize = Math.max(5, chunkSize);
     if (index + chunkSize > str.length) {
       appendChunk();
-      numMatchedChars = str.length - index;
-      appendChar(str.charCodeAt(index++));
+      let numMatchedChars = str.length - index;
+      result += appendChar(str.charCodeAt(index++));
       while (--numMatchedChars) {
-        appendChar(str.charCodeAt(index++));
+        result += appendChar(str.charCodeAt(index++));
       }
     } else {
       let chunk = str.substr(index, chunkSize);
@@ -51,14 +54,14 @@ export const compress = (str) => {
       let matchIndex = str.substring(searchStart, index).lastIndexOf(chunk);
       if (matchIndex >= 0) {
         numLastMatchChars = index - (searchStart + matchIndex);
-        h = chunkSize++;
-        if (h >= 64) {
+        numMatchingChars = chunkSize++;
+        if (numMatchingChars >= 64) {
           appendChunk();
         }
-      } else if (h) {
+      } else if (numMatchingChars) {
         appendChunk();
       } else {
-        appendChar(str.charCodeAt(index++));
+        result += appendChar(str.charCodeAt(index++));
       }
     }
   }
