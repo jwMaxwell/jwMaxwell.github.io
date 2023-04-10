@@ -1,90 +1,100 @@
-const appendChar = (charCode) =>
-  charCode < 32 || charCode === 127
-    ? `\`${String.fromCharCode((charCode + 34) & 127)}`
-    : charCode === 96
-    ? `\`${String.fromCharCode(charCode)}`
-    : String.fromCharCode(charCode);
+const appendChar = (charCode) => {
+  let res = "";
+  if (charCode < 32 || charCode == 127) {
+    res += "`";
+    charCode = (charCode + 34) & 127;
+  } else if (charCode == 96) {
+    res += "`";
+  }
+  res += String.fromCharCode(charCode);
+  return res;
+};
 
 export const compress = (str) => {
-  // Initialize values
   let result = "";
+  let index = 0;
   let chunkSize = 0;
-  let lastMatchChars = 0;
-  let matchingChars = 0;
+  let numLastMatchChars = 0;
+  let numMatchingChars = 0;
+  let charCode;
 
-  // Loop over the input string one character at a time
-  for (let i = 0; i < str.length; ) {
-    // Set the chunk size to 5 or the current chunk size
+  const appendChunk = () => {
+    if (numMatchingChars) {
+      index += numMatchingChars;
+      chunkSize -= numMatchingChars;
+      result += "`";
+      numLastMatchChars -= 5;
+      numMatchingChars -= 5;
+      numMatchingChars += 66;
+      if (numMatchingChars >= 96) {
+        numMatchingChars += 1;
+      }
+      result += String.fromCharCode(numMatchingChars);
+      charCode = numLastMatchChars % 94;
+      numLastMatchChars = (numLastMatchChars - charCode) / 94;
+      result +=
+        String.fromCharCode(charCode + 33) +
+        String.fromCharCode(numLastMatchChars + 33);
+      numMatchingChars = 0;
+    }
+  };
+
+  while (index < str.length) {
     chunkSize = Math.max(5, chunkSize);
-    // Current chunk + chunk size <= length of input string.
-    // If so, search for a repeated substring within the chunk.
-    if (i + chunkSize <= str.length) {
-      let match = str.slice(0, i).lastIndexOf(str.slice(i, i + chunkSize));
-
-      // If a repeated substring is found, set the counters and
-      // continue the loop if the matching characters are less than 64.
-      if (match >= 0) {
-        lastMatchChars = i - match;
-        matchingChars = chunkSize++;
-        if (matchingChars < 64) {
-          continue;
+    if (index + chunkSize > str.length) {
+      appendChunk();
+      let numMatchedChars = str.length - index;
+      result += appendChar(str.charCodeAt(index++));
+      while (--numMatchedChars) {
+        result += appendChar(str.charCodeAt(index++));
+      }
+    } else {
+      let chunk = str.substr(index, chunkSize);
+      let searchStart = index > 8840 ? index - 8840 : 0;
+      let matchIndex = str.substring(searchStart, index).lastIndexOf(chunk);
+      if (matchIndex >= 0) {
+        numLastMatchChars = index - (searchStart + matchIndex);
+        numMatchingChars = chunkSize++;
+        if (numMatchingChars >= 64) {
+          appendChunk();
         }
-        // If no repeated substring is found and there are no matching
-        // characters, append the first character of the current chunk
-        // to the result string and continue the loop.
-      } else if (!matchingChars) {
-        result += appendChar(str.charCodeAt(i++));
-        continue;
+      } else if (numMatchingChars) {
+        appendChunk();
+      } else {
+        result += appendChar(str.charCodeAt(index++));
       }
     }
-    // If there are matching characters, encode the position and length
-    // of the repeated substring in the compressed output, and reset the
-    // counters for matching characters.
-    if (matchingChars) {
-      i += matchingChars;
-      chunkSize -= matchingChars;
-      lastMatchChars -= 5;
-      matchingChars += matchingChars >= 35 ? 62 : 61;
-      const charCode = lastMatchChars % 94;
-      lastMatchChars = (lastMatchChars - charCode) / 94;
-      result +=
-        "`" +
-        String.fromCharCode(matchingChars) +
-        String.fromCharCode(charCode + 33) +
-        String.fromCharCode(lastMatchChars + 33);
-      matchingChars = 0;
-    }
-    // If current chunk + the chunk size > length of input append
-    // the remaining characters of the input string to the result string
-    if (i + chunkSize > str.length)
-      while (i < str.length) result += appendChar(str.charCodeAt(i++));
   }
 
   return result;
 };
 
-export const decompress = (str) => {
-  let res = "";
-  const arr = str.split("").map((c) => c.charCodeAt(0));
+export const decompress = (compressed) => {
+  let index = 0;
+  let output = "";
 
-  for (let i = 0; i < str.length; ++i) {
-    let currChar = arr[i - 1];
+  while (index < compressed.length) {
+    let currChar = compressed.charCodeAt(index++);
 
-    if (arr[i] === 96) {
-      currChar = arr[i + 1];
-      if (currChar > 65) {
-        const length = currChar - (currChar > 96 ? 62 : 61);
-        const offset = arr[i + 2] - 28 + 94 * (arr[i + 3] - 33);
-        res += res.slice(res.length - offset, res.length - offset + length);
-        i += 2;
-      } else if (arr[i + 1] > 32) {
-        res += String.fromCharCode((arr[i + 1] - 34) & 127);
+    if (currChar === 96) {
+      currChar = compressed.charCodeAt(index++);
+      if (currChar === 96) {
+        output += String.fromCharCode(currChar);
+      } else if (currChar > 65) {
+        currChar -= currChar > 96 ? 62 : 61;
+        const length = currChar;
+        currChar = compressed.charCodeAt(index++);
+        let offset = currChar - 28;
+        currChar = compressed.charCodeAt(index++);
+        offset += 94 * (currChar - 33);
+        output += output.substr(output.length - offset, length);
+      } else if (currChar > 32) {
+        output += String.fromCharCode((currChar - 34) & 127);
       }
-      i++;
     } else {
-      res += String.fromCharCode(arr[i]);
+      output += String.fromCharCode(currChar);
     }
   }
 
-  return res;
+  return output;
 };
