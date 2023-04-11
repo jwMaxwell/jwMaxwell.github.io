@@ -86,7 +86,10 @@ export const decompress = (compressed) => {
         let offset = currChar - 28;
         currChar = compressed.charCodeAt(index++);
         offset += 94 * (currChar - 33);
-        output += output.substr(output.length - offset, length);
+        output += output.slice(
+          output.length - offset,
+          output.length - offset + length
+        );
       } else if (currChar > 32) {
         output += String.fromCharCode((currChar - 34) & 127);
       }
