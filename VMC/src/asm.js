@@ -66,6 +66,7 @@ export const runASM = (str) => {
       return `${operators[op]} 00000000 ${toBin(x, 8)} ${toBin(y, 8)}`;
     },
     CLEAN: () => "10100000 00000000 00000000 00000000",
+    DEREF: (addr) => `10110000 ${toBin(addr, 24)}`,
   };
 
   const lines = str.split("\n").map(escapeChars);

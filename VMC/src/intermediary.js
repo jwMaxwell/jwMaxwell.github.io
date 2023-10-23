@@ -154,6 +154,10 @@ export const runIntermediary = (str) => {
       labels[title] = vLine;
     },
     "//": () => {},
+    DEREF: (title, val) => {
+      variables[title] = val;
+      return `DEREF ${val}`;
+    },
   };
 
   const lines = str.split("\n").filter((t) => t !== "");

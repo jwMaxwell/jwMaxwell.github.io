@@ -72,6 +72,8 @@ export const runVMC = (str) => {
     10000000: (_1, _2, _3) => vmcMemory.pop(), //pop
     10010000: (x1, x2, x3) => (vmcMemory[0] += bind(x1, x2, x3)), //jump
     10100000: (_1, _2, _3) => (vmcMemory = [0]), //clean
+    10110000: (x1, x2, x3) =>
+      vmcMemory.push(vmcMemory[vmcMemory[bind(x1, x2, x3)]]), //dereference
   };
 
   const code = str.replace(/\s+/g, "").match(/.{1,32}/g);

@@ -11,6 +11,11 @@
       "description": "Code Editor and Executor sporting the Monaco editor and Piston code execution engine."
     },
     {
+      "path": "./langtonsAnt/",
+      "title": "Langtons Ant",
+      "description": "A nifty single cellular automata."
+    },
+    {
       "path": "./lisp/",
       "title": "Lisp Interpreter",
       "description": "The interactive web variation of eLispsis, which is interpreted and executed in real-time."
