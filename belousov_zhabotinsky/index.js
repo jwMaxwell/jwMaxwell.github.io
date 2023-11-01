@@ -11,7 +11,6 @@ const params = {
   alpha: 1.2,
   beta: 1,
   gamma: 1,
-  delta: 0.5,
 };
 
 let grid = [];
@@ -88,7 +87,6 @@ const gui = new window.dat.GUI();
 gui.add(params, "alpha", 0, 5).step(0.1);
 gui.add(params, "beta", 0, 5).step(0.1);
 gui.add(params, "gamma", 0, 5).step(0.1);
-gui.add(params, "delta", 0, 5).step(0.1);
 gui.add(
   {
     reset: reset,
