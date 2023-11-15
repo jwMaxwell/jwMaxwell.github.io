@@ -1,0 +1,18 @@
+body {
+  margin: 0;
+  background-color: black;
+}
+
+pre {
+  color: snow;
+  position: fixed;
+  left: 10px;
+  padding: 10px;
+}
+
+canvas {
+  float: right;
+  width: 100vw;
+  height: 100vh;
+  image-rendering: pixelated;
+}
