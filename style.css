@@ -1,15 +1,17 @@
 body {
-  margin: 40px auto;
+  /*   margin: 40px auto; */
   max-width: 650px;
   line-height: 1.6;
   font-size: 18px;
   color: #e9e9e9;
   padding: 0 10px;
-  background-color: rgb(37, 37, 37);
+  background-color: black;
+  /*   overflow: hidden; */
 }
 h1,
 h2,
 h3 {
+  transform: translate(100%, 0%);
   line-height: 1.2;
 }
 a {
@@ -19,4 +21,23 @@ section {
   padding: 10px;
   border-style: solid;
   border-width: 1px;
+}
+div {
+  transform: translate(100%, 0%);
+}
+h1,
+h2,
+h3,
+a,
+section,
+div {
+  position: relative;
+  z-index: 1;
+}
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
 }
