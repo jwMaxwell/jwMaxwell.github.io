@@ -1,17 +1,41 @@
 <!DOCTYPE html>
-<head>
-  <link rel="stylesheet" type="text/css" href="style.css" />
-  <title>Lisp</title>
-</head>
-<body>
-  <div class="col">
-    <h3>Lisp</h3>
-    <textarea id="input"></textarea>
-  </div>
-  <div class="col">
-    <h3>Output</h3>
-    <pre id="output"></pre>
-  </div>
+<html>
+  <head>
+    <title>LisPP Editor</title>
+    <link rel="stylesheet" href="./src/style.css" />
+    <link
+      rel="stylesheet"
+      data-name="vs/editor/editor.main"
+      href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/editor/editor.main.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div id="code"></div>
 
-  <script type="module" src="./index.js"></script>
-</body>
+      <div class="island">
+        <button id="run">Run</button>
+        <div class="dropdown">
+          <button class="dropbtn">Advanced</button>
+          <div class="dropdown-content">
+            <input
+              type="text"
+              list="themes"
+              id="theme"
+              class="advoption"
+              placeholder="theme"
+            />
+            <datalist id="themes"></datalist>
+          </div>
+        </div>
+
+        <div class="buffer-wheel" hidden="true"></div>
+
+        <pre id="output" class="output"></pre>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
