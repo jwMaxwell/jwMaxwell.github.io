@@ -1,28 +1,32 @@
 const tokenRegex = /\(|\)|"[^"]*"|'|[^\s()]+/g;
 
 export const tokenize = (str) => {
-    const tokens = [];
+  const tokens = [];
 
-    `${str}\n`.replace(/;(.*?)\n/g, '').replace(tokenRegex, (value, _, offset) => {
-        const prev = str.slice(0, offset);
-        let type = 'identifier';
-        if (!isNaN(Number(value))) {
-            type = "number";
-            value = Number(value);
-        } else if ("()[]{}.".includes(value)) {
-            type = "symbol";
-        } else if (value[0] === '"' && value.slice(-1) === '"') {
-            type = "string";
-            value = value.slice(1, -1);
-        }
+  `${str}\n`
+    .replace(/;(.*?)\n/g, "")
+    .replace(tokenRegex, (value, offset, _) => {
+      const prev = str.slice(0, offset);
+      let type = "identifier";
+      if (!isNaN(Number(value))) {
+        type = "number";
+        value = Number(value);
+      } else if ("()[]{}.".includes(value)) {
+        type = "symbol";
+      } else if (value[0] === '"' && value.slice(-1) === '"') {
+        type = "string";
+        value = value.slice(1, -1);
+      }
 
-        tokens.push({
-            value, 
-            type,
-            line: prev.split('\n').length, 
-            col: prev.length - prev.lastIndexOf('\n'),
-        });
+      console.log(`v-${value},_-${_},offset${offset}}`);
+
+      tokens.push({
+        value,
+        type,
+        line: prev.split("\n").length,
+        col: prev.length - prev.lastIndexOf("\n"),
+      });
     });
 
-    return tokens;
-}
+  return tokens;
+};
