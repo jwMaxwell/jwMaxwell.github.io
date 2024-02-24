@@ -1,12 +1,12 @@
 import { compress, decompress } from "./url-crunch.js";
-import { checkParens } from "./validator.js"
+import { checkParens } from "./validator.js";
 import { tokenize } from "./tokenizer.js";
 import { parse } from "./parser.js";
-import { execute } from "./evaluator.js"
+import { execute, getMessages, clearMessages } from "./evaluator.js";
 
 require.config({
   paths: {
-    vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs",
+    vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.46.0/min/vs",
   },
 });
 
@@ -15,7 +15,7 @@ let editor;
 require(["vs/editor/editor.main"], () => {
   editor = monaco.editor.create(document.getElementById("code"), {
     value: location.hash
-	  ? urlOptions.slice(urlOptions + 1).replace(/lambda/g, 'λ')
+      ? urlOptions.slice(urlOptions + 1).replace(/lambda/g, "λ")
       : `;; Your code here...`,
     language: "scheme",
     theme: "vs-dark",
@@ -40,21 +40,26 @@ fetch("src/themes.json")
 
 // code execution
 run.addEventListener("click", () => {
-    location.hash = btoa(compress(`${editor.getValue().replace(/λ/g, "lambda")}`));
-    bufferState(true);
+  location.hash = btoa(
+    compress(`${editor.getValue().replace(/λ/g, "lambda")}`)
+  );
+  bufferState(true);
 
-    editor.setValue(editor.getValue().replace(/lambda/g, "λ"));
-    try {
-	console.log(tokenize(editor.getValue()));
-	console.log(parse(tokenize(editor.getValue())));
-	output.innerText = execute(parse(checkParens(tokenize(editor.getValue()))));
-    } catch (e) {
-	output.innerText = e;
-    }
+  editor.setValue(editor.getValue().replace(/lambda/g, "λ"));
 
-    bufferState(false);
+  clearMessages();
+  try {
+    // console.log(tokenize(editor.getValue()));
+    // console.log(parse(tokenize(editor.getValue())));
+    execute(parse(checkParens(tokenize(editor.getValue()))));
+    output.innerText = getMessages();
+  } catch (e) {
+    output.innerText = getMessages().shift(); // + `\n\n${e}`;
+  }
+
+  bufferState(false);
 });
-    
+
 const bufferState = (bool) => {
   run.disabled = bool ? true : false;
   document.querySelector(".buffer-wheel").style.visibility = bool

@@ -1,10 +1,11 @@
 import { tokenize } from "./tokenizer.js";
 import { parse } from "./parser.js";
+import { evalError } from "./validator.js";
 
-const evalError = (stack, message) => {
-  const result = `${message}\n\t*> ${stack.join("\n\tat ")}\n~~~ End of stack trace ~~~\n`;
-  return new Error(result);
-};
+let messages = [];
+export const getMessages = () => messages;
+export const addMessage = (str) => messages.push(str);
+export const clearMessages = () => (messages = []);
 
 const evaluate = (expr, env, stack = []) => {
   if (Array.isArray(expr)) {
@@ -23,10 +24,10 @@ const evaluate = (expr, env, stack = []) => {
         return result;
       } catch (e) {
         /*
-         * For some reason, throwing errors here will recusively
+         * For some reason, throwing errors here will recursively
          * spam the output with stacktrace messages.
          */
-        console.error(e);
+        messages.push(e);
       }
     }
   }
@@ -55,17 +56,23 @@ const getLiteral = (expr) =>
   Array.isArray(expr)
     ? expr.map(getLiteral)
     : expr && typeof expr === "object"
-      ? expr.value
-      : expr;
+    ? expr.value
+    : expr;
 
 const isAtom = (expr) => !Array.isArray(expr) || !expr.length;
 const toBool = (val) => (val ? "t" : []);
 const fromBool = (val) => val && (!Array.isArray(val) || val.length);
 const math = (func) => (args, env, stack) => {
-  return args.map((x) => evaluate(x, env, stack)).reduce(func);
+  const values = args.map((x) => evaluate(x, env, stack));
+  for (const v of values)
+    if (!Number(v)) {
+      clearMessages();
+      throw evalError(stack, `Expected number. Got "${v}"`);
+    }
+  return values.reduce(func);
 };
 
-export const defaultEnv = Object.entries({
+const defaultEnv = Object.entries({
   quote: ([a]) => getLiteral(a),
   car: ([a], env, stack) => evaluate(a, env, stack)?.[0],
   cdr: ([a], env, stack) => evaluate(a, env, stack).slice(1),
@@ -99,25 +106,23 @@ export const defaultEnv = Object.entries({
           ]),
           ...env,
         ],
-        stack,
+        stack
       ),
-  defun: ([name, args, body], env, stack) => {
-    return [
-      [
-        getLiteral(name),
-        evaluate(
-          [
-            { value: "λ", type: "identifier", line: name.line, col: name.col },
-            args,
-            body,
-          ],
-          env,
-          stack,
-        ),
-      ],
-      ...env,
-    ];
-  },
+  defun: ([name, args, body], env, stack) => [
+    [
+      getLiteral(name),
+      evaluate(
+        [
+          { value: "λ", type: "identifier", line: name.line, col: name.col },
+          args,
+          body,
+        ],
+        env,
+        stack
+      ),
+    ],
+    ...env,
+  ],
   import: ([url], env, stack) => {
     const fetchSync = (url) => {
       const xhr = new XMLHttpRequest();
@@ -134,7 +139,10 @@ export const defaultEnv = Object.entries({
       ...env,
     ];
   },
-  print: null, // TODO
+  println: ([args], env, stack) => {
+    messages.push(evaluate(args, env, stack));
+    return env;
+  },
   defmacro: ([name, [argName], body], env, stack) => {
     const res = [
       [
@@ -143,12 +151,11 @@ export const defaultEnv = Object.entries({
           evaluate(
             evaluate(body, [[getLiteral(argName), args], ...env], stack),
             env,
-            [`${name.value} ${name.line}:${name.col}`, ...stack],
+            [`${name.value} ${name.line}:${name.col}`, ...stack]
           ),
       ],
       ...env,
     ];
-    console.log(env);
     return res;
   },
   "+": math((a, b) => a + b),
