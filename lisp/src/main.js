@@ -40,16 +40,16 @@ fetch("src/themes.json")
 
 // code execution
 run.addEventListener("click", () => {
+  bufferState(true);
   location.hash = btoa(
     compress(`${editor.getValue().replace(/λ/g, "lambda")}`)
   );
-  bufferState(true);
 
   editor.setValue(editor.getValue().replace(/lambda/g, "λ"));
 
   clearMessages();
   try {
-    console.log(tokenize(editor.getValue()));
+    // console.log(tokenize(editor.getValue()));
     // console.log(parse(tokenize(editor.getValue())));
     execute(parse(checkParens(tokenize(editor.getValue()))));
     output.innerText = getMessages().join("\n");
