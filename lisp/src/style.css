@@ -8,7 +8,7 @@ body {
 }
 
 .island {
-  height: 95vh;
+  height: 95vh - 1px;
   padding-left: 10px;
   padding-right: 10px;
   border: 1px solid #b8b8b8;
