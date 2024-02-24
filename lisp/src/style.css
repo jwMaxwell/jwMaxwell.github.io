@@ -8,7 +8,7 @@ body {
 }
 
 .island {
-  height: 95vh;
+  height: 95vh - 1px;
   padding-left: 10px;
   padding-right: 10px;
   border: 1px solid #b8b8b8;
@@ -140,14 +140,13 @@ body {
 }
 
 .text-input {
-  background-color: rgb(5, 6, 45);
+  background-color: #05062d;
   border: none;
   color: white;
   padding: 5px 6px;
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
-  cursor: pointer;
   border-radius: 5px;
 }
 
