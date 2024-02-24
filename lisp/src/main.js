@@ -52,9 +52,9 @@ run.addEventListener("click", () => {
     // console.log(tokenize(editor.getValue()));
     // console.log(parse(tokenize(editor.getValue())));
     execute(parse(checkParens(tokenize(editor.getValue()))));
-    output.innerText = getMessages().join("\n");
+    output.innerText = getMessages("output").join("\n");
   } catch (e) {
-    output.innerText = getMessages().shift(); // + `\n\n${e}`;
+    output.innerText = getMessages("error").shift(); // + `\n\n${e}`;
   }
 
   bufferState(false);
@@ -72,7 +72,21 @@ theme.addEventListener("change", () => {
   monaco.editor.setTheme(theme.value);
 });
 
-// dropdown toggle
-document.querySelector(".dropbtn").addEventListener("click", () => {
-  document.querySelector(".dropdown-content").classList.toggle("show-content");
+tokenBtn.addEventListener("click", () => {
+  output.innerText = getMessages("token").map(JSON.stringify).join("\n");
 });
+
+astBtn.addEventListener("click", () => {
+  output.innerText = getMessages("ast")
+    .map((n) => JSON.stringify(n, null, 2))
+    .join("\n");
+});
+
+errBtn.addEventListener("click", () => {
+  output.innerText = getMessages("error").join("\n");
+});
+
+// dropdown toggle
+// document.querySelector(".dropbtn").addEventListener("click", () => {
+//   document.querySelector(".dropdown-content").classList.toggle("show-content");
+// });

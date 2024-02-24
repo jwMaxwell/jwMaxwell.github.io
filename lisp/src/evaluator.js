@@ -2,10 +2,18 @@ import { tokenize } from "./tokenizer.js";
 import { parse } from "./parser.js";
 import { evalError } from "./validator.js";
 
-let messages = [];
-export const getMessages = () => messages;
-export const addMessage = (str) => messages.push(str);
-export const clearMessages = () => (messages = []);
+const messages = { token: [], ast: [], error: [], output: [] };
+export const getMessages = (lvl) => messages[lvl];
+export const addMessage = (lvl, dat) => {
+  messages[lvl].push(dat);
+  return messages;
+};
+export const clearMessages = () => {
+  messages.token = [];
+  messages.ast = [];
+  messages.error = [];
+  messages.output = [];
+};
 
 const evaluate = (expr, env, stack = []) => {
   if (Array.isArray(expr)) {
@@ -27,7 +35,7 @@ const evaluate = (expr, env, stack = []) => {
          * For some reason, throwing errors here will recursively
          * spam the output with stacktrace messages.
          */
-        addMessage(e);
+        addMessage("error", e);
       }
     }
   }
@@ -139,7 +147,7 @@ const defaultEnv = Object.entries({
     ];
   },
   println: ([args], env, stack) => {
-    addMessage(evaluate(args, env, stack));
+    addMessage("output", evaluate(args, env, stack));
     return env;
   },
   defmacro: ([name, [argName], body], env, stack) => {

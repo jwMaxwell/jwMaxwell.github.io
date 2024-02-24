@@ -10,7 +10,7 @@ const makeError = (token, message) => {
     "^" +
     "~".repeat(token.value.length - 1);
 
-  addMessage(err);
+  addMessage("error", err);
   throw new Error(err + "\n\n");
 };
 
@@ -19,7 +19,7 @@ export const evalError = (stack, message) => {
     "\n\tat "
   )}\n~~~ End of stack trace ~~~\n`;
 
-  addMessage(result);
+  addMessage("error", result);
   return new Error(result);
 };
 

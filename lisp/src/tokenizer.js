@@ -1,3 +1,5 @@
+import { addMessage, getMessages } from "./evaluator.js";
+
 const tokenRegex = /\(|\)|"[^"]*"|'|[^\s()]+/g;
 
 export const tokenize = (str) => {
@@ -26,5 +28,6 @@ export const tokenize = (str) => {
       });
     });
 
+  tokens.map((t) => addMessage("token", t));
   return tokens;
 };

@@ -14,19 +14,19 @@
       <div id="code"></div>
 
       <div class="island">
-        <button id="run">Run</button>
-        <div class="dropdown">
-          <button class="dropbtn">Advanced</button>
-          <div class="dropdown-content">
-            <input
-              type="text"
-              list="themes"
-              id="theme"
-              class="advoption"
-              placeholder="theme"
-            />
-            <datalist id="themes"></datalist>
-          </div>
+        <button id="run" class="button">Run</button>
+        <button id="tokenBtn" class="button">Tokens</button>
+        <button id="astBtn" class="button">AST</button>
+        <button id="errBtn" class="button">Error Log</button>
+        <div class="dropdown-content">
+          <input
+            type="text"
+            list="themes"
+            id="theme"
+            class="text-input"
+            placeholder="theme"
+          />
+          <datalist id="themes"></datalist>
         </div>
 
         <div class="buffer-wheel" hidden="true"></div>
