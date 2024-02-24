@@ -46,7 +46,6 @@ const evaluate = (expr, env, stack = []) => {
     }
   }
 
-  // FIXME can be symbol or undefined variable
   throw expr.type === "identifier"
     ? evalError(stack, `Variable ${expr.value} not defined`)
     : evalError(stack, `Unexpected symbol: ${JSON.stringify(expr)}`);
