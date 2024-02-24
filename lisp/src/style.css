@@ -140,7 +140,7 @@ body {
 }
 
 .text-input {
-  background-color: #323232;
+  background-color: rgb(5, 6, 45);
   border: none;
   color: white;
   padding: 5px 6px;
@@ -149,6 +149,10 @@ body {
   font-size: 16px;
   cursor: pointer;
   border-radius: 5px;
+}
+
+.text-input:focus {
+  outline: none;
 }
 
 .show-content {
