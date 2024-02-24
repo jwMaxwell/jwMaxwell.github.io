@@ -27,7 +27,7 @@ const evaluate = (expr, env, stack = []) => {
          * For some reason, throwing errors here will recursively
          * spam the output with stacktrace messages.
          */
-        messages.push(e);
+        addMessage(e);
       }
     }
   }
@@ -139,7 +139,7 @@ const defaultEnv = Object.entries({
     ];
   },
   println: ([args], env, stack) => {
-    messages.push(evaluate(args, env, stack));
+    addMessage(evaluate(args, env, stack));
     return env;
   },
   defmacro: ([name, [argName], body], env, stack) => {

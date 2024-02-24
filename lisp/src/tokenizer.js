@@ -18,8 +18,6 @@ export const tokenize = (str) => {
         value = value.slice(1, -1);
       }
 
-      console.log(`v-${value},_-${_},offset${offset}}`);
-
       tokens.push({
         value,
         type,

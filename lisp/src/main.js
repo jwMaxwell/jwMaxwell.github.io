@@ -49,7 +49,7 @@ run.addEventListener("click", () => {
 
   clearMessages();
   try {
-    // console.log(tokenize(editor.getValue()));
+    console.log(tokenize(editor.getValue()));
     // console.log(parse(tokenize(editor.getValue())));
     execute(parse(checkParens(tokenize(editor.getValue()))));
     output.innerText = getMessages().join("\n");
