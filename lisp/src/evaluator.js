@@ -1,6 +1,6 @@
 import { tokenize } from "./tokenizer.js";
 import { parse } from "./parser.js";
-import { evalError } from "./validator.js";
+import { bestMatch, evalError } from "./validator.js";
 
 const messages = { token: [], ast: [], error: [], output: [] };
 export const getMessages = (lvl) => messages[lvl];
@@ -15,7 +15,10 @@ export const clearMessages = () => {
   messages.output = [];
 };
 
+const stackLimit = 1000;
+
 const evaluate = (expr, env, stack = []) => {
+  if (stack.length > stackLimit) throw evalError(stack, "stack limit exceeded");
   if (Array.isArray(expr)) {
     if (!expr?.[0]) throw evalError(stack, "Empty expression");
     const { value, type, line, col } = expr?.[0];
@@ -50,12 +53,24 @@ const evaluate = (expr, env, stack = []) => {
           return val;
         }
       }
-      throw evalError(stack, `Variable ${value} not defined`);
+      throw evalError(
+        stack,
+        `Variable "${value}" not defined. Did you mean "${bestMatch(
+          value,
+          env
+        )}"?`
+      );
     }
   }
 
   throw expr.type === "identifier"
-    ? evalError(stack, `Variable ${expr.value} not defined`)
+    ? evalError(
+        stack,
+        `Variable "${expr.value}" not defined. Did you mean "${bestMatch(
+          expr.value,
+          env
+        )}"?`
+      )
     : evalError(stack, `Unexpected symbol: ${JSON.stringify(expr)}`);
 };
 
@@ -78,6 +93,10 @@ const math = (func) => (args, env, stack) => {
     }
   return values.reduce(func);
 };
+const deepEq = (a, b) =>
+  Array.isArray(a) && Array.isArray(b)
+    ? a.length === b.length && a.every((x, i) => deepEq(x, b[i]))
+    : a === b;
 
 const defaultEnv = Object.entries({
   quote: ([a]) => getLiteral(a),
@@ -85,7 +104,7 @@ const defaultEnv = Object.entries({
   cdr: ([a], env, stack) => evaluate(a, env, stack).slice(1),
   atom: ([a], env, stack) => toBool(isAtom(evaluate(a, env, stack))),
   eq: ([a, b], env, stack) =>
-    toBool(evaluate(a, env, stack) === evaluate(b, env, stack)),
+    toBool(deepEq(evaluate(a, env, stack), evaluate(b, env, stack))),
   cons: ([a, b], env, stack) => [
     evaluate(a, env, stack),
     ...evaluate(b, env, stack),
