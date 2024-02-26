@@ -1,4 +1,4 @@
-import { addMessage, getMessages } from "./evaluator.js";
+import { addMessage } from "./system.js";
 
 const tokenRegex = /\(|\)|"[^"]*"|'|[^\s()]+/g;
 

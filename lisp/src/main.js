@@ -2,7 +2,8 @@ import { compress, decompress } from "./url-crunch.js";
 import { checkParens } from "./validator.js";
 import { tokenize } from "./tokenizer.js";
 import { parse } from "./parser.js";
-import { execute, getMessages, clearMessages } from "./evaluator.js";
+import { execute } from "./evaluator.js";
+import { getMessages, clearMessages } from "./system.js";
 
 require.config({
   paths: {
@@ -19,7 +20,8 @@ require(["vs/editor/editor.main"], () => {
       : `;; Your code here...`,
     language: "scheme",
     theme: "vs-dark",
-    "bracketPairColorization.enabled": true,
+    bracketPairColorization: true,
+    automaticLayout: true,
   });
 });
 

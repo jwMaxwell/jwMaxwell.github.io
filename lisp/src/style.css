@@ -136,7 +136,6 @@ body {
   -webkit-user-select: none;
   touch-action: manipulation;
   white-space: nowrap;
-  cursor: pointer;
 }
 
 .text-input {

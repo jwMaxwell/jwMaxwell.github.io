@@ -1,4 +1,4 @@
-import { addMessage } from "./evaluator.js";
+import { addMessage } from "./system.js";
 
 const buildAST = (tokens, ast = []) => {
   const token = tokens.shift();

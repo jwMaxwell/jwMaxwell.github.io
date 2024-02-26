@@ -1,21 +1,7 @@
 import { tokenize } from "./tokenizer.js";
 import { parse } from "./parser.js";
 import { bestMatch, evalError } from "./validator.js";
-
-const messages = { token: [], ast: [], error: [], output: [] };
-export const getMessages = (lvl) => messages[lvl];
-export const addMessage = (lvl, dat) => {
-  messages[lvl].push(dat);
-  return messages;
-};
-export const clearMessages = () => {
-  messages.token = [];
-  messages.ast = [];
-  messages.error = [];
-  messages.output = [];
-};
-
-const stackLimit = 1000;
+import { addMessage, stackLimit } from "./system.js";
 
 const evaluate = (expr, env, stack = []) => {
   if (stack.length > stackLimit) throw evalError(stack, "stack limit exceeded");
@@ -34,11 +20,7 @@ const evaluate = (expr, env, stack = []) => {
         ]);
         return result;
       } catch (e) {
-        /*
-         * For some reason, throwing errors here will recursively
-         * spam the output with stacktrace messages.
-         */
-        addMessage("error", e);
+        throw addMessage("error", e);
       }
     }
   }
@@ -88,7 +70,6 @@ const math = (func) => (args, env, stack) => {
   const values = args.map((x) => evaluate(x, env, stack));
   for (const v of values)
     if (!Number(v)) {
-      clearMessages();
       throw evalError(stack, `Expected number. Got "${v}"`);
     }
   return values.reduce(func);
