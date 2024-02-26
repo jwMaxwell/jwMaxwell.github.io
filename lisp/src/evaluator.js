@@ -147,7 +147,7 @@ const defaultEnv = Object.entries({
     ];
   },
   println: ([args], env, stack) => {
-    addMessage("output", evaluate(args, env, stack));
+    addMessage("output", evaluate(args, env, stack).replace("\\n", "\n"));
     return env;
   },
   defmacro: ([name, [argName], body], env, stack) => {
