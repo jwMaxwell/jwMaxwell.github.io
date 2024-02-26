@@ -68,10 +68,10 @@ const toBool = (val) => (val ? "t" : []);
 const fromBool = (val) => val && (!Array.isArray(val) || val.length);
 const math = (func) => (args, env, stack) => {
   const values = args.map((x) => evaluate(x, env, stack));
-  for (const v of values)
-    if (!Number(v)) {
-      throw evalError(stack, `Expected number. Got "${v}"`);
-    }
+  // for (const v of values)
+  //   if (!Number(v)) {
+  //     throw evalError(stack, `Expected number. Got "${v}"`);
+  //   }
   return values.reduce(func);
 };
 const deepEq = (a, b) =>

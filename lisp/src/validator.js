@@ -59,7 +59,6 @@ export const bestMatch = (str, env) => {
   for (const [key, value] of env) {
     likelihoods.push([key, similarity(str, key)]);
   }
-  console.log(likelihoods);
   return likelihoods.sort((a, b) => a[1] - b[1]).pop()[0];
 };
 
