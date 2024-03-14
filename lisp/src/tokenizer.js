@@ -7,7 +7,7 @@ export const tokenize = (str) => {
   const tokens = [];
 
   `${str}\n`.replace(tokenRegex, (value, offset1, offset2) => {
-    console.log(value, offset1, offset2);
+    // console.log(value, offset1, offset2);
     const offset = offset1 ?? offset2;
     const prev = str.slice(0, offset);
     let type = "identifier";
