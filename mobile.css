@@ -4,6 +4,8 @@ html {
   padding: 0;
   height: 100%;
   overflow-x: hidden;
+  font-family: Monospace;
+  font-size: 1.2em;
 }
 
 canvas {
