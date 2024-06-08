@@ -1,0 +1,173 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Oscillating Life</title>
+        <style>
+            body {
+                margin: 0;
+                background-color: black;
+                overflow: hidden;
+            }
+            canvas {
+                width: 100vw;
+                height: 100vh;
+                image-rendering: pixelated;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas onclick="reset()"></canvas>
+    </body>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js" integrity="sha512-LF8ZB1iTwi4Qvkm4pekHG4a437Y9Af5ZuwbnW4GTbAWQeR2E4KW8WF+xH8b9psevV7wIlDMx1MH9YfPqgKhA/Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        const canvas = document.querySelector("canvas");
+        const ctx = canvas.getContext("2d");
+        
+        const params = {
+            width: (canvas.width = window.innerWidth / 7)|0,
+            height: canvas.height = (window.innerHeight / 7)|0,
+            grid: [],
+            innerRadius: 2,
+            outerRadius: 5,
+            growth: 0.1,
+            decay: 0.33,
+            alpha: 1.2,
+            beta: 1,
+            gamma: 1.08,
+            delta: 0.5,
+            epsilon: 0.26,
+            zeta: 0.46,
+            theta: 0.27,
+            iota: 0.36
+        };
+
+        const imageData = ctx.createImageData(params.width, params.height);
+
+        // Lookup tables are fast
+        const neighborChart = [];
+        const populateNeighbors = () => {          
+            for (let i = 0; i < params.width * params.height; ++i) {
+                const centerX = i % params.width;
+                const centerY = Math.floor(i / params.width);
+    
+                const inner = [];
+                const outer = [];
+    
+                for (let dx = -params.outerRadius; dx <= params.outerRadius; dx++) {
+                    const dxSq = dx ** 2;
+                    for (let dy = -params.outerRadius; dy <= params.outerRadius; dy++) {
+                        const nx = (centerX + dx + params.width) % params.width;
+                        const ny = (centerY + dy + params.height) % params.height;
+                        const dist = Math.sqrt(dxSq + dy ** 2);
+    
+                        if (dist <= params.innerRadius) {
+                            inner.push(ny * params.width + nx);
+                        } else if (dist <= params.outerRadius) {
+                            outer.push(ny * params.width + nx);
+                        }
+                    }
+                }
+    
+                neighborChart[i] = { inner, outer };
+            }
+        }
+
+        const reset = () => {
+            params.grid = new Array(params.width * params.height);
+            for (let i = 0; i < params.grid.length; ++i) {
+                params.grid[i] = new Float64Array(3);
+                for (let j = 0; j < 3; ++j) {
+                    params.grid[i][j] = Math.random();
+                }
+            }
+            populateNeighbors();
+        }
+
+        const normalize = (inner, outer) => {
+            const convolve = (arr) => {
+                let sum = 0;
+                for (const v of arr) {
+                    sum += v;
+                }
+                return isNaN(sum) ? 0 : sum / arr.length;
+            }
+            
+            const innerValues = inner.map(t => params.grid[t]);
+            const outerValues = outer.map(t => params.grid[t]);
+
+            const res = {ui: [], uo: []};
+            for (let i = 0; i < 3; ++i) {
+                res.ui.push(convolve(innerValues.map(t => t[i])));
+                res.uo.push(convolve(outerValues.map(t => t[i])));
+            }
+
+            return res;
+        }
+        
+        // Life function 
+        const life = (indx) => {
+            const limit = (x) => Math.max(0, Math.min(x, 1));
+            const [A, B, C] = params.grid[indx];
+
+            // Caculations based on Belousov Zhabotinsky reaction
+            params.grid[indx][0] = A + A * (params.alpha * B - params.gamma * C);
+            params.grid[indx][1] = B + B * (params.beta * C - params.gamma * A);
+            params.grid[indx][2] = C + C * (params.gamma * A - params.gamma * B);
+
+            const neighborhood = normalize(neighborChart[indx].inner, neighborChart[indx].outer);
+
+            params.grid[indx] = params.grid[indx].map((n, i) => {
+                let res = n;
+                if (neighborhood.ui[i] >= params.delta 
+                    && neighborhood.uo[i] >= params.epsilon 
+                    && neighborhood.uo[i] <= params.zeta) {
+                        res += params.growth;
+                    }
+                else if (neighborhood.ui[i] < params.delta 
+                    && neighborhood.uo[i] >= params.theta 
+                    && neighborhood.uo[i] <= params.iota) {
+                        res += params.growth;
+                    }
+                else {
+                    res -= params.decay;
+                }
+
+                return res;                
+            }).map(limit);
+        }
+
+        const draw = () => {
+            for (let i = 5; i < params.grid.length; ++i) {
+                life(i);
+
+                const [A, B, C] = params.grid[i].map(t => t * 255);
+
+                const offset = (i) * 4;
+                imageData.data[offset] = A;
+                imageData.data[offset + 1] = B;
+                imageData.data[offset + 2] = C;
+                imageData.data[offset + 3] = 255;
+            }
+            ctx.putImageData(imageData, 0, 0);
+            requestAnimationFrame(draw);
+        }
+
+        const gui = new window.dat.GUI();
+        gui.add(params, "innerRadius", 0, 8).step(1);
+        gui.add(params, "outerRadius", 0, 8).step(1);
+        gui.add(params, "growth", 0, 1).step(0.01);
+        gui.add(params, "decay", 0, 1).step(0.01);
+        gui.add(params, "alpha", 0, 5).step(0.01);
+        gui.add(params, "beta", 0, 5).step(0.01);
+        gui.add(params, "gamma", 0, 5).step(0.01);
+        gui.add(params, "delta", 0, 1).step(0.001);
+        gui.add(params, "epsilon", 0, 1).step(0.001);
+        gui.add(params, "zeta", 0, 1).step(0.001);
+        gui.add(params, "theta", 0, 1).step(0.001);
+        gui.add(params, "iota", 0, 1).step(0.001);
+
+        reset();
+        draw();
+    </script>
+</html>
