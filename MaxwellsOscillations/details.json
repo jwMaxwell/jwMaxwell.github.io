@@ -1,0 +1,4 @@
+{
+  "title": "Maxwells Oscillations",
+  "description": "Another implementation of the Belousov Zhabotinsky reaction, this time with variable neighbor radii and convolutions!"
+}
