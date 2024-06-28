@@ -1,0 +1,4 @@
+{
+  "title": "WebGL - Belousov Zhabotinsky Reaction",
+  "description": "Belousov Zhabotinsky reaction, written in webgl in order to get the best performance."
+}
