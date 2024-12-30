@@ -1,4 +1,4 @@
-#+title: TI99/4a Basic Fizzbuzz
+#+title: TI99/4a Basic: Fizzbuzz
 #+author: Joshua Maxwell
 #+date: 12/27/2024
 #+description: A walkthrough of the Fizzbuzz code written for the TI99/4A

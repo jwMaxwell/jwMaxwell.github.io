@@ -1,4 +1,4 @@
-#+title: Javascript Type Coercion
+#+title: Javascript: Type Coercion
 #+author: Joshua Maxwell
 #+date: 12/27/2024
 #+description: An exploration of type coercion in javascript

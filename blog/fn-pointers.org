@@ -1,4 +1,4 @@
-#+title: C/C++ Function Pointers
+#+title: C/C++: Function Pointers
 #+author: Joshua Maxwell
 #+date: 12/27/2024
 #+description: An exploration of function pointers in C and C++
