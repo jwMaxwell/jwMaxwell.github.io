@@ -3,12 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-12-29 Sun 19:28 -->
+<!-- 2024-12-29 Sun 19:48 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TI99/4a Basic Fizzbuzz</title>
+<title>Clojure: How to Learn</title>
 <meta name="author" content="Joshua Maxwell" />
-<meta name="description" content="A walkthrough of the Fizzbuzz code written for the TI99/4A" />
+<meta name="description" content="A detailed guide on how to start your learning journey in Clojure" />
 <meta name="generator" content="Org Mode" />
 <style>
   #content { max-width: 60em; margin: auto; }
@@ -195,99 +195,97 @@
   .org-svg { }
 </style>
 <link rel="stylesheet" href="https://latex.now.sh/style.css">
+<script type="module" src="dark-mode.js"></script>
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">TI99/4a Basic Fizzbuzz</h1>
+<h1 class="title">Clojure: How to Learn</h1>
 <p>
-I'm pretty new to Basic and I'm especially new to the TI99/4A variant. I refuse to let that limit my ability to create silly and over the top programs though. When I am learning a new language, my first program is always the traditional "Hello, World!". My second program is my favorite program: FizzBuzz.
+<b>Table of Contents</b> :toc:
 </p>
+<ul class="org-ul">
+<li><a href="#the-tryclojure-website">The TryClojure Website</a></li>
+<li><a href="#work-your-way-through-the-clojure-koans">Work Your Way Through the Clojure Koans</a></li>
+<li><a href="#practice-with-coding-challenges">Practice with Coding Challenges</a></li>
+<li><a href="#dont-be-afraid-to-look-it-up">Don’t Be Afraid to Look It Up</a></li>
+<li><a href="#create-personal-projects">Create Personal Projects</a></li>
+</ul>
 
+<div id="outline-container-learn-the-basics-of-lisp" class="outline-2">
+<h2 id="learn-the-basics-of-lisp">Learn the Basics of LISP</h2>
+<div class="outline-text-2" id="text-learn-the-basics-of-lisp">
 <p>
-This program was an interesting challenge in TI99/4A basic Because there doesn't seem to be any built-in modulo or remainder operator/function. Instead, you have to use math.
-</p>
-
-<p>
-To start, it's always a good idea to clear the screen
-</p>
-<div class="org-src-container">
-<pre class="src src-basic">10 CALL CLEAR
-</pre>
-</div>
-
-<p>
-Then we will need to make a loop, which provides us the numbers from 1 to 100
-</p>
-<div class="org-src-container">
-<pre class="src src-basic">20 FOR I=1 TO 100
-</pre>
-</div>
-<p>
-Now we can calculate whether or not I % 3, I % 5, or I % 15 have remainders. We will do this by dividing I by X (which returns a float) and then subtracting I / X type-casted to an integer (JS equivalent: Math.floor(y))
+To effectively learn Clojure, it’s essential to first understand the foundational concepts of LISP. In LISP, all data and code are represented as either atomic literals or lists. Code in LISP takes the form of symbolic expressions (s-expressions), which are lists where the first element represents the function to execute and all other elements are treated as function parameters. For instance:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-basic">30  FB=((I/15)-INT(I/15))
-40  B=((I/5)-INT(I/5))
-50  F=((I/3)-INT(I/3))
+<pre class="src src-lisp">(+ 1 2 3) ; Adds 1, 2, and 3, returning 6
+(list 1 2 3) ; Creates a list containing 1, 2, and 3
 </pre>
 </div>
+
 <p>
-Next, we can take care of the conditional statements. In this version of basic, conditional statements operates as follows: IF [condition] THEN [line#]
+This is LISP's super power: functions, data structures, and even the code itself are all lists. Developing an intuition for this design will help you navigate Clojure’s syntax and functionality with confidence. For further insights into LISP, visit <a href="https://andrewmaxwell.github.io/junk/lisp">Lisp in JS</a>.
 </p>
-<div class="org-src-container">
-<pre class="src src-basic">60  IF FB=0 THEN 110
-70  IF B=0 THEN 130
-80  IF F=0 THEN 150
-</pre>
 </div>
-<p>
-We're almost done. Now we need to print our results
-</p>
-<div class="org-src-container">
-<pre class="src src-basic">90  PRINT I
-100 GOTO 160
-110 PRINT "FIZZBUZZ"
-120 GOTO 160
-130 PRINT "BUZZ"
-140 GOTO 160
-150 PRINT "FIZZ"
-</pre>
 </div>
+
+<div id="outline-container-the-tryclojure-website" class="outline-2">
+<h2 id="the-tryclojure-website">The TryClojure Website</h2>
+<div class="outline-text-2" id="text-the-tryclojure-website">
 <p>
-Finally, we can continue the loop and end the program
+Explore the <a href="https://www.tryclojure.org/">TryClojure</a> website for an interactive learning experience. This platform allows you to experiment with Clojure directly in your browser, making it an ideal starting point. The tutorials walk you through the language’s core concepts while providing hands-on coding practice without requiring any local setup.
 </p>
-<div class="org-src-container">
-<pre class="src src-basic">160 NEXT I
-170 END
-</pre>
+
+<p>
+Furthermore, you will be able to try Clojure before committing to it. If you decide you would rather learn a different dialect of LISP or learn a different language entirely, TryClojure offers a clear point of return.
+</p>
 </div>
-<p>
-All together, our FizzBuzz program looks like this:
-</p>
-<div class="org-src-container">
-<pre class="src src-basic">10  CALL CLEAR
-20  FOR I=1 TO 100
-30  FB=((I/15)-INT(I/15))
-40  B=((I/5)-INT(I/5))
-50  F=((I/3)-INT(I/3))
-60  IF FB=0 THEN 110
-70  IF B=0 THEN 130
-80  IF F=0 THEN 150
-90  PRINT I
-100 GOTO 160
-110 PRINT "FIZZBUZZ"
-120 GOTO 160
-130 PRINT "BUZZ"
-140 GOTO 160
-150 PRINT "FIZZ"
-160 NEXT I
-170 END
-</pre>
 </div>
+
+<div id="outline-container-work-your-way-through-the-clojure-koans" class="outline-2">
+<h2 id="work-your-way-through-the-clojure-koans">Work Your Way Through the Clojure Koans</h2>
+<div class="outline-text-2" id="text-work-your-way-through-the-clojure-koans">
 <p>
-This is not the best, cleanest, or most efficient FizzBuzz, however, it is my FizzBuzz. That might not mean much to you, but to me it also doesn't all that much. It'll get better eventually. Maybe.
+Learn and practice with the <a href="http://clojurekoans.com/">Clojure Koans</a>. These fill-in-the-blank exercises provide puzzles that progressively intoduce you to the language and its capabilities. No experience in the language is assumed or required. While working through the Koans myself, I would occasionally get stuck. Don't feel discouraged if this happens to you, instead you should embrace Google and other learning resources. Tricky exercises are an opportunity to learn more about the language!
 </p>
+</div>
+</div>
+
+<div id="outline-container-practice-with-coding-challenges" class="outline-2">
+<h2 id="practice-with-coding-challenges">Practice with Coding Challenges</h2>
+<div class="outline-text-2" id="text-practice-with-coding-challenges">
+<p>
+The best way that I've found to practice and refine my understanding of a programming language is to solve programming challenges. Working through problems will help you learn, not only how certain functions and concepts work, but how and when to implement them as well. At first your solutions will be awkward, verbose, and disorganized but when you finish a challenge, you can look at other people's solutions, which is where the real benefits are at.
+</p>
+
+<p>
+Other solutions, created by more experienced developers, will teach you different approaches, functions, macros, etc. which you can then begin to implement in your own code as well. A couple platforms I would recommend are <a href="https://exercism.org/tracks/clojure">Exercism</a> and <a href="https://www.codewars.com/">Codewars</a>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-dont-be-afraid-to-look-it-up" class="outline-2">
+<h2 id="dont-be-afraid-to-look-it-up">Don’t Be Afraid to Look It Up</h2>
+<div class="outline-text-2" id="text-dont-be-afraid-to-look-it-up">
+<p>
+The Clojure ecosystem is rich but can feel overwhelming at first. Make frequent use of resources such as the <a href="https://clojure.org/reference/documentation">official documentation</a>, <a href="https://clojuredocs.org/">ClojureDocs</a>, and community spaces like the <a href="https://www.reddit.com/r/Clojure/">Clojure subreddit</a>.
+</p>
+
+<p>
+Pro tip: The most helpful resource I've found is the <a href="https://clojure.org/api/cheatsheet">Clojure Cheatsheet</a>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-create-personal-projects" class="outline-2">
+<h2 id="create-personal-projects">Create Personal Projects</h2>
+<div class="outline-text-2" id="text-create-personal-projects">
+<p>
+Coding challenges are a great way to learn the language, however, their scope is quite limited. To broaden your scope of learning and experience, you should try building your own personal projects. Start small and work your way up to larger and more difficult applications. Don't forget to upload your code to Github so can begin to quantify your experience and display your growth for potential employment opportunities.
+</p>
+</div>
+</div>
 </div>
 </body>
 </html>

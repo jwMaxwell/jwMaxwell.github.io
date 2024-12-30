@@ -1,0 +1,70 @@
+#+title: Clojure: How to Learn
+#+author: Joshua Maxwell
+#+date: 12/27/2024
+#+description: A detailed guide on how to start your learning journey in Clojure
+#+tags: clojure, lisp, learn
+#+options: num:nil
+#+HTML_HEAD: <link rel="stylesheet" href="https://latex.now.sh/style.css">
+#+HTML_HEAD: <script type="module" src="dark-mode.js"></script>
+
+*Table of Contents* :toc:
+- [[#the-tryclojure-website][The TryClojure Website]]
+- [[#work-your-way-through-the-clojure-koans][Work Your Way Through the Clojure Koans]]
+- [[#practice-with-coding-challenges][Practice with Coding Challenges]]
+- [[#dont-be-afraid-to-look-it-up][Don’t Be Afraid to Look It Up]]
+- [[#create-personal-projects][Create Personal Projects]]
+
+* Learn the Basics of LISP
+:PROPERTIES:
+:CUSTOM_ID: learn-the-basics-of-lisp
+:END:
+
+To effectively learn Clojure, it’s essential to first understand the foundational concepts of LISP. In LISP, all data and code are represented as either atomic literals or lists. Code in LISP takes the form of symbolic expressions (s-expressions), which are lists where the first element represents the function to execute and all other elements are treated as function parameters. For instance:
+
+ #+begin_src lisp
+(+ 1 2 3) ; Adds 1, 2, and 3, returning 6
+(list 1 2 3) ; Creates a list containing 1, 2, and 3
+#+end_src
+
+This is LISP's super power: functions, data structures, and even the code itself are all lists. Developing an intuition for this design will help you navigate Clojure’s syntax and functionality with confidence. For further insights into LISP, visit [[https://andrewmaxwell.github.io/junk/lisp][Lisp in JS]].
+
+* The TryClojure Website
+:PROPERTIES:
+:CUSTOM_ID: the-tryclojure-website
+:END:
+
+Explore the [[https://www.tryclojure.org/][TryClojure]] website for an interactive learning experience. This platform allows you to experiment with Clojure directly in your browser, making it an ideal starting point. The tutorials walk you through the language’s core concepts while providing hands-on coding practice without requiring any local setup.
+
+Furthermore, you will be able to try Clojure before committing to it. If you decide you would rather learn a different dialect of LISP or learn a different language entirely, TryClojure offers a clear point of return.
+
+* Work Your Way Through the Clojure Koans
+:PROPERTIES:
+:CUSTOM_ID: work-your-way-through-the-clojure-koans
+:END:
+
+Learn and practice with the [[http://clojurekoans.com/][Clojure Koans]]. These fill-in-the-blank exercises provide puzzles that progressively intoduce you to the language and its capabilities. No experience in the language is assumed or required. While working through the Koans myself, I would occasionally get stuck. Don't feel discouraged if this happens to you, instead you should embrace Google and other learning resources. Tricky exercises are an opportunity to learn more about the language!
+
+* Practice with Coding Challenges
+:PROPERTIES:
+:CUSTOM_ID: practice-with-coding-challenges
+:END:
+
+The best way that I've found to practice and refine my understanding of a programming language is to solve programming challenges. Working through problems will help you learn, not only how certain functions and concepts work, but how and when to implement them as well. At first your solutions will be awkward, verbose, and disorganized but when you finish a challenge, you can look at other people's solutions, which is where the real benefits are at.
+
+Other solutions, created by more experienced developers, will teach you different approaches, functions, macros, etc. which you can then begin to implement in your own code as well. A couple platforms I would recommend are [[https://exercism.org/tracks/clojure][Exercism]] and [[https://www.codewars.com/][Codewars]].
+
+* Don’t Be Afraid to Look It Up
+:PROPERTIES:
+:CUSTOM_ID: dont-be-afraid-to-look-it-up
+:END:
+
+The Clojure ecosystem is rich but can feel overwhelming at first. Make frequent use of resources such as the [[https://clojure.org/reference/documentation][official documentation]], [[https://clojuredocs.org/][ClojureDocs]], and community spaces like the [[https://www.reddit.com/r/Clojure/][Clojure subreddit]].
+
+Pro tip: The most helpful resource I've found is the [[https://clojure.org/api/cheatsheet][Clojure Cheatsheet]].
+
+* Create Personal Projects
+:PROPERTIES:
+:CUSTOM_ID: create-personal-projects
+:END:
+
+Coding challenges are a great way to learn the language, however, their scope is quite limited. To broaden your scope of learning and experience, you should try building your own personal projects. Start small and work your way up to larger and more difficult applications. Don't forget to upload your code to Github so can begin to quantify your experience and display your growth for potential employment opportunities.

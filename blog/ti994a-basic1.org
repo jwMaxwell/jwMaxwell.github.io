@@ -1,0 +1,71 @@
+#+title: TI99/4a Basic Fizzbuzz
+#+author: Joshua Maxwell
+#+date: 12/27/2024
+#+description: A walkthrough of the Fizzbuzz code written for the TI99/4A
+#+tags: basic, learn
+#+options: num:nil toc:nil
+#+HTML_HEAD: <link rel="stylesheet" href="https://latex.now.sh/style.css">
+#+HTML_HEAD: <script type="module" src="dark-mode.js"></script>
+
+I'm pretty new to Basic and I'm especially new to the TI99/4A variant. I refuse to let that limit my ability to create silly and over the top programs though. When I am learning a new language, my first program is always the traditional "Hello, World!". My second program is my favorite program: FizzBuzz.
+
+This program was an interesting challenge in TI99/4A basic Because there doesn't seem to be any built-in modulo or remainder operator/function. Instead, you have to use math.
+
+To start, it's always a good idea to clear the screen
+#+begin_src basic
+	10 CALL CLEAR
+#+end_src
+
+Then we will need to make a loop, which provides us the numbers from 1 to 100
+#+begin_src basic
+	20 FOR I=1 TO 100
+#+end_src
+Now we can calculate whether or not I % 3, I % 5, or I % 15 have remainders. We will do this by dividing I by X (which returns a float) and then subtracting I / X type-casted to an integer (JS equivalent: Math.floor(y))
+
+#+begin_src basic
+  30  FB=((I/15)-INT(I/15))
+  40  B=((I/5)-INT(I/5))
+  50  F=((I/3)-INT(I/3))
+#+end_src
+Next, we can take care of the conditional statements. In this version of basic, conditional statements operates as follows: IF [condition] THEN [line#]
+#+begin_src basic
+	60  IF FB=0 THEN 110
+  70  IF B=0 THEN 130
+  80  IF F=0 THEN 150
+#+end_src
+We're almost done. Now we need to print our results
+#+begin_src basic
+	90  PRINT I
+  100 GOTO 160
+  110 PRINT "FIZZBUZZ"
+  120 GOTO 160
+  130 PRINT "BUZZ"
+  140 GOTO 160
+  150 PRINT "FIZZ"
+#+end_src
+Finally, we can continue the loop and end the program
+#+begin_src basic
+	160 NEXT I
+  170 END
+#+end_src
+All together, our FizzBuzz program looks like this:
+#+begin_src basic
+	10  CALL CLEAR
+  20  FOR I=1 TO 100
+  30  FB=((I/15)-INT(I/15))
+  40  B=((I/5)-INT(I/5))
+  50  F=((I/3)-INT(I/3))
+  60  IF FB=0 THEN 110
+  70  IF B=0 THEN 130
+  80  IF F=0 THEN 150
+  90  PRINT I
+  100 GOTO 160
+  110 PRINT "FIZZBUZZ"
+  120 GOTO 160
+  130 PRINT "BUZZ"
+  140 GOTO 160
+  150 PRINT "FIZZ"
+  160 NEXT I
+  170 END
+#+end_src
+This is not the best, cleanest, or most efficient FizzBuzz, however, it is my FizzBuzz. That might not mean much to you, but to me it also doesn't all that much. It'll get better eventually. Maybe.
