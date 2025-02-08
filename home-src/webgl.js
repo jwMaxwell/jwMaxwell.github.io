@@ -15,7 +15,7 @@ const fragWrap = (str) =>
     gl_FragColor = fragColor;
 }`;
 
-const response = await fetch("./shader.frag");
+const response = await fetch("./home-src/shader.frag");
 const fragmentShader = fragWrap(await response.text());
 
 const renderer = new THREE.WebGLRenderer();
