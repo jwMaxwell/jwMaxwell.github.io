@@ -1,0 +1,48 @@
+*{box-sizing:border-box}
+:root{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;color:#f6f1d0}
+html,body{margin:0;width:100%;height:100%;background:#090b0d;overflow:hidden}
+body{display:grid;place-items:center}
+#game-shell{position:relative;width:min(100vw,calc(100vh * 1.8));height:min(100vh,calc(100vw / 1.8));min-width:320px;min-height:178px;overflow:hidden;background:#101820;box-shadow:0 0 0 1px #222,0 16px 80px #000}
+canvas{display:block;width:100%;height:100%;image-rendering:auto}
+#hud{position:absolute;inset:0;pointer-events:none;text-shadow:2px 2px 0 #12100d}
+.hud-top{position:absolute;top:18px;left:22px;right:22px;display:flex;justify-content:space-between;gap:12px}
+.timer-box{min-width:150px;background:linear-gradient(#171b1dca,#080b0dcc);border:2px solid #c9a86a;padding:5px 9px;box-shadow:0 3px 0 #0008}
+.label{font-size:10px;letter-spacing:2px;color:#c9a86a}
+.timer-box div:last-child{font-size:18px;color:#fff9dc}
+.hud-bottom{position:absolute;left:0;right:0;bottom:0;height:92px;padding:15px 24px;display:flex;align-items:end;gap:20px;background:linear-gradient(transparent,#080a0ce8 50%,#050607)}
+.gear-wrap{text-align:center;width:70px}
+#gear{font-size:42px;line-height:40px;color:#f7d77d}
+.rpm-wrap{flex:1;max-width:430px}
+.rpm-bar{height:16px;border:2px solid #c9a86a;background:#080a0b;box-shadow:inset 0 0 0 2px #1e2526}
+#rpm-fill{height:100%;width:0;background:linear-gradient(90deg,#4ba86a 0 62%,#d2b43f 62% 82%,#c85243 82%);transition:width .05s linear}
+.rpm-numbers{display:flex;justify-content:space-between;font-size:9px;color:#a9a28c;margin-top:2px}
+.speed-wrap{width:190px;text-align:right;white-space:nowrap}
+#speed{display:inline-block;font-size:46px;line-height:42px;color:#f6f1d0}
+.speed-wrap span{font-size:10px;color:#c9a86a}
+.panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%,#28353bdd,#080b0eef 70%);padding:25px;text-align:center}
+.logo{font-size:56px;letter-spacing:5px;color:#f2d17a;text-shadow:5px 5px 0 #552f29,8px 8px 0 #111}
+.logo span{color:#b85d47}
+.subtitle{font-size:12px;letter-spacing:4px;color:#bdb8a0;margin:6px 0 25px}
+.controls-card{max-width:650px;border:1px solid #72664e;background:#101519d9;padding:12px 16px;line-height:1.8;font-size:11px;color:#d2ccb7}
+button{font:inherit;color:#f6f1d0;background:#26343a;border:2px solid #c9a86a;padding:11px 17px;cursor:pointer;box-shadow:3px 3px 0 #000;margin-top:20px}
+button:hover{background:#34474e}
+#start-button{font-size:15px;letter-spacing:1px}
+.small{font-size:9px;color:#777e7c;margin-top:13px}
+#gamepad-status{font-size:10px;color:#a8cbb1;margin-top:15px}
+.hidden{display:none!important}
+#center-message{position:absolute;left:50%;top:43%;transform:translate(-50%,-50%);font-size:70px;font-weight:900;color:#f8dda0;text-shadow:6px 6px 0 #4e2d26;pointer-events:none}
+.result-time{font-size:54px;color:#f4d37e;margin:20px 0 5px}
+.result-best{font-size:14px;color:#bbb59d}
+.icon-button,.debug-button{position:absolute;top:12px;border:1px solid #8b7957;background:#101519c9;padding:6px 9px;font-size:12px;box-shadow:none;margin:0;z-index:5}
+.icon-button{right:14px}.debug-button{right:56px}
+.debug-panel{position:absolute;right:10px;top:48px;width:min(390px,calc(100% - 20px));max-height:calc(100% - 58px);overflow:auto;background:#0a0e10f5;border:2px solid #a88d57;z-index:10;padding:10px;box-shadow:7px 7px 0 #000a}
+.debug-head{display:flex;justify-content:space-between;position:sticky;top:-10px;background:#0a0e10;padding:2px 0 8px;border-bottom:1px solid #4b4437;margin-bottom:8px}
+.debug-head button{border:0;padding:0;margin:0;background:none;box-shadow:none;font-size:20px}
+.debug-row{display:grid;grid-template-columns:1fr 105px 45px;gap:7px;align-items:center;margin:5px 0;font-size:9px;color:#d6d0ba}
+.debug-row input[type=range]{width:100%}
+.debug-row output{text-align:right;color:#f0d57f}
+.debug-group{font-size:10px;color:#c9a86a;letter-spacing:1px;margin:13px 0 4px;border-bottom:1px solid #3c3930;padding-bottom:3px}
+.debug-actions{display:flex;gap:6px}.debug-actions button{margin:8px 0 0;font-size:10px;padding:7px}
+#toast{position:absolute;left:50%;bottom:102px;transform:translateX(-50%);background:#0a0d0ddd;border:1px solid #82734f;padding:6px 10px;font-size:10px;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.show{opacity:1}
+@media(max-width:650px){.logo{font-size:32px}.controls-card{font-size:9px}.timer-box{min-width:90px}.timer-box div:last-child{font-size:12px}.speed-wrap{width:125px}#speed{font-size:32px}.hud-top{left:8px;right:8px}.hud-bottom{padding:10px 10px;height:75px}.gear-wrap{width:45px}#gear{font-size:30px}}
