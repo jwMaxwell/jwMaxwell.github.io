@@ -8,11 +8,13 @@ import {formatTime,crossedLapForward} from "./physics.js";
 
 const canvas=document.getElementById("game");
 const renderer=new Renderer(canvas),input=new Input(),audio=new AudioEngine(),ui=new UI();
-const track=TRACKS.mesa86, params=loadParams(), car=new Car(params);
+let selectedTrackId=localStorage.getItem("dustline86-track")||"mesa86";
+let track=TRACKS[selectedTrackId]||TRACKS.mesa86;
+const params=loadParams(), car=new Car(params);
+let scenery=buildScenery(track);
 renderer.upload("track",buildTrackMesh(null,track));
-const scenery=buildScenery(track);
 
-let state="menu",count=3,countTimer=0,raceTime=0,lapTime=0,bestLap=Infinity,lap=0,lastProgress=0,lapValid=true,lapArmed=false,lapDistance=0;
+let state="menu",count=3,countTimer=0,raceTime=0,lapTime=0,bestLap=Infinity,lap=0,lastProgress=0,lapValid=true,lapArmed=false,lapDistance=0,totalDistance=0;
 let last=performance.now(),gearLatch=0;
 
 ui.bind({
@@ -20,19 +22,29 @@ ui.bind({
   onRestart:()=>start(),
   onFullscreen:()=>toggleFullscreen(),
   onReset:()=>{Object.assign(params,cloneCarParams());ui.buildDebug(params,()=>{});ui.toast("Defaults restored")},
-  onSave:()=>{localStorage.setItem("dustline86-tuning-v6",JSON.stringify(params));ui.toast("Tuning saved locally")}
+  onSave:()=>{localStorage.setItem("dustline86-tuning-v6",JSON.stringify(params));ui.toast("Tuning saved locally")},
+  onTrackSelect:(id)=>selectTrack(id)
 });
 ui.buildDebug(params,(k,v)=>params[k]=v);
+ui.renderTrackSelector(TRACKS,selectedTrackId,id=>selectTrack(id));
 ui.setGamepad(input.connectedName());
+
+function selectTrack(id){
+  if(!TRACKS[id])return;
+  selectedTrackId=id;track=TRACKS[id];scenery=buildScenery(track);
+  renderer.upload("track",buildTrackMesh(null,track));
+  localStorage.setItem("dustline86-track",id);
+  ui.setTrackSelected(id,track);
+}
 
 function loadParams(){try{return Object.assign(cloneCarParams(),JSON.parse(localStorage.getItem("dustline86-tuning-v6")||"{}"))}catch{return cloneCarParams()}}
 function start(){
   audio.start();car.reset();
-  const startPose=track.sample(0);
+  const startPose=track.sample(track.startHint||0);
   car.x=startPose.x; car.z=startPose.z; car.y=startPose.y+.42;
   car.trackIndex=0;
   car.yaw=Math.atan2(startPose.tz,startPose.tx);
-  state="countdown";count=3;countTimer=0;raceTime=0;lapTime=0;bestLap=Infinity;lap=0;lastProgress=track.nearest(car.x,car.z,car.y,car.trackIndex).progress;lapValid=true;lapArmed=false;lapDistance=0;gearLatch=0;
+  state="countdown";count=3;countTimer=0;raceTime=0;lapTime=0;bestLap=Infinity;lap=0;totalDistance=0;lastProgress=track.nearest(car.x,car.z,car.y,car.trackIndex).progress;lapValid=true;lapArmed=false;lapDistance=0;gearLatch=0;
   ui.setStartVisible(false);ui.setFinishVisible(false);ui.hideCountdown();
 }
 function toggleFullscreen(){
@@ -75,7 +87,9 @@ function step(dt){
     // the selected gear never changes without a driver command.
     car.update(dt,ctl,track);
     raceTime+=dt;lapTime+=dt;
-    lapDistance+=car.speed*dt;
+    const distanceStep=car.speed*dt;
+    lapDistance+=distanceStep;
+    totalDistance+=distanceStep;
     const prog=track.nearest(car.x,car.z,car.y,car.trackIndex).progress;
     // The start line is physically the same point as the lap seam. Do not allow the
     // first few meters of movement to count as a completed lap due to sample jitter.

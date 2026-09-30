@@ -26,28 +26,18 @@
           <div id="race-time">00:00.000</div>
         </div>
       </div>
-
-      <div class="hud-bottom">
-        <div class="gear-wrap">
-          <div class="label">GEAR</div>
-          <div id="gear">N</div>
-        </div>
-        <div class="rpm-wrap">
-          <div class="rpm-bar"><div id="rpm-fill"></div></div>
-          <div class="rpm-numbers"><span>0</span><span>4</span><span>8</span><span>12</span></div>
-          <div class="label">RPM x1000</div>
-        </div>
-        <div class="speed-wrap">
-          <div id="speed">000</div><span> KM/H</span>
-        </div>
-      </div>
     </div>
 
     <div id="center-message" class="hidden"></div>
 
     <div id="start-screen" class="panel">
       <div class="logo">DUSTLINE <span>86</span></div>
-      <p class="subtitle">SOLO TIME TRIAL / MESA CIRCUIT</p>
+      <p class="subtitle" id="track-subtitle">SOLO TIME TRIAL / MESA CIRCUIT</p>
+      <div class="track-selector" aria-label="Track selector">
+        <div class="selector-heading"><span>SELECT COURSE</span><span id="selected-track-meta">1.15 KM · FAST</span></div>
+        <div id="track-grid" class="track-grid"></div>
+        <div id="selected-track-description" class="selected-track-description"></div>
+      </div>
       <div class="controls-card">
         <div><b>DUALSHOCK 4</b> Left stick steer · R2 throttle · L2 front brake · □ rear brake · ✕ handbrake · L1/R1 shift · △ reverse</div>
         <div><b>KEYBOARD</b> A/D steer · W throttle · S front brake · Z rear brake · Space handbrake · Q/E shift · R restart · F fullscreen · X reverse</div>

@@ -103,3 +103,23 @@ The v5 build uses a periodic closed-loop track with no intentional self-intersec
 - Gear-dependent engine speed is now mechanically tied to wheel speed. Each forward gear has a real redline-limited road speed, and throttle is cut at the selected gear's redline rather than allowing first gear to pull to arbitrary speed.
 - Closed-throttle engine braking is ratio-dependent and increases when the selected gear is being oversped, giving short gears visibly stronger deceleration.
 - Manual shifting remains fully manual; there is still no automatic upshift.
+
+
+## v9 cockpit/rendering pass
+- Analog speedometer and tachometer; the old RPM bar HUD is removed.
+- Gear indicator is integrated into the speedometer.
+- Red/yellow shift lights flash at redline.
+- Larger, high-contrast steering wheel with steering-intensity animation.
+- Shallow roof/windshield frame added to the cockpit.
+- Road visibility uses a software depth buffer so perpendicular views do not rely on painter-order guesses.
+
+## v10 multi-track update
+- Added `Mesa Circuit` (~1.15 km): the original fast desert benchmark.
+- Added `Copper Switchback` (~1.17 km): tighter linked bends, stronger grade changes, and more frequent gear changes.
+- Added `Quarry Serpentine` (~1.14 km): the most technical layout, with repeated direction changes and steeper elevation shifts.
+- Added a start-screen map selector with miniature course previews, distance, character, and description.
+- The selected course is remembered locally and is used for the next session.
+- Track generation is generalized so future courses can be added without changing the race loop.
+
+## v11 world-depth update
+The non-track desert is now world-space terrain that follows the course elevation, rather than only a screen-space backdrop. Road, terrain, and roadside entities share one software depth buffer. Sprite silhouettes are rasterized into that depth buffer so pavement, terrain rises, and other foreground geometry occlude them correctly. Depth interpolation uses perspective-correct reciprocal-Z interpolation to reduce grazing-angle visibility errors.

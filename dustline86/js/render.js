@@ -19,10 +19,16 @@ export class Renderer{
     if(!this.ctx)throw new Error('Canvas 2D unavailable');
     this.w=0;this.h=0;this.dpr=1;
     this.fov=Math.PI*70/180;
-    this.near=.18;
+    this.near=.60;
     this.far=380;
     this.camera={x:0,y:0,z:0,forward:[1,0,0],right:[0,0,1],up:[0,1,0]};
     this.nearest=null;
+    this.wheelVisual=0;
+    this.roadScale=.72;
+    this.roadCanvas=document.createElement('canvas');
+    this.roadCtx=this.roadCanvas.getContext('2d',{alpha:true});
+    this.roadImage=null;
+    this.roadDepth=null;
   }
 
   // Kept for compatibility with main.js and older builds. The current renderer is
@@ -35,6 +41,12 @@ export class Renderer{
     const w=Math.max(1,Math.floor(r.width*dpr)),h=Math.max(1,Math.floor(r.height*dpr));
     if(this.canvas.width!==w||this.canvas.height!==h){this.canvas.width=w;this.canvas.height=h}
     this.w=w;this.h=h;this.dpr=dpr;
+    const rw=Math.max(320,Math.floor(w*this.roadScale)),rh=Math.max(180,Math.floor(h*this.roadScale));
+    if(this.roadCanvas.width!==rw||this.roadCanvas.height!==rh){
+      this.roadCanvas.width=rw;this.roadCanvas.height=rh;
+      this.roadImage=this.roadCtx.createImageData(rw,rh);
+      this.roadDepth=new Float32Array(rw*rh);
+    }
   }
 
   setupCamera(car,track){
@@ -70,6 +82,16 @@ export class Renderer{
   }
   project(x,y,z){return this.projectCP(this.cameraPoint(x,y,z))}
 
+  spriteGeometry(s){
+    const scale=Number.isFinite(s?.scale)?s.scale:1;
+    switch(s?.type){
+      case 'cactus': return {worldHeight:4.8*scale,widthRatio:.52};
+      case 'marker': return {worldHeight:4.4*scale,widthRatio:.68};
+      case 'rock': return {worldHeight:2.0*scale,widthRatio:1.05};
+      default: return {worldHeight:3.0*scale,widthRatio:.72};
+    }
+  }
+
   clipCamera(poly){
     let out=poly;
     for(const evalPlane of [p=>p.depth-this.near,p=>this.far-p.depth]){
@@ -96,20 +118,20 @@ export class Renderer{
   triangleWorld(ctx,a,b,c,fill,alpha=1){this.drawPolyCP(ctx,[this.cameraPoint(...a),this.cameraPoint(...b),this.cameraPoint(...c)],fill,alpha)}
   quadTriangles(ctx,a,b,c,d,fill,alpha=1){this.triangleWorld(ctx,a,b,c,fill,alpha);this.triangleWorld(ctx,a,c,d,fill,alpha)}
 
-  render(car,track,scenery){
+  render(car,track,scenery,telemetry={}){
     this.resize();
     const ctx=this.ctx,w=this.w,h=this.h;
     ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.clearRect(0,0,w,h);
     this.setupCamera(car,track);
-    const horizon=h*.43;
-    this.drawSky(ctx,w,h);this.drawMountains(ctx,w,h);this.drawGround(ctx,w,h,horizon);
+    this.drawSky(ctx,w,h);
+    this.drawMountains(ctx,w,h);
+    this.drawGround(ctx,w,h,h*.43);
 
-    const primitives=[];
-    this.collectTrackPrimitives(track,primitives);
-    this.collectSceneryPrimitives(scenery,primitives);
-    primitives.sort((a,b)=>b.depth-a.depth);
-    for(const p of primitives)p.draw(ctx);
-    this.drawHood(ctx,w,h,car);
+    // Near and mid-distance desert are world geometry, not a screen-space paint fill.
+    // Road, terrain, and scenery share one depth buffer so hills and pavement can
+    // correctly occlude objects instead of letting sprites float through them.
+    this.drawWorld(track,scenery);
+    this.drawCockpit(ctx,w,h,car);
   }
 
   drawSky(ctx,w,h){
@@ -140,134 +162,312 @@ export class Renderer{
     ctx.globalAlpha=1;
   }
 
-  trackRingIndices(center,n,back=220,ahead=240){
+  trackRingIndices(center,n,back=260,ahead=300){
     const ids=[];
     for(let k=-back;k<=ahead;k++)ids.push((center+k+n)%n);
     return ids;
   }
 
-  collectTrackPrimitives(track,out){
-    const n=track.samples.length,center=this.nearest.index,ids=this.trackRingIndices(center,n,300,320);
-    const W=track.width*.5,outer=W+26;
+  cameraPolyDepth(poly){
+    let sum=0;for(const p of poly)sum+=p.depth;return sum/poly.length;
+  }
 
-    const pushTriangle=(a,b,c,fill,depth)=>{
-      out.push({depth,draw:ctx=>this.triangleWorld(ctx,a,b,c,fill)});
-    };
-    const triDepth=(a,b,c)=>{
-      const ca=this.cameraPoint(...a),cb=this.cameraPoint(...b),cc=this.cameraPoint(...c);
-      return (ca.depth+cb.depth+cc.depth)/3;
-    };
+  roadColor(hex){
+    const [r,g,b]=hexToRgb(hex);return [r,g,b,255];
+  }
 
+  rasterTriangle(v0,v1,v2,color,bias=0){
+    const rw=this.roadCanvas.width,rh=this.roadCanvas.height, sx=rw/this.w, sy=rh/this.h;
+    const x0=v0.x*sx,y0=v0.y*sy,x1=v1.x*sx,y1=v1.y*sy,x2=v2.x*sx,y2=v2.y*sy;
+    const minX=Math.max(0,Math.floor(Math.min(x0,x1,x2))),maxX=Math.min(rw-1,Math.ceil(Math.max(x0,x1,x2)));
+    const minY=Math.max(0,Math.floor(Math.min(y0,y1,y2))),maxY=Math.min(rh-1,Math.ceil(Math.max(y0,y1,y2)));
+    if(minX>maxX||minY>maxY)return;
+    const area=(x1-x0)*(y2-y0)-(y1-y0)*(x2-x0);if(Math.abs(area)<1e-6)return;
+    const inv=1/area,data=this.roadImage.data,depth=this.roadDepth,rgba=this.roadColor(color);
+    for(let y=minY;y<=maxY;y++){
+      const py=y+.5;
+      for(let x=minX;x<=maxX;x++){
+        const px=x+.5;
+        // Edge-function weights are ordered by opposite vertex: w0=v2, w1=v0, w2=v1.
+        const w0=((x1-x0)*(py-y0)-(y1-y0)*(px-x0))*inv;
+        const w1=((x2-x1)*(py-y1)-(y2-y1)*(px-x1))*inv;
+        const w2=((x0-x2)*(py-y2)-(y0-y2)*(px-x2))*inv;
+        if(w0<-1e-5||w1<-1e-5||w2<-1e-5)continue;
+        // Perspective-correct depth is important when a sprite/terrain polygon crosses
+        // the road at a steep viewing angle. Interpolating camera-space Z directly can
+        // make the far edge win the depth test and produces the exact popping the game had.
+        const invZ=w1/Math.max(v0.depth,1e-6)+w2/Math.max(v1.depth,1e-6)+w0/Math.max(v2.depth,1e-6);
+        const d=(1/Math.max(invZ,1e-9))+bias,idx=y*rw+x;
+        if(d>=depth[idx])continue;
+        depth[idx]=d;
+        const o=idx*4;data[o]=rgba[0];data[o+1]=rgba[1];data[o+2]=rgba[2];data[o+3]=255;
+      }
+    }
+  }
+
+  rasterPoly(poly,color,bias=0){
+    const clipped=this.clipCamera(poly);if(clipped.length<3)return;
+    const pts=[];for(const p of clipped){const q=this.projectCP(p);if(q)pts.push(q)}
+    if(pts.length<3)return;
+    // Fan triangulation is safe for the clipped convex road/curb polygons.
+    for(let i=1;i<pts.length-1;i++)this.rasterTriangle(pts[0],pts[i],pts[i+1],color,bias);
+  }
+
+  drawWorld(track,scenery){
+    const rctx=this.roadCtx,rw=this.roadCanvas.width,rh=this.roadCanvas.height;
+    const data=this.roadImage.data,depth=this.roadDepth;
+    data.fill(0);depth.fill(Infinity);
+
+    this.drawWorldTerrain(track);
+    this.drawRoad(track);
+    this.drawSceneryDepth(scenery);
+
+    rctx.putImageData(this.roadImage,0,0);
+    this.ctx.save();this.ctx.imageSmoothingEnabled=false;
+    this.ctx.drawImage(this.roadCanvas,0,0,this.w,this.h);
+    this.ctx.restore();
+  }
+
+  drawWorldTerrain(track){
+    const n=track.samples.length,center=this.nearest.index;
+    const ids=this.trackRingIndices(center,n,245,285);
+    // Four expanding ground bands on each side. Every vertex lives in track/world
+    // coordinates, so the ground moves and rises with the terrain instead of being a
+    // fixed screen-space desert rectangle.
+    const bands=[
+      {inner:track.width*.5-.02,outer:18,color:'#806a50'},
+      {inner:18,outer:42,color:'#746149'},
+      {inner:42,outer:78,color:'#685744'},
+      {inner:78,outer:132,color:'#5d5041'}
+    ];
+    const bandCount=bands.length;
     for(let q=0;q<ids.length-1;q++){
       const i=ids[q],j=ids[q+1],a=track.samples[i],b=track.samples[j];
-      const na=[a.nx,0,a.nz],nb=[b.nx,0,b.nz];
-      const leftOuterA=[a.x-na[0]*outer,a.y-.28,a.z-na[2]*outer];
-      const rightOuterA=[a.x+na[0]*outer,a.y-.28,a.z+na[2]*outer];
-      const leftOuterB=[b.x-nb[0]*outer,b.y-.28,b.z-nb[2]*outer];
-      const rightOuterB=[b.x+nb[0]*outer,b.y-.28,b.z+nb[2]*outer];
-      const leftA=[a.x-na[0]*W,a.y+.025,a.z-na[2]*W];
-      const rightA=[a.x+na[0]*W,a.y+.025,a.z+na[2]*W];
-      const leftB=[b.x-nb[0]*W,b.y+.025,b.z-nb[2]*W];
-      const rightB=[b.x+nb[0]*W,b.y+.025,b.z+nb[2]*W];
-      const leftCurbA=[a.x-na[0]*(W+.22),a.y+.045,a.z-na[2]*(W+.22)];
-      const rightCurbA=[a.x+na[0]*(W+.22),a.y+.045,a.z+na[2]*(W+.22)];
-      const leftCurbB=[b.x-nb[0]*(W+.22),b.y+.045,b.z-nb[2]*(W+.22)];
-      const rightCurbB=[b.x+nb[0]*(W+.22),b.y+.045,b.z+nb[2]*(W+.22)];
-
-      const cps=[leftA,rightA,leftB,rightB].map(v=>this.cameraPoint(...v));
-      const segmentMax=Math.max(...cps.map(v=>v.depth));
-      const segmentMin=Math.min(...cps.map(v=>v.depth));
-      if(segmentMax<this.near||segmentMin>this.far)continue;
-      const midDepth=cps.reduce((sum,v)=>sum+v.depth,0)/cps.length;
-      const fog=clamp((Math.max(0,midDepth)-95)/(this.far-95),0,1);
-      const roadColor=fogColor(i%28<4?'#4c5553':'#353d3f',fog);
-      const curbColor=fogColor(i%10<5?'#d05b46':'#e5d39a',fog);
-      const groundColor=fogColor(i%24<12?'#7d694d':'#665840',fog);
-      const groundVisible=midDepth>18;
-
-      // Sort each triangle independently. Sorting a complete road segment by a single
-      // average depth allowed adjacent triangles to overwrite one another at steep
-      // viewing angles, producing the disappearing road chunks seen near the car.
-      const rd1=[leftA,rightA,rightB],rd2=[leftA,rightB,leftB];
-      pushTriangle(...rd1,roadColor,triDepth(...rd1));
-      pushTriangle(...rd2,roadColor,triDepth(...rd2));
-      const lc1=[leftCurbA,leftA,leftB],lc2=[leftCurbA,leftB,leftCurbB];
-      pushTriangle(...lc1,curbColor,triDepth(...lc1));
-      pushTriangle(...lc2,curbColor,triDepth(...lc2));
-      const rc1=[rightA,rightCurbA,rightCurbB],rc2=[rightA,rightCurbB,rightB];
-      pushTriangle(...rc1,curbColor,triDepth(...rc1));
-      pushTriangle(...rc2,curbColor,triDepth(...rc2));
-      if(groundVisible){
-        const g1=[leftOuterA,rightOuterA,rightOuterB],g2=[leftOuterA,rightOuterB,leftOuterB];
-        pushTriangle(...g1,groundColor,triDepth(...g1));
-        pushTriangle(...g2,groundColor,triDepth(...g2));
-      }
-      if(i%6<2){
-        const half=.11;
-        const da=[a.x-na[0]*half,a.y+.055,a.z-na[2]*half],db=[a.x+na[0]*half,a.y+.055,a.z+na[2]*half];
-        const dc=[b.x-nb[0]*half,b.y+.055,b.z-nb[2]*half],dd=[b.x+nb[0]*half,b.y+.055,b.z+nb[2]*half];
-        const mark=fogColor('#dbc78f',fog);
-        const m1=[da,db,dd],m2=[da,dd,dc];
-        pushTriangle(...m1,mark,triDepth(...m1));
-        pushTriangle(...m2,mark,triDepth(...m2));
-      }
-    }
-  }
-
-  spriteGeometry(s){
-    const baseHeights={cactus:2.55,marker:3.15,rock:1.05};
-    const widthRatios={cactus:.42,marker:.26,rock:.95};
-    const worldHeight=(baseHeights[s.type]||1.5)*s.scale;
-    const widthRatio=widthRatios[s.type]||.5;
-    return {worldHeight,widthRatio};
-  }
-
-  collectSceneryPrimitives(scenery,out){
-    for(const s of scenery){
-      const baseY=s.groundY??s.y;
-      const geom=this.spriteGeometry(s);
-      const baseCP=this.cameraPoint(s.x,baseY,s.z);
-      const topCP=this.cameraPoint(s.x,baseY+geom.worldHeight,s.z);
-      const centerDepth=(baseCP.depth+topCP.depth)*.5;
-      if(Math.max(baseCP.depth,topCP.depth)<this.near||Math.min(baseCP.depth,topCP.depth)>this.far)continue;
-      const fog=clamp((centerDepth-75)/(this.far-75),0,1);
-      const alpha=1-fog*.78;
-      out.push({depth:centerDepth+.01,draw:ctx=>{
-        const base=this.project(s.x,baseY,s.z);
-        const top=this.project(s.x,baseY+geom.worldHeight,s.z);
-        if(!base||!top)return;
-        // Derive the sprite's pixel size from its actual projected world height.
-        // This guarantees that a fixed-height object gets larger as camera distance
-        // decreases, including when the car approaches from an angle.
-        const pixelHeight=Math.abs(base.y-top.y);
-        if(pixelHeight<.75)return;
-        const width=Math.max(2,pixelHeight*geom.widthRatio);
-        const x=base.x,y=base.y;
-        ctx.save();ctx.globalAlpha=Math.min(1,alpha);
-        ctx.fillStyle='rgba(24,22,17,.30)';ctx.beginPath();ctx.ellipse(x,y+pixelHeight*.018,width*.42,Math.max(1,pixelHeight*.055),0,0,Math.PI*2);ctx.fill();
-        if(s.type==='rock'){
-          ctx.fillStyle=fogColor('#5b5044',fog);ctx.beginPath();
-          ctx.moveTo(x-width*.54,y);ctx.lineTo(x-width*.32,y-pixelHeight*.60);ctx.lineTo(x-width*.03,y-pixelHeight);ctx.lineTo(x+width*.55,y-pixelHeight*.32);ctx.lineTo(x+width*.42,y);ctx.closePath();ctx.fill();
-          ctx.fillStyle=fogColor('#8f7a59',fog);ctx.fillRect(x-width*.14,y-pixelHeight*.68,width*.24,pixelHeight*.10);
-        }else if(s.type==='marker'){
-          ctx.fillStyle=fogColor('#dbc27c',fog);ctx.fillRect(x-width*.13,y-pixelHeight,width*.26,pixelHeight);
-          ctx.fillStyle=fogColor('#a8483e',fog);ctx.fillRect(x-width*.31,y-pixelHeight,width*.62,pixelHeight*.27);
-        }else{
-          ctx.fillStyle=fogColor('#2e5535',fog);
-          ctx.fillRect(x-width*.22,y-pixelHeight*.91,width*.44,pixelHeight*.91);
-          ctx.fillRect(x-width*.72,y-pixelHeight*.66,width*.54,pixelHeight*.13);
-          ctx.fillRect(x+width*.18,y-pixelHeight*.56,width*.54,pixelHeight*.13);
-          ctx.fillStyle=fogColor('#4c7542',fog);ctx.fillRect(x-width*.40,y-pixelHeight,width*.80,pixelHeight*.10);
+      for(let side=-1;side<=1;side+=2){
+        for(let bi=0;bi<bandCount;bi++){
+          const band=bands[bi],ia=band.inner*side,oa=band.outer*side;
+          const ay=a.y-.22-Math.abs(ia)*.012,by=b.y-.22-Math.abs(ia)*.012;
+          const aY2=a.y-.22-Math.abs(oa)*.012,bY2=b.y-.22-Math.abs(oa)*.012;
+          const p0=[a.x+a.nx*ia,ay,a.z+a.nz*ia];
+          const p1=[a.x+a.nx*oa,aY2,a.z+a.nz*oa];
+          const p2=[b.x+b.nx*oa,bY2,b.z+b.nz*oa];
+          const p3=[b.x+b.nx*ia,by,b.z+b.nz*ia];
+          const fog=clamp((this.cameraPolyDepth([this.cameraPoint(...p0),this.cameraPoint(...p1),this.cameraPoint(...p2),this.cameraPoint(...p3)])-75)/(this.far-75),0,1);
+          this.rasterPoly([this.cameraPoint(...p0),this.cameraPoint(...p1),this.cameraPoint(...p2),this.cameraPoint(...p3)],fogColor(band.color,fog),0);
         }
-        ctx.restore();
-      }});
+      }
     }
   }
 
-  drawHood(ctx,w,h,car){
-    const shift=clamp(car.steer*16*this.dpr,-12*this.dpr,12*this.dpr),y=h*.895;
-    ctx.fillStyle='#0b1114';ctx.beginPath();ctx.moveTo(w*.21+shift,h);ctx.lineTo(w*.31+shift*.45,y);ctx.lineTo(w*.69+shift*.45,y);ctx.lineTo(w*.79+shift,h);ctx.closePath();ctx.fill();
-    ctx.fillStyle='#29353b';ctx.beginPath();ctx.moveTo(w*.31+shift*.45,y);ctx.lineTo(w*.36+shift*.45,y-h*.035);ctx.lineTo(w*.64+shift*.45,y-h*.035);ctx.lineTo(w*.69+shift*.45,y);ctx.closePath();ctx.fill();
-    ctx.strokeStyle='#af9661';ctx.lineWidth=Math.max(1,this.dpr);ctx.stroke();
+  drawRoad(track){
+    const n=track.samples.length,center=this.nearest.index,W=track.width*.5;
+    const ids=this.trackRingIndices(center,n,260,300);
+    for(let q=0;q<ids.length-1;q++){
+      const i=ids[q],j=ids[q+1],a=track.samples[i],b=track.samples[j];
+      const leftA=[a.x-a.nx*W,a.y+.045,a.z-a.nz*W];
+      const rightA=[a.x+a.nx*W,a.y+.045,a.z+a.nz*W];
+      const leftB=[b.x-b.nx*W,b.y+.045,b.z-b.nz*W];
+      const rightB=[b.x+b.nx*W,b.y+.045,b.z+b.nz*W];
+      const poly=[this.cameraPoint(...leftA),this.cameraPoint(...rightA),this.cameraPoint(...rightB),this.cameraPoint(...leftB)];
+      const minD=Math.min(...poly.map(p=>p.depth)),maxD=Math.max(...poly.map(p=>p.depth));
+      if(maxD<this.near||minD>this.far)continue;
+      const fog=clamp((this.cameraPolyDepth(poly)-95)/(this.far-95),0,1);
+      this.rasterPoly(poly,fogColor(i%28<4?'#4c5553':'#353d3f',fog),-.045);
+
+      const curbW=.22,half=.11;
+      const leftOuterA=[a.x-a.nx*(W+curbW),a.y+.068,a.z-a.nz*(W+curbW)];
+      const leftRoadA=[a.x-a.nx*W,a.y+.055,a.z-a.nz*W];
+      const leftRoadB=[b.x-b.nx*W,b.y+.055,b.z-b.nz*W];
+      const leftOuterB=[b.x-b.nx*(W+curbW),b.y+.068,b.z-b.nz*(W+curbW)];
+      const rightRoadA=[a.x+a.nx*W,a.y+.055,a.z+a.nz*W];
+      const rightOuterA=[a.x+a.nx*(W+curbW),a.y+.068,a.z+a.nz*(W+curbW)];
+      const rightOuterB=[b.x+b.nx*(W+curbW),b.y+.068,b.z+b.nz*(W+curbW)];
+      const rightRoadB=[b.x+b.nx*W,b.y+.055,b.z+b.nz*W];
+      const curbColor=fogColor(i%10<5?'#d05b46':'#e5d39a',fog);
+      this.rasterPoly([this.cameraPoint(...leftOuterA),this.cameraPoint(...leftRoadA),this.cameraPoint(...leftRoadB),this.cameraPoint(...leftOuterB)],curbColor,-.060);
+      this.rasterPoly([this.cameraPoint(...rightRoadA),this.cameraPoint(...rightOuterA),this.cameraPoint(...rightOuterB),this.cameraPoint(...rightRoadB)],curbColor,-.060);
+      if(i%6<2){
+        const da=[a.x-a.nx*half,a.y+.078,a.z-a.nz*half],db=[a.x+a.nx*half,a.y+.078,a.z+a.nz*half];
+        const dc=[b.x-b.nx*half,b.y+.078,b.z-b.nz*half],dd=[b.x+b.nx*half,b.y+.078,b.z+b.nz*half];
+        this.rasterPoly([this.cameraPoint(...da),this.cameraPoint(...db),this.cameraPoint(...dd),this.cameraPoint(...dc)],fogColor('#dbc78f',fog),-.072);
+      }
+    }
   }
+
+  billboardPoly(s,baseY,worldHeight,points){
+    const f=this.camera.forward,r=this.camera.right;
+    const geom=this.spriteGeometry(s);
+    const half=(worldHeight*geom.widthRatio)*.5;
+    const base={x:s.x,y:baseY,z:s.z},top={x:s.x,y:baseY+worldHeight,z:s.z};
+    return points.map(([u,v])=>{
+      const ww=u*half;
+      const yy=base.y+(top.y-base.y)*v;
+      return [base.x+r[0]*ww,yy,base.z+r[2]*ww];
+    });
+  }
+
+  drawSceneryDepth(scenery){
+    const drawList=[];
+    for(const s of scenery){
+      const baseY=s.groundY??s.y,geom=this.spriteGeometry(s),baseCP=this.cameraPoint(s.x,baseY,s.z);
+      if(baseCP.depth<this.near*.75||baseCP.depth>this.far)continue;
+      drawList.push({s,baseY,geom,depth:baseCP.depth});
+    }
+    drawList.sort((a,b)=>b.depth-a.depth);
+    for(const item of drawList){
+      const {s,baseY,geom}=item, h=geom.worldHeight;
+      const fog=clamp((item.depth-55)/(this.far-55),0,1);
+      const color=(type)=>fogColor(type,fog);
+      if(s.type==='rock'){
+        const pts=this.billboardPoly(s,baseY,h,[[-1,0],[-.78,.48],[-.10,1],[.88,.48],[1,0]]);
+        this.rasterPoly(pts.map(p=>this.cameraPoint(...p)),color('#5b5044'),0);
+        const hi=this.billboardPoly(s,baseY,h,[[-.30,.47],[.02,.76],[.30,.61],[.23,.51]]);
+        this.rasterPoly(hi.map(p=>this.cameraPoint(...p)),color('#8f7a59'),-.01);
+      }else if(s.type==='marker'){
+        const pole=this.billboardPoly(s,baseY,h,[[-.18,0],[.18,0],[.18,1],[-.18,1]]);
+        this.rasterPoly(pole.map(p=>this.cameraPoint(...p)),color('#dbc27c'),0);
+        const flag=this.billboardPoly(s,baseY,h,[[-.45,.78],[.45,.78],[.45,1],[-.45,1]]);
+        this.rasterPoly(flag.map(p=>this.cameraPoint(...p)),color('#a8483e'),-.005);
+      }else{
+        const trunk=this.billboardPoly(s,baseY,h,[[-.24,0],[.24,0],[.24,.92],[-.24,.92]]);
+        this.rasterPoly(trunk.map(p=>this.cameraPoint(...p)),color('#2e5535'),0);
+        const armL=this.billboardPoly(s,baseY,h,[[-.72,.52],[-.18,.52],[-.18,.65],[-.72,.65]]);
+        const armR=this.billboardPoly(s,baseY,h,[[.18,.43],[.72,.43],[.72,.56],[.18,.56]]);
+        this.rasterPoly(armL.map(p=>this.cameraPoint(...p)),color('#2e5535'),-.002);
+        this.rasterPoly(armR.map(p=>this.cameraPoint(...p)),color('#2e5535'),-.002);
+        const crown=this.billboardPoly(s,baseY,h,[[-.55,.86],[.55,.86],[.38,1],[-.38,1]]);
+        this.rasterPoly(crown.map(p=>this.cameraPoint(...p)),color('#4c7542'),-.003);
+      }
+    }
+  }
+
+  drawRoadDetails(s,W){
+    const ctx=this.ctx,i=s.i,a=s.a,b=s.b,fog=s.fog;
+    const curbW=.22,half=.11;
+    const leftOuterA=[a.x-a.nx*(W+curbW),a.y+.068,a.z-a.nz*(W+curbW)];
+    const leftRoadA=[a.x-a.nx*W,a.y+.055,a.z-a.nz*W];
+    const leftRoadB=[b.x-b.nx*W,b.y+.055,b.z-b.nz*W];
+    const leftOuterB=[b.x-b.nx*(W+curbW),b.y+.068,b.z-b.nz*(W+curbW)];
+    const rightRoadA=[a.x+a.nx*W,a.y+.055,a.z+a.nz*W];
+    const rightOuterA=[a.x+a.nx*(W+curbW),a.y+.068,a.z+a.nz*(W+curbW)];
+    const rightOuterB=[b.x+b.nx*(W+curbW),b.y+.068,b.z+b.nz*(W+curbW)];
+    const rightRoadB=[b.x+b.nx*W,b.y+.055,b.z+b.nz*W];
+    const curbColor=fogColor(i%10<5?'#d05b46':'#e5d39a',fog);
+
+    // Details are clipped camera-space quads too. Drawing them as independent
+    // triangles was another source of grazing-angle seams around the car.
+    this.drawPolyCP(ctx,[this.cameraPoint(...leftOuterA),this.cameraPoint(...leftRoadA),this.cameraPoint(...leftRoadB),this.cameraPoint(...leftOuterB)],curbColor,1);
+    this.drawPolyCP(ctx,[this.cameraPoint(...rightRoadA),this.cameraPoint(...rightOuterA),this.cameraPoint(...rightOuterB),this.cameraPoint(...rightRoadB)],curbColor,1);
+
+    if(i%6<2){
+      const da=[a.x-a.nx*half,a.y+.078,a.z-a.nz*half],db=[a.x+a.nx*half,a.y+.078,a.z+a.nz*half];
+      const dc=[b.x-b.nx*half,b.y+.078,b.z-b.nz*half],dd=[b.x+b.nx*half,b.y+.078,b.z+b.nz*half];
+      const mark=fogColor('#dbc78f',fog);
+      this.drawPolyCP(ctx,[this.cameraPoint(...da),this.cameraPoint(...db),this.cameraPoint(...dd),this.cameraPoint(...dc)],mark,1);
+    }
+  }
+
+  drawDial(ctx,cx,cy,r,value,min,max,label,units,needle=true){
+    const start=135*Math.PI/180,end=405*Math.PI/180;
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.fillStyle='rgba(10,13,14,.94)';ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#ab9361';ctx.lineWidth=Math.max(2,this.dpr);ctx.stroke();
+    ctx.fillStyle='#d9cfad';ctx.font=`${Math.max(8,r*.13)}px ui-monospace,monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
+    const steps=9;
+    for(let i=0;i<=steps;i++){
+      const t=i/steps,ang=start+(end-start)*t;
+      const x1=Math.cos(ang)*(r*.77),y1=Math.sin(ang)*(r*.77);
+      const x2=Math.cos(ang)*(r*.90),y2=Math.sin(ang)*(r*.90);
+      ctx.strokeStyle=i===steps?'#c85a47':'#d6c998';ctx.lineWidth=Math.max(1,this.dpr);
+      ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+      if(i%2===0){
+        const tx=Math.cos(ang)*(r*.60),ty=Math.sin(ang)*(r*.60);
+        ctx.fillText(String(Math.round(min+(max-min)*t)),tx,ty);
+      }
+    }
+    if(needle){
+      const t=clamp((value-min)/(max-min),0,1),ang=start+(end-start)*t;
+      ctx.strokeStyle='#df5b47';ctx.lineWidth=Math.max(2,this.dpr*1.5);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(ang)*(r*.73),Math.sin(ang)*(r*.73));ctx.stroke();
+      ctx.fillStyle='#d9cfad';ctx.beginPath();ctx.arc(0,0,r*.055,0,Math.PI*2);ctx.fill();
+    }
+    ctx.fillStyle='#a99f87';ctx.font=`${Math.max(7,r*.10)}px ui-monospace,monospace`;ctx.fillText(label,0,r*.23);
+    ctx.fillStyle='#d6c998';ctx.font=`${Math.max(6,r*.085)}px ui-monospace,monospace`;ctx.fillText(units,0,r*.39);
+    ctx.restore();
+  }
+
+  drawSpeedometer(ctx,cx,cy,r,mph,gear){
+    this.drawDial(ctx,cx,cy,r,mph,0,160,'SPEED','MPH',true);
+    ctx.save();ctx.translate(cx,cy);
+    ctx.fillStyle='#111517';ctx.beginPath();ctx.roundRect(-r*.23,-r*.30,r*.46,r*.25,r*.06);ctx.fill();
+    ctx.strokeStyle='#ab9361';ctx.lineWidth=Math.max(1,this.dpr);ctx.stroke();
+    const text=gear<0?'R':(gear===0?'N':String(gear));
+    ctx.fillStyle='#f5d26f';ctx.font=`bold ${Math.max(10,r*.18)}px ui-monospace,monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,0,-r*.175);
+    ctx.restore();
+  }
+
+  drawShiftLights(ctx,cx,cy,r,rpm,redline){
+    const ratio=clamp(rpm/Math.max(redline,1),0,1.1);
+    const total=6,spacing=r*.19,startX=cx-(total-1)*spacing*.5,y=cy-r*1.08;
+    const hardRed=ratio>=.995, flash=hardRed&&(Math.floor(performance.now()/95)%2===0);
+    for(let i=0;i<total;i++){
+      const threshold=.76+i*.042;
+      const active=ratio>=threshold;
+      const red=i>=4;
+      let fill='rgba(55,49,35,.65)';
+      if(active)fill=red?'#d24d3f':'#d5b63f';
+      if(hardRed)fill=flash?(red?'#ff3d2f':'#ffe16b'):'rgba(55,49,35,.65)';
+      ctx.save();ctx.fillStyle=fill;ctx.strokeStyle='#201c17';ctx.lineWidth=Math.max(1,this.dpr);
+      ctx.beginPath();ctx.arc(startX+i*spacing,y,r*.065,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
+    }
+  }
+
+  drawRoof(ctx,w,h){
+    // A shallow roof/windshield surround closes the cockpit while leaving the road
+    // and horizon overwhelmingly unobstructed.
+    ctx.save();
+    const roofH=h*.085,pillarW=Math.max(8,w*.018);
+    ctx.fillStyle='#0a0d0e';ctx.fillRect(0,0,w,roofH*.56);
+    ctx.fillStyle='#1d2528';ctx.fillRect(w*.07,0,w*.12,roofH*.72);ctx.fillRect(w*.81,0,w*.12,roofH*.72);
+    ctx.fillStyle='#ab9361';ctx.fillRect(w*.08,roofH*.66,w*.10,Math.max(2,this.dpr*2));ctx.fillRect(w*.82,roofH*.66,w*.10,Math.max(2,this.dpr*2));
+    ctx.fillStyle='#0c1012';ctx.beginPath();ctx.moveTo(w*.03,0);ctx.lineTo(w*.10,roofH*.7);ctx.lineTo(w*.125,roofH*.7);ctx.lineTo(w*.065,0);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(w*.97,0);ctx.lineTo(w*.90,roofH*.7);ctx.lineTo(w*.875,roofH*.7);ctx.lineTo(w*.935,0);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#283235';ctx.fillRect(w*.455,0,w*.09,Math.max(4,roofH*.38));
+    ctx.restore();
+  }
+
+  drawCockpit(ctx,w,h,car){
+    // Roof/windshield frame is deliberately subtle and drawn first so it reads as a
+    // cockpit boundary rather than a HUD overlay.
+    this.drawRoof(ctx,w,h);
+
+    const deckY=h*.715;
+    ctx.save();
+    const dash=ctx.createLinearGradient(0,deckY,0,h);dash.addColorStop(0,'#202a2f');dash.addColorStop(.45,'#151b1f');dash.addColorStop(1,'#080a0c');
+    ctx.fillStyle=dash;ctx.beginPath();ctx.moveTo(0,h);ctx.lineTo(0,deckY+h*.05);ctx.lineTo(w*.14,deckY-h*.01);ctx.lineTo(w*.86,deckY-h*.01);ctx.lineTo(w,deckY+h*.05);ctx.lineTo(w,h);ctx.closePath();ctx.fill();
+    ctx.fillStyle='rgba(202,169,106,.25)';ctx.fillRect(0,deckY,w,Math.max(2,this.dpr*2));
+
+    const speedMph=car.speed*2.2369362921;
+    const tachR=Math.min(w*.105,h*.17),speedR=Math.min(w*.105,h*.17);
+    this.drawSpeedometer(ctx,w*.245,h*.846,speedR,speedMph,car.gear);
+    this.drawDial(ctx,w*.755,h*.846,tachR,car.rpm/1000,0,car.p.redline/1000,'RPM','x1000',true);
+    this.drawShiftLights(ctx,w*.755,h*.846,tachR,car.rpm,car.p.redline);
+
+    // Larger, high-contrast steering wheel. The dark inner rim remains readable
+    // against the dash because the outer ring is intentionally warm/bright.
+    const targetWheel=car.steer*4.1;
+    this.wheelVisual+=(targetWheel-this.wheelVisual)*.18;
+    const wx=w*.50,wy=h*.885,wr=Math.min(w*.19,h*.20);
+    ctx.save();ctx.translate(wx,wy);ctx.rotate(this.wheelVisual);
+    ctx.strokeStyle='#050607';ctx.lineWidth=Math.max(12,wr*.16);ctx.beginPath();ctx.arc(0,0,wr*.82,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#c5a66d';ctx.lineWidth=Math.max(4,wr*.06);ctx.beginPath();ctx.arc(0,0,wr*.82,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#ead39a';ctx.lineWidth=Math.max(1,this.dpr*1.4);ctx.beginPath();ctx.arc(0,0,wr*.74,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#0d1113';ctx.lineWidth=Math.max(6,wr*.075);
+    for(const a of [-Math.PI/2,Math.PI/6,5*Math.PI/6]){ctx.beginPath();ctx.moveTo(Math.cos(a)*wr*.08,Math.sin(a)*wr*.08);ctx.lineTo(Math.cos(a)*wr*.72,Math.sin(a)*wr*.72);ctx.stroke()}
+    ctx.fillStyle='#1a2225';ctx.beginPath();ctx.arc(0,0,wr*.22,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#c5a66d';ctx.lineWidth=Math.max(2,this.dpr);ctx.stroke();
+    ctx.fillStyle='#bd5a44';ctx.font=`bold ${Math.max(8,wr*.14)}px ui-monospace,monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('86',0,0);
+    ctx.restore();
+    ctx.restore();
+  }
+
 }
