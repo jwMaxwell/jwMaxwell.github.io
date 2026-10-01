@@ -1,74 +1,118 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Dustline 86 - Retro Time Trial</title>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <main id="game-shell">
-    <canvas id="game" width="900" height="500" aria-label="Dustline 86 racing game"></canvas>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <title>Dustline 86 - Retro Time Trial</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <main id="game-shell">
+      <canvas
+        id="game"
+        width="900"
+        height="500"
+        aria-label="Dustline 86 racing game"
+      ></canvas>
 
-    <div id="hud">
-      <div class="hud-top">
-        <div class="timer-box">
-          <div class="label">LAP</div>
-          <div id="lap-time">00:00.000</div>
+      <div id="hud">
+        <div class="hud-top">
+          <div class="timer-box">
+            <div class="label">LAP</div>
+            <div id="lap-time">00:00.000</div>
+          </div>
+          <div class="timer-box">
+            <div class="label">BEST</div>
+            <div id="best-lap">--:--.---</div>
+          </div>
+          <div class="timer-box">
+            <div class="label">RACE</div>
+            <div id="race-time">00:00.000</div>
+          </div>
         </div>
-        <div class="timer-box">
-          <div class="label">BEST</div>
-          <div id="best-lap">--:--.---</div>
+      </div>
+
+      <div id="center-message" class="hidden"></div>
+
+      <div id="start-screen" class="panel">
+        <div class="logo">DUSTLINE <span>86</span></div>
+        <p class="subtitle" id="track-subtitle">
+          SOLO TIME TRIAL / MESA CIRCUIT
+        </p>
+        <div class="track-selector" aria-label="Track selector">
+          <div class="selector-heading">
+            <span>SELECT COURSE</span
+            ><span id="selected-track-meta">1.15 KM · FAST</span>
+          </div>
+          <div id="track-grid" class="track-grid"></div>
+          <div
+            id="selected-track-description"
+            class="selected-track-description"
+          ></div>
         </div>
-        <div class="timer-box">
-          <div class="label">RACE</div>
-          <div id="race-time">00:00.000</div>
+        <div class="controls-card">
+          <div>
+            <b>DUALSHOCK 4</b> Left stick steer · R2 throttle · L2 front brake ·
+            □ rear brake · ✕ handbrake · L1/R1 shift · △ reverse
+          </div>
+          <div>
+            <b>KEYBOARD</b> A/D steer · W throttle · S front brake · Z rear
+            brake · Space handbrake · Q/E shift · R restart · F fullscreen · M
+            mute · X reverse
+          </div>
+        </div>
+        <button id="start-button">START 5-LAP TIME TRIAL</button>
+        <div id="gamepad-status">Gamepad: searching…</div>
+        <div class="small">
+          Click once to enable audio. Fullscreen is available after starting.
         </div>
       </div>
-    </div>
 
-    <div id="center-message" class="hidden"></div>
-
-    <div id="start-screen" class="panel">
-      <div class="logo">DUSTLINE <span>86</span></div>
-      <p class="subtitle" id="track-subtitle">SOLO TIME TRIAL / MESA CIRCUIT</p>
-      <div class="track-selector" aria-label="Track selector">
-        <div class="selector-heading"><span>SELECT COURSE</span><span id="selected-track-meta">1.15 KM · FAST</span></div>
-        <div id="track-grid" class="track-grid"></div>
-        <div id="selected-track-description" class="selected-track-description"></div>
+      <div id="finish-screen" class="panel hidden">
+        <div class="logo small-logo">SESSION COMPLETE</div>
+        <div class="result-time" id="finish-time">00:00.000</div>
+        <div class="result-best">
+          Best lap <span id="finish-best">--:--.---</span>
+        </div>
+        <div class="finish-actions">
+          <button id="restart-button">RUN IT AGAIN</button
+          ><button id="menu-button">BACK TO MAIN MENU</button>
+        </div>
       </div>
-      <div class="controls-card">
-        <div><b>DUALSHOCK 4</b> Left stick steer · R2 throttle · L2 front brake · □ rear brake · ✕ handbrake · L1/R1 shift · △ reverse</div>
-        <div><b>KEYBOARD</b> A/D steer · W throttle · S front brake · Z rear brake · Space handbrake · Q/E shift · R restart · F fullscreen · X reverse</div>
-      </div>
-      <button id="start-button">START 5-LAP TIME TRIAL</button>
-      <div id="gamepad-status">Gamepad: searching…</div>
-      <div class="small">Click once to enable audio. Fullscreen is available after starting.</div>
-    </div>
 
-    <div id="finish-screen" class="panel hidden">
-      <div class="logo small-logo">SESSION COMPLETE</div>
-      <div class="result-time" id="finish-time">00:00.000</div>
-      <div class="result-best">Best lap <span id="finish-best">--:--.---</span></div>
-      <button id="restart-button">RUN IT AGAIN</button>
-    </div>
+      <button
+        id="mute-button"
+        class="icon-button"
+        title="Mute / unmute audio"
+        aria-label="Mute audio"
+      >
+        🔊
+      </button>
+      <button id="fullscreen-button" class="icon-button" title="Fullscreen">
+        ⛶
+      </button>
+      <button id="debug-toggle" class="debug-button" title="Developer tuning">
+        DEV
+      </button>
 
-    <button id="fullscreen-button" class="icon-button" title="Fullscreen">⛶</button>
-    <button id="debug-toggle" class="debug-button" title="Developer tuning">DEV</button>
+      <aside id="debug-panel" class="debug-panel hidden">
+        <div class="debug-head">
+          <b>VEHICLE LAB</b><button id="debug-close">×</button>
+        </div>
+        <div id="debug-controls"></div>
+        <div class="debug-actions">
+          <button id="reset-tuning">Reset defaults</button>
+          <button id="save-tuning">Save local</button>
+        </div>
+      </aside>
 
-    <aside id="debug-panel" class="debug-panel hidden">
-      <div class="debug-head"><b>VEHICLE LAB</b><button id="debug-close">×</button></div>
-      <div id="debug-controls"></div>
-      <div class="debug-actions">
-        <button id="reset-tuning">Reset defaults</button>
-        <button id="save-tuning">Save local</button>
-      </div>
-    </aside>
+      <div id="toast"></div>
+    </main>
 
-    <div id="toast"></div>
-  </main>
-
-  <script type="module" src="js/main.js"></script>
-</body>
+    <script type="module" src="js/main.js"></script>
+  </body>
 </html>

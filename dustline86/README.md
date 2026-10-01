@@ -123,3 +123,23 @@ The v5 build uses a periodic closed-loop track with no intentional self-intersec
 
 ## v11 world-depth update
 The non-track desert is now world-space terrain that follows the course elevation, rather than only a screen-space backdrop. Road, terrain, and roadside entities share one software depth buffer. Sprite silhouettes are rasterized into that depth buffer so pavement, terrain rises, and other foreground geometry occlude them correctly. Depth interpolation uses perspective-correct reciprocal-Z interpolation to reduce grazing-angle visibility errors.
+
+
+## v12 changes
+- Analog speedometer uses 20 MPH tick increments from 0 to 160 MPH.
+- Analog tachometer uses 1,000 RPM tick increments through 8,000 RPM.
+- Layered synthesized engine audio with intake texture.
+- Distinct gear-shift clunk, redline alarm, tire/drift noise, and spinout sound.
+- Mute button in the upper-right cockpit HUD plus keyboard `M`.
+
+## v12.1 runtime fix
+
+The v12 build had a missing local `clamp()` helper in `js/main.js`, which caused the race loop to throw a `ReferenceError` once drift telemetry was evaluated. v12.1 defines that helper locally.
+
+This build was additionally checked with a synthetic main-loop smoke test through the menu, countdown, and race states, plus standalone car/track physics execution and JavaScript syntax validation.
+
+
+## v12.2 changes
+- Added an explicit Back to Main Menu button on the results screen.
+- Updated factory/default car tuning to the requested values.
+- Bumped tuning persistence to `dustline86-tuning-v12` so older saved tuning cannot override the new requested defaults.
