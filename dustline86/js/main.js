@@ -53,6 +53,7 @@ ui.bind({
     localStorage.setItem("dustline86-tuning-v12", JSON.stringify(params));
     ui.toast("Tuning saved locally");
   },
+  onCopy: () => ui.copyTuning(params),
   onTrackSelect: (id) => selectTrack(id),
   onMute: () => ui.setMuted(audio.toggleMute()),
 });
@@ -86,6 +87,8 @@ function showMainMenu() {
   ui.hideCountdown();
   ui.setFinishVisible(false);
   ui.setStartVisible(true);
+  ui.setRaceMenuVisible(false);
+  audio.stopVehicleSound?.();
 }
 
 function start() {
@@ -114,6 +117,7 @@ function start() {
   wasSpinning = false;
   ui.setStartVisible(false);
   ui.setFinishVisible(false);
+  ui.setRaceMenuVisible(true);
   ui.hideCountdown();
 }
 function toggleFullscreen() {
@@ -140,6 +144,7 @@ function step(dt) {
     ui.countdown(count > 0 ? String(count) : "GO!");
     if (count <= 0 && countTimer > 0.45) {
       state = "race";
+      ui.setRaceMenuVisible(true);
       ui.hideCountdown();
       lastProgress = track.nearest(
         car.x,
@@ -210,6 +215,8 @@ function step(dt) {
       lapDistance = 0;
       if (lap >= 5) {
         state = "finish";
+        ui.setRaceMenuVisible(false);
+        audio.stopVehicleSound?.();
         ui.finishRace(raceTime, bestLap);
         ui.setFinishVisible(true);
       }

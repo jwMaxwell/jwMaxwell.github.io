@@ -44,20 +44,54 @@ export class Input {
       ].includes(k)
     )
       e.preventDefault();
-    if (k === "a" || k === "arrowleft")
-      this.state.steer = on ? -1 : this.state.steer < 0 ? 0 : this.state.steer;
-    if (k === "d" || k === "arrowright")
-      this.state.steer = on ? 1 : this.state.steer > 0 ? 0 : this.state.steer;
-    if (k === "w" || k === "arrowup") this.state.throttle = on ? 1 : 0;
-    if (k === "s" || k === "arrowdown") this.state.frontBrake = on ? 1 : 0;
-    if (k === "z") this.state.rearBrake = on ? 1 : 0;
-    if (k === " ") this.state.handbrake = on;
-    if (k === "e") this.state.up = on;
-    if (k === "q") this.state.down = on;
-    if (k === "x" && on) this.state.reverse = true;
-    if (k === "r" && on) this.state.restart = true;
-    if (k === "f" && on) this.state.fullscreen = true;
-    if (k === "m" && on) this.state.mute = true;
+
+    switch (k) {
+      case "a":
+      case "arrowleft":
+        this.state.steer = on
+          ? -1
+          : this.state.steer < 0
+            ? 0
+            : this.state.steer;
+        break;
+      case "d":
+      case "arrowright":
+        this.state.steer = on ? 1 : this.state.steer > 0 ? 0 : this.state.steer;
+        break;
+      case "w":
+      case "arrowup":
+        this.state.throttle = on ? 1 : 0;
+        break;
+      case "s":
+      case "arrowdown":
+        this.state.frontBrake = on ? 1 : 0;
+        break;
+      case "z":
+        this.state.rearBrake = on ? 1 : 0;
+        break;
+      case " ":
+        this.state.handbrake = on;
+        break;
+      case "e":
+        this.state.up = on;
+        break;
+      case "q":
+        this.state.down = on;
+        break;
+
+      case "x":
+        if (on) this.state.reverse = true;
+        break;
+      case "r":
+        if (on) this.state.restart = true;
+        break;
+      case "f":
+        if (on) this.state.fullscreen = true;
+        break;
+      case "m":
+        if (on) this.state.mute = true;
+        break;
+    }
   }
   poll() {
     const gps = navigator.getGamepads ? navigator.getGamepads() : [];
@@ -81,14 +115,18 @@ export class Input {
       this.state.frontBrake = Math.max(0, analogDeadzone(b[6]?.value ?? 0));
       this.state.rearBrake = b[2]?.pressed ? 1 : 0;
       this.state.handbrake = !!b[0]?.pressed;
-      const up = !!b[5]?.pressed,
-        down = !!b[4]?.pressed,
-        options = !!b[9]?.pressed,
-        triangle = !!b[3]?.pressed;
+
+      const up = !!b[5]?.pressed;
+      const down = !!b[4]?.pressed;
+      const options = !!b[9]?.pressed;
+      const triangle = !!b[3]?.pressed;
+
       this.state.up = up && !this.gpPrev.up;
       this.state.down = down && !this.gpPrev.down;
+
       if (options && !this.gpPrev.options) this.state.restart = true;
       if (triangle && !this.gpPrev.triangle) this.state.reverse = true;
+
       this.gpPrev = { up, down, options, triangle };
     }
     const out = { ...this.state };

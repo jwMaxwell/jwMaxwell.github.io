@@ -24,6 +24,7 @@ export class AudioEngine {
   start() {
     if (this.ctx) {
       this.ctx.resume?.();
+      this.engineBus?.gain.setTargetAtTime(0.9, this.ctx.currentTime, 0.035);
       return;
     }
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -187,6 +188,14 @@ export class AudioEngine {
     this.lastGear = gear;
   }
 
+  stopVehicleSound() {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    this.engineBus?.gain.setTargetAtTime(0, now, 0.035);
+    for (const source of [this.intake, this.tireNoise, this.driftNoise])
+      source?.gain.setTargetAtTime(0, now, 0.035);
+  }
+
   shift(direction = 1, gear = 1) {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
@@ -226,29 +235,17 @@ export class AudioEngine {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
     const o = this.ctx.createOscillator(),
-      g = this.ctx.createGain(),
-      n = this.ctx.createOscillator(),
-      ng = this.ctx.createGain();
-    o.type = "square";
-    n.type = "sawtooth";
-    o.frequency.setValueAtTime(1280, now);
-    o.frequency.exponentialRampToValueAtTime(980, now + 0.12);
-    n.frequency.setValueAtTime(74, now);
-    n.frequency.exponentialRampToValueAtTime(48, now + 0.12);
+      g = this.ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(2520, now);
+    o.frequency.exponentialRampToValueAtTime(2050, now + 0.065);
     g.gain.setValueAtTime(0.0001, now);
-    g.gain.exponentialRampToValueAtTime(0.038, now + 0.005);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
-    ng.gain.setValueAtTime(0.0001, now);
-    ng.gain.exponentialRampToValueAtTime(0.018, now + 0.005);
-    ng.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+    g.gain.exponentialRampToValueAtTime(0.018, now + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.075);
     o.connect(g);
-    n.connect(ng);
     g.connect(this.effectsBus);
-    ng.connect(this.effectsBus);
     o.start(now);
-    n.start(now);
-    o.stop(now + 0.13);
-    n.stop(now + 0.13);
+    o.stop(now + 0.08);
   }
 
   spinout() {

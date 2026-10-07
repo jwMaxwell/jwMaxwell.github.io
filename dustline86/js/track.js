@@ -256,6 +256,26 @@ function quarryPoint(t) {
   };
 }
 
+function driftBasinPoint(t) {
+  // Broad, fast-radius corners with only modest curvature changes. The course is
+  // intentionally less demanding than Quarry Serpentine so the rear axle has room
+  // to rotate without immediately forcing a 180-degree spin.
+  const theta = -Math.PI / 2 + t;
+  const radius =
+    1 +
+    0.055 * Math.sin(2 * theta + 0.25) +
+    0.03 * Math.sin(3 * theta - 0.9) +
+    0.018 * Math.sin(6 * theta + 0.4);
+  return {
+    x: 220 * radius * Math.cos(theta),
+    y:
+      3.5 +
+      8.5 * (0.5 + 0.5 * Math.sin(theta + 0.7)) +
+      2.2 * Math.sin(4 * theta - 0.4),
+    z: -10 + 168 * radius * Math.sin(theta),
+  };
+}
+
 TRACKS.mesa86 = buildTrack({
   id: "mesa86",
   name: "Mesa Circuit",
@@ -320,6 +340,29 @@ TRACKS.quarrySerpentine = buildTrack({
   },
 });
 
+TRACKS.driftBasin = buildTrack({
+  id: "driftBasin",
+  name: "Drift Basin",
+  subtitle: "FAST / OPEN CORNERS",
+  description:
+    "Long sweepers, forgiving exits, and enough speed to work the throttle through a sustained rear-wheel drive slide.",
+  difficulty: "DRIFT",
+  targetLength: 1175,
+  width: 12.6,
+  point: (_, __, ___) => driftBasinPoint(_),
+  theme: {
+    skyTop: "#6d9ab2",
+    skyMid: "#c7c4aa",
+    skyBottom: "#dcbf87",
+    groundTop: "#91785a",
+    groundBottom: "#302e29",
+    road: "#343d3d",
+    roadAlt: "#505b57",
+    curbA: "#d25a45",
+    curbB: "#ebd59e",
+  },
+});
+
 export function buildTrackMesh(gl, track) {
   const positions = [],
     normals = [],
@@ -359,7 +402,8 @@ export function buildScenery(track) {
     s = (s * 1664525 + 1013904223) >>> 0;
     return s / 4294967296;
   };
-  const count = track.id === "quarrySerpentine" ? 210 : 195;
+  const count =
+    track.id === "quarrySerpentine" ? 210 : track.id === "driftBasin" ? 185 : 195;
   for (let i = 0; i < count; i++) {
     const progress = (i / count + rand() * 0.01) % 1;
     const p = track.sample(progress),

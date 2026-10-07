@@ -418,6 +418,7 @@ export class Renderer {
 
     this.drawWorldTerrain(track);
     this.drawRoad(track);
+    this.drawStartFinish(track);
     this.drawSceneryDepth(scenery);
 
     rctx.putImageData(this.roadImage, 0, 0);
@@ -598,6 +599,103 @@ export class Renderer {
       const yy = base.y + (top.y - base.y) * v;
       return [base.x + r[0] * ww, yy, base.z + r[2] * ww];
     });
+  }
+
+  drawStartFinish(track) {
+    const center = track.sample(0);
+    const ahead = track.sample(0.004);
+    const W = track.width * 0.5;
+    const rows = 2;
+    const columns = 10;
+    const dark = "#17191a";
+    const light = "#eee3b6";
+
+    for (let row = 0; row < rows; row++) {
+      const t0 = row / rows;
+      const t1 = (row + 1) / rows;
+      const c0x = center.x + (ahead.x - center.x) * t0;
+      const c0y = center.y + (ahead.y - center.y) * t0 + 0.085;
+      const c0z = center.z + (ahead.z - center.z) * t0;
+      const c1x = center.x + (ahead.x - center.x) * t1;
+      const c1y = center.y + (ahead.y - center.y) * t1 + 0.085;
+      const c1z = center.z + (ahead.z - center.z) * t1;
+
+      for (let col = 0; col < columns; col++) {
+        const side0 = -W + (2 * W * col) / columns;
+        const side1 = -W + (2 * W * (col + 1)) / columns;
+        const p0 = [
+          c0x + center.nx * side0,
+          c0y,
+          c0z + center.nz * side0,
+        ];
+        const p1 = [
+          c0x + center.nx * side1,
+          c0y,
+          c0z + center.nz * side1,
+        ];
+        const p2 = [
+          c1x + ahead.nx * side1,
+          c1y,
+          c1z + ahead.nz * side1,
+        ];
+        const p3 = [
+          c1x + ahead.nx * side0,
+          c1y,
+          c1z + ahead.nz * side0,
+        ];
+        const color = (row + col) % 2 === 0 ? light : dark;
+        const poly = [
+          this.cameraPoint(...p0),
+          this.cameraPoint(...p1),
+          this.cameraPoint(...p2),
+          this.cameraPoint(...p3),
+        ];
+        this.rasterPoly(poly, color, -0.095);
+      }
+    }
+
+    // Small roadside posts make the line readable from a distance and in reverse.
+    for (const side of [-1, 1]) {
+      const postBottom = [
+        center.x + center.nx * side * (W + 0.95),
+        center.y,
+        center.z + center.nz * side * (W + 0.95),
+      ];
+      const postTop = [postBottom[0], postBottom[1] + 3.0, postBottom[2]];
+      const bannerHalf = 1.15;
+      const boardLeft = [
+        postTop[0] - center.tx * bannerHalf,
+        postTop[1] - 0.45,
+        postTop[2] - center.tz * bannerHalf,
+      ];
+      const boardRight = [
+        postTop[0] + center.tx * bannerHalf,
+        postTop[1] - 0.45,
+        postTop[2] + center.tz * bannerHalf,
+      ];
+      const boardLeftTop = [boardLeft[0], boardLeft[1] + 0.9, boardLeft[2]];
+      const boardRightTop = [boardRight[0], boardRight[1] + 0.9, boardRight[2]];
+      this.rasterPoly(
+        [
+          this.cameraPoint(...postBottom),
+          this.cameraPoint(...[postBottom[0], postBottom[1] + 3.0, postBottom[2]]),
+          this.cameraPoint(...[postBottom[0] + 0.14, postBottom[1] + 3.0, postBottom[2]]),
+          this.cameraPoint(...[postBottom[0] + 0.14, postBottom[1], postBottom[2]]),
+        ],
+        "#6e6047",
+        -0.02,
+      );
+      this.rasterPoly(
+        [
+          this.cameraPoint(...boardLeft),
+          this.cameraPoint(...boardRight),
+          this.cameraPoint(...boardRightTop),
+          this.cameraPoint(...boardLeftTop),
+        ],
+        "#c9a45c",
+        -0.018,
+      );
+    }
   }
 
   drawSceneryDepth(scenery) {

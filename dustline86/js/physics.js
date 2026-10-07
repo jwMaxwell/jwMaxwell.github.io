@@ -6,12 +6,15 @@ export function formatTime(seconds) {
     s = seconds - m * 60;
   return `${String(m).padStart(2, "0")}:${s.toFixed(3).padStart(6, "0")}`;
 }
+
 export function wrap01(x) {
   return ((x % 1) + 1) % 1;
 }
+
 export function crossedFinish(prevProgress, nextProgress) {
   return prevProgress > 0.82 && nextProgress < 0.18;
 }
+
 export function crossedLapForward(prevProgress, nextProgress) {
   return prevProgress > 0.92 && nextProgress < 0.08;
 }

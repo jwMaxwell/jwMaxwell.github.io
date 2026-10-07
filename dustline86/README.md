@@ -27,6 +27,17 @@ Firefox/LibreWolf should work with the same local-server fallback.
 - Cross: handbrake
 - L1/R1: sequential down/up; Triangle: reverse at low speed
 - Options: restart
+
+### Xbox controller
+
+- Left stick X: steering
+- RT: throttle
+- LT: front brake
+- X: rear brake
+- A: handbrake
+- LB/RB: sequential down/up
+- Y: reverse at low speed
+- Menu/Start: restart
 - F: fullscreen (keyboard)
 
 ### Keyboard
@@ -49,7 +60,7 @@ Firefox/LibreWolf should work with the same local-server fallback.
 - `js/input.js`: Gamepad API and keyboard fallback.
 - `js/render.js`: Canvas 2D pseudo-3D presentation renderer.
 - `js/audio.js`: synthesized engine and event sounds.
-- `js/ui.js`: HUD, start/finish screens and live tuning controls.
+- `js/ui.js`: HUD, start/finish screens, live tuning controls, map selector, and tuning export.
 - `js/main.js`: game state and orchestration.
 
 ## Physics simplifications
@@ -143,3 +154,14 @@ This build was additionally checked with a synthetic main-loop smoke test throug
 - Added an explicit Back to Main Menu button on the results screen.
 - Updated factory/default car tuning to the requested values.
 - Bumped tuning persistence to `dustline86-tuning-v12` so older saved tuning cannot override the new requested defaults.
+
+
+## Current gameplay/dev additions
+
+- Added `Drift Basin`, a fourth circuit with wider, faster sweepers intended for sustained RWD drifting.
+- Added a visible in-race `MENU` button for returning to the main menu without refreshing the page.
+- Added a physical checkered start/finish line and roadside marker posts to make lap completion obvious.
+- Expanded the developer tuning ranges substantially, including a 50–1500 Nm engine-torque range.
+- Added `Copy values` to the Vehicle Lab. It copies grouped, human-readable tuning values to the clipboard, with a text-area fallback when the Clipboard API is unavailable.
+- Revised the drift tire response to peak and then fall away progressively after the slip-angle peak, plus a small speed-dependent drift stability assist during sustained throttle-on slides. The goal is a controllable RWD slide with room for countersteer rather than an immediate spinout.
+- Simplified the redline warning sound to a short, higher-pitched Type R-inspired electronic chirp.

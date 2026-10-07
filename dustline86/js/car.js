@@ -250,13 +250,21 @@ export class Car {
         w.load * tireMu * p.latGrip * (idx >= 2 ? 0.97 : 1),
       );
 
-      // Progressive brush-style cornering force. The previous tangent model hit the
-      // lateral limit too abruptly, which made any 60 mph slide collapse into a 180.
-      const normalizedSlip = Math.tan(slipAng) / Math.max(0.04, p.anglePeak);
+      // Use a peaked tire curve instead of a force that keeps increasing toward a
+      // hard maximum. Once the tire passes its slip-angle peak, grip falls away
+      // progressively, which gives the rear axle a controllable drifting plateau
+      // instead of an abrupt snap into a 180-degree spin.
+      const normalizedSlip = Math.abs(
+        Math.tan(slipAng) / Math.max(0.04, p.anglePeak),
+      );
+      const peakCurve =
+        (2 * normalizedSlip) / Math.max(0.001, 1 + normalizedSlip * normalizedSlip);
+      const rearBreakaway =
+        idx >= 2 && normalizedSlip > 1.1
+          ? 1 - 0.22 * clamp((normalizedSlip - 1.1) / 2.5, 0, 1)
+          : 1;
       const lateralDemand =
-        -Math.sign(normalizedSlip) *
-        fyMax *
-        (1 - Math.exp(-Math.abs(normalizedSlip) * 0.72));
+        -Math.sign(slipAng || 1) * fyMax * peakCurve * rearBreakaway;
       const latF = clamp(lateralDemand, -fyMax, fyMax);
       const remaining = Math.sqrt(Math.max(0, fxMax * fxMax - latF * latF));
 
@@ -387,10 +395,32 @@ export class Car {
     this.yawRate += (totalMz / inertia) * dt;
     const countering = this.yawRate * this.steer < -0.035;
     const counterAssist = countering
-      ? 6.0 * clamp(Math.abs(this.yawRate) / 1.0, 0, 1)
+      ? 8.5 * clamp(Math.abs(this.yawRate) / 1.0, 0, 1)
       : 0;
-    const yawDamp = 1 / (1 + dt * (3.4 + this.speed * 0.028 + counterAssist));
+    const yawDamp = 1 / (1 + dt * (3.15 + this.speed * 0.024 + counterAssist));
     this.yawRate *= yawDamp;
+
+    // Simcade drift stability: while the rear axle is genuinely sliding and the
+    // driver is using throttle, let steering influence the vehicle's yaw rate more
+    // directly. This is deliberately modest and only activates in a slide, giving
+    // the driver a wider recovery window without changing normal cornering.
+    const rearSlip = Math.abs(this.wheelStates[2]?.slipAngle || 0);
+    if (
+      this.speed > 12 &&
+      this.throttle > 0.18 &&
+      rearSlip > p.anglePeak * 0.9
+    ) {
+      const steeringAngle = this.steer * p.steerMax;
+      const desiredYawRate =
+        (forwardSpeed * Math.tan(steeringAngle)) / Math.max(1, p.wheelbase);
+      const driftAssist =
+        1.8 *
+        clamp((rearSlip - p.anglePeak * 0.8) / 0.22, 0, 1) *
+        clamp(this.speed / 28, 0, 1);
+      this.yawRate +=
+        (desiredYawRate - this.yawRate) * clamp(driftAssist * dt, 0, 0.22);
+    }
+
     if (this.speed > 10) this.yawRate = clamp(this.yawRate, -2.0, 2.0);
     this.yaw += this.yawRate * dt;
     if (this.speed < 0.25) {

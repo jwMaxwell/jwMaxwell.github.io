@@ -176,6 +176,21 @@ button:hover {
 .debug-button {
   right: 98px;
 }
+.race-menu-button {
+  position: absolute;
+  left: 14px;
+  top: 58px;
+  z-index: 5;
+  margin: 0;
+  border: 1px solid #8b7957;
+  background: #101519c9;
+  padding: 7px 10px;
+  font-size: 11px;
+  box-shadow: none;
+}
+.race-menu-button:hover {
+  background: #27343a;
+}
 #mute-button {
   right: 56px;
   min-width: 34px;
@@ -301,7 +316,7 @@ button:hover {
 }
 .track-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 9px;
 }
 .track-card {
@@ -366,6 +381,12 @@ button:hover {
   text-align: left;
   line-height: 1.4;
 }
+@media (max-width: 1080px) {
+  .track-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 780px) {
   .track-grid {
     grid-template-columns: 1fr;
