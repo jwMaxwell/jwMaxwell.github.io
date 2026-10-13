@@ -28,18 +28,34 @@ function hexToRgb(hex) {
     parseInt(hex.slice(5, 7), 16),
   ];
 }
-function rgbToHex(r, g, b) {
-  return (
-    "#" +
-    [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, "0")).join("")
-  );
+// The software rasterizer writes whole pixels through a Uint32Array view of the
+// ImageData, so colors are packed once into the platform's byte order instead of
+// being formatted and re-parsed as hex strings for every polygon.
+const LITTLE_ENDIAN = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
+function packRgb(r, g, b) {
+  r = Math.round(r);
+  g = Math.round(g);
+  b = Math.round(b);
+  return LITTLE_ENDIAN
+    ? ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0
+    : ((r << 24) | (g << 16) | (b << 8) | 255) >>> 0;
+}
+const rgbCache = new Map();
+function cachedRgb(hex) {
+  let rgb = rgbCache.get(hex);
+  if (!rgb) rgbCache.set(hex, (rgb = hexToRgb(hex)));
+  return rgb;
+}
+function packHex(hex) {
+  const [r, g, b] = cachedRgb(hex);
+  return packRgb(r, g, b);
 }
 function fogColor(hex, fog) {
-  const [r, g, b] = hexToRgb(hex),
+  const [r, g, b] = cachedRgb(hex),
     fr = 126,
     fg = 133,
     fb = 125;
-  return rgbToHex(r + (fr - r) * fog, g + (fg - g) * fog, b + (fb - b) * fog);
+  return packRgb(r + (fr - r) * fog, g + (fg - g) * fog, b + (fb - b) * fog);
 }
 
 const DEFAULT_THEME = {
@@ -75,7 +91,14 @@ export class Renderer {
     };
     this.nearest = null;
     this.wheelVisual = 0;
-    this.roadScale = 0.72;
+    // Internal world resolution relative to the canvas. It drops automatically
+    // when the software rasterizer cannot keep up and recovers when there is
+    // headroom; see adaptResolution().
+    this.maxRoadScale = 0.72;
+    this.minRoadScale = 0.4;
+    this.roadScale = this.maxRoadScale;
+    this.worldMsAvg = 0;
+    this.scaleCooldown = 0;
     this.roadCanvas = document.createElement("canvas");
     this.roadCtx = this.roadCanvas.getContext("2d", { alpha: true });
     this.roadImage = null;
@@ -107,6 +130,7 @@ export class Renderer {
       this.roadCanvas.width = rw;
       this.roadCanvas.height = rh;
       this.roadImage = this.roadCtx.createImageData(rw, rh);
+      this.roadPixels = new Uint32Array(this.roadImage.data.buffer);
       this.roadDepth = new Float32Array(rw * rh);
     }
   }
@@ -221,39 +245,7 @@ export class Renderer {
     return out;
   }
 
-  drawPolyCP(ctx, poly, fill, alpha = 1) {
-    const clipped = this.clipCamera(poly);
-    if (clipped.length < 3) return;
-    const pts = [];
-    for (const p of clipped) {
-      const q = this.projectCP(p);
-      if (q) pts.push(q);
-    }
-    if (pts.length < 3) return;
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = fill;
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-  }
-  triangleWorld(ctx, a, b, c, fill, alpha = 1) {
-    this.drawPolyCP(
-      ctx,
-      [this.cameraPoint(...a), this.cameraPoint(...b), this.cameraPoint(...c)],
-      fill,
-      alpha,
-    );
-  }
-  quadTriangles(ctx, a, b, c, d, fill, alpha = 1) {
-    this.triangleWorld(ctx, a, b, c, fill, alpha);
-    this.triangleWorld(ctx, a, c, d, fill, alpha);
-  }
-
-  render(car, track, scenery, telemetry = {}) {
+  render(car, track, scenery, extras = {}) {
     this.resize();
     const ctx = this.ctx,
       w = this.w,
@@ -271,8 +263,31 @@ export class Renderer {
     // Near and mid-distance desert are world geometry, not a screen-space paint fill.
     // Road, terrain, and scenery share one depth buffer so hills and pavement can
     // correctly occlude objects instead of letting sprites float through them.
-    this.drawWorld(track, scenery);
+    const worldStart = performance.now();
+    this.drawWorld(track, scenery, extras.ghost);
+    this.adaptResolution(performance.now() - worldStart);
     this.drawCockpit(ctx, w, h, car);
+  }
+
+  // Keep the world pass inside a frame budget. A smoothed timing avoids reacting
+  // to single hitches, and the cooldown stops the resolution from oscillating.
+  adaptResolution(ms) {
+    this.worldMsAvg += (ms - this.worldMsAvg) * 0.1;
+    if (this.scaleCooldown > 0) {
+      this.scaleCooldown--;
+      return;
+    }
+    const target = 8;
+    let next = this.roadScale;
+    if (this.worldMsAvg > target) next -= 0.06;
+    else if (this.worldMsAvg < target * 0.45) next += 0.04;
+    next = clamp(next, this.minRoadScale, this.maxRoadScale);
+    if (Math.abs(next - this.roadScale) > 1e-3) {
+      // Pixel count scales with the square of the resolution factor.
+      this.worldMsAvg *= (next / this.roadScale) ** 2;
+      this.roadScale = next;
+      this.scaleCooldown = 45;
+    }
   }
 
   drawSky(ctx, w, h) {
@@ -352,12 +367,8 @@ export class Renderer {
     return sum / poly.length;
   }
 
-  roadColor(hex) {
-    const [r, g, b] = hexToRgb(hex);
-    return [r, g, b, 255];
-  }
 
-  rasterTriangle(v0, v1, v2, color, bias = 0) {
+  rasterTriangle(v0, v1, v2, color, bias = 0, dither = false) {
     const rw = this.roadCanvas.width,
       rh = this.roadCanvas.height,
       sx = rw / this.w,
@@ -376,39 +387,60 @@ export class Renderer {
     const area = (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
     if (Math.abs(area) < 1e-6) return;
     const inv = 1 / area,
-      data = this.roadImage.data,
+      pixels = this.roadPixels,
       depth = this.roadDepth,
-      rgba = this.roadColor(color);
+      eps = -1e-5;
+    // Edge-function weights are ordered by opposite vertex: w0=v2, w1=v0, w2=v1.
+    // Each weight is linear in x along a row (w = a*x + b), as is the reciprocal
+    // depth, so every row is solved for its covered span up front and then walked
+    // incrementally. Testing every pixel of the bounding box wasted most of the
+    // work on the long, thin terrain and road strips.
+    const a0 = -(y1 - y0) * inv,
+      a1 = -(y2 - y1) * inv,
+      a2 = -(y0 - y2) * inv;
+    // Perspective-correct depth is important when a sprite/terrain polygon crosses
+    // the road at a steep viewing angle. Interpolating camera-space Z directly can
+    // make the far edge win the depth test and produces the exact popping the game had.
+    const iz0 = 1 / Math.max(v0.depth, 1e-6),
+      iz1 = 1 / Math.max(v1.depth, 1e-6),
+      iz2 = 1 / Math.max(v2.depth, 1e-6);
+    const az = a1 * iz0 + a2 * iz1 + a0 * iz2;
     for (let y = minY; y <= maxY; y++) {
       const py = y + 0.5;
-      for (let x = minX; x <= maxX; x++) {
-        const px = x + 0.5;
-        // Edge-function weights are ordered by opposite vertex: w0=v2, w1=v0, w2=v1.
-        const w0 = ((x1 - x0) * (py - y0) - (y1 - y0) * (px - x0)) * inv;
-        const w1 = ((x2 - x1) * (py - y1) - (y2 - y1) * (px - x1)) * inv;
-        const w2 = ((x0 - x2) * (py - y2) - (y0 - y2) * (px - x2)) * inv;
-        if (w0 < -1e-5 || w1 < -1e-5 || w2 < -1e-5) continue;
-        // Perspective-correct depth is important when a sprite/terrain polygon crosses
-        // the road at a steep viewing angle. Interpolating camera-space Z directly can
-        // make the far edge win the depth test and produces the exact popping the game had.
-        const invZ =
-          w1 / Math.max(v0.depth, 1e-6) +
-          w2 / Math.max(v1.depth, 1e-6) +
-          w0 / Math.max(v2.depth, 1e-6);
-        const d = 1 / Math.max(invZ, 1e-9) + bias,
-          idx = y * rw + x;
+      const b0 = ((x1 - x0) * (py - y0) + (y1 - y0) * x0) * inv,
+        b1 = ((x2 - x1) * (py - y1) + (y2 - y1) * x1) * inv,
+        b2 = ((x0 - x2) * (py - y2) + (y0 - y2) * x2) * inv;
+      // Intersect the three half-planes a*px + b >= eps with this row.
+      let lo = minX + 0.5,
+        hi = maxX + 0.5;
+      if (a0 > 0) lo = Math.max(lo, (eps - b0) / a0);
+      else if (a0 < 0) hi = Math.min(hi, (eps - b0) / a0);
+      else if (b0 < eps) continue;
+      if (a1 > 0) lo = Math.max(lo, (eps - b1) / a1);
+      else if (a1 < 0) hi = Math.min(hi, (eps - b1) / a1);
+      else if (b1 < eps) continue;
+      if (a2 > 0) lo = Math.max(lo, (eps - b2) / a2);
+      else if (a2 < 0) hi = Math.min(hi, (eps - b2) / a2);
+      else if (b2 < eps) continue;
+      const xStart = Math.ceil(lo - 0.5),
+        xEnd = Math.floor(hi - 0.5);
+      if (xStart > xEnd) continue;
+      const px = xStart + 0.5;
+      let invZ =
+        (a1 * px + b1) * iz0 + (a2 * px + b2) * iz1 + (a0 * px + b0) * iz2;
+      let idx = y * rw + xStart;
+      for (let x = xStart; x <= xEnd; x++, idx++, invZ += az) {
+        if (dither && (x ^ y) & 1) continue;
+        const d = 1 / Math.max(invZ, 1e-9) + bias;
         if (d >= depth[idx]) continue;
         depth[idx] = d;
-        const o = idx * 4;
-        data[o] = rgba[0];
-        data[o + 1] = rgba[1];
-        data[o + 2] = rgba[2];
-        data[o + 3] = 255;
+        pixels[idx] = color;
       }
     }
   }
 
-  rasterPoly(poly, color, bias = 0) {
+  rasterPoly(poly, color, bias = 0, dither = false) {
+    if (typeof color === "string") color = packHex(color);
     const clipped = this.clipCamera(poly);
     if (clipped.length < 3) return;
     const pts = [];
@@ -419,22 +451,21 @@ export class Renderer {
     if (pts.length < 3) return;
     // Fan triangulation is safe for the clipped convex road/curb polygons.
     for (let i = 1; i < pts.length - 1; i++)
-      this.rasterTriangle(pts[0], pts[i], pts[i + 1], color, bias);
+      this.rasterTriangle(pts[0], pts[i], pts[i + 1], color, bias, dither);
   }
 
-  drawWorld(track, scenery) {
+  drawWorld(track, scenery, ghost = null) {
     const rctx = this.roadCtx,
       rw = this.roadCanvas.width,
       rh = this.roadCanvas.height;
-    const data = this.roadImage.data,
-      depth = this.roadDepth;
-    data.fill(0);
-    depth.fill(Infinity);
+    this.roadPixels.fill(0);
+    this.roadDepth.fill(Infinity);
 
     this.drawWorldTerrain(track);
     this.drawRoad(track);
     this.drawStartFinish(track);
     this.drawSceneryDepth(scenery);
+    if (ghost) this.drawGhost(ghost);
 
     rctx.putImageData(this.roadImage, 0, 0);
     this.ctx.save();
@@ -475,28 +506,18 @@ export class Renderer {
           const p1 = [a.x + a.nx * oa, aY2, a.z + a.nz * oa];
           const p2 = [b.x + b.nx * oa, bY2, b.z + b.nz * oa];
           const p3 = [b.x + b.nx * ia, by, b.z + b.nz * ia];
+          const poly = [
+            this.cameraPoint(...p0),
+            this.cameraPoint(...p1),
+            this.cameraPoint(...p2),
+            this.cameraPoint(...p3),
+          ];
           const fog = clamp(
-            (this.cameraPolyDepth([
-              this.cameraPoint(...p0),
-              this.cameraPoint(...p1),
-              this.cameraPoint(...p2),
-              this.cameraPoint(...p3),
-            ]) -
-              75) /
-              (this.far - 75),
+            (this.cameraPolyDepth(poly) - 75) / (this.far - 75),
             0,
             1,
           );
-          this.rasterPoly(
-            [
-              this.cameraPoint(...p0),
-              this.cameraPoint(...p1),
-              this.cameraPoint(...p2),
-              this.cameraPoint(...p3),
-            ],
-            fogColor(band.color, fog),
-            0,
-          );
+          this.rasterPoly(poly, fogColor(band.color, fog), 0);
         }
       }
     }
@@ -716,6 +737,48 @@ export class Renderer {
     }
   }
 
+  // The record-lap ghost: a low-poly box car drawn with a checkerboard (screen-door)
+  // fill so it reads as translucent while still depth-testing against the world.
+  drawGhost(pose) {
+    const c = this.camera;
+    // Hide it when the player is driving through it rather than filling the view.
+    const near = Math.hypot(pose.x - c.x, pose.z - c.z);
+    if (near < 4.5) return;
+    const fx = Math.cos(pose.yaw),
+      fz = Math.sin(pose.yaw),
+      rx = -fz,
+      rz = fx,
+      ground = pose.y - 0.42;
+    const at = (along, side, up) => [
+      pose.x + fx * along + rx * side,
+      ground + up,
+      pose.z + fz * along + rz * side,
+    ];
+    const fog = clamp((near - 55) / (this.far - 55), 0, 1);
+    const shade = (hex) => fogColor(hex, fog);
+    const box = (back, front, half, bottom, top, colors) => {
+      const p = (a, s, u) => this.cameraPoint(...at(a, s, u));
+      const faces = [
+        // top, left, right, front, rear
+        [[back, -half, top], [front, -half, top], [front, half, top], [back, half, top]],
+        [[back, -half, bottom], [front, -half, bottom], [front, -half, top], [back, -half, top]],
+        [[back, half, bottom], [back, half, top], [front, half, top], [front, half, bottom]],
+        [[front, -half, bottom], [front, half, bottom], [front, half, top], [front, -half, top]],
+        [[back, -half, bottom], [back, -half, top], [back, half, top], [back, half, bottom]],
+      ];
+      faces.forEach((f, i) =>
+        this.rasterPoly(
+          f.map(([a, s, u]) => p(a, s, u)),
+          shade(colors[Math.min(i, colors.length - 1)]),
+          -0.02,
+          true,
+        ),
+      );
+    };
+    box(-2.1, 2.1, 0.83, 0.18, 0.78, ["#b9e6f5", "#6fb7d2", "#6fb7d2", "#4f8ea8"]);
+    box(-1.25, 0.65, 0.7, 0.78, 1.28, ["#d3f1fa", "#86c7de", "#86c7de", "#5d9fb8"]);
+  }
+
   drawSceneryDepth(scenery) {
     const drawList = [];
     for (const s of scenery) {
@@ -824,85 +887,6 @@ export class Renderer {
           -0.003,
         );
       }
-    }
-  }
-
-  drawRoadDetails(s, W) {
-    const ctx = this.ctx,
-      i = s.i,
-      a = s.a,
-      b = s.b,
-      fog = s.fog;
-    const curbW = 0.22,
-      half = 0.11;
-    const leftOuterA = [
-      a.x - a.nx * (W + curbW),
-      a.y + 0.068,
-      a.z - a.nz * (W + curbW),
-    ];
-    const leftRoadA = [a.x - a.nx * W, a.y + 0.055, a.z - a.nz * W];
-    const leftRoadB = [b.x - b.nx * W, b.y + 0.055, b.z - b.nz * W];
-    const leftOuterB = [
-      b.x - b.nx * (W + curbW),
-      b.y + 0.068,
-      b.z - b.nz * (W + curbW),
-    ];
-    const rightRoadA = [a.x + a.nx * W, a.y + 0.055, a.z + a.nz * W];
-    const rightOuterA = [
-      a.x + a.nx * (W + curbW),
-      a.y + 0.068,
-      a.z + a.nz * (W + curbW),
-    ];
-    const rightOuterB = [
-      b.x + b.nx * (W + curbW),
-      b.y + 0.068,
-      b.z + b.nz * (W + curbW),
-    ];
-    const rightRoadB = [b.x + b.nx * W, b.y + 0.055, b.z + b.nz * W];
-    const curbColor = fogColor(i % 10 < 5 ? "#d05b46" : "#e5d39a", fog);
-
-    // Details are clipped camera-space quads too. Drawing them as independent
-    // triangles was another source of grazing-angle seams around the car.
-    this.drawPolyCP(
-      ctx,
-      [
-        this.cameraPoint(...leftOuterA),
-        this.cameraPoint(...leftRoadA),
-        this.cameraPoint(...leftRoadB),
-        this.cameraPoint(...leftOuterB),
-      ],
-      curbColor,
-      1,
-    );
-    this.drawPolyCP(
-      ctx,
-      [
-        this.cameraPoint(...rightRoadA),
-        this.cameraPoint(...rightOuterA),
-        this.cameraPoint(...rightOuterB),
-        this.cameraPoint(...rightRoadB),
-      ],
-      curbColor,
-      1,
-    );
-
-    if (i % 6 < 2) {
-      const da = [a.x - a.nx * half, a.y + 0.078, a.z - a.nz * half],
-        db = [a.x + a.nx * half, a.y + 0.078, a.z + a.nz * half];
-      const dc = [b.x - b.nx * half, b.y + 0.078, b.z - b.nz * half],
-        dd = [b.x + b.nx * half, b.y + 0.078, b.z + b.nz * half];
-      const mark = fogColor("#dbc78f", fog);
-      this.drawPolyCP(
-        ctx,
-        [
-          this.cameraPoint(...da),
-          this.cameraPoint(...db),
-          this.cameraPoint(...dd),
-          this.cameraPoint(...dc),
-        ],
-        mark,
-        1,
-      );
     }
   }
 
@@ -1136,7 +1120,8 @@ export class Renderer {
 
     // Larger, high-contrast steering wheel. The dark inner rim remains readable
     // against the dash because the outer ring is intentionally warm/bright.
-    const targetWheel = car.steer * 4.1;
+    // Hand-wheel angle is the commanded road-wheel angle times the steering ratio.
+    const targetWheel = car.steer * car.p.steerMax * car.p.steeringRatio;
     this.wheelVisual += (targetWheel - this.wheelVisual) * 0.18;
     const wx = w * 0.5,
       wy = h * 0.885,

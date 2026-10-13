@@ -5,6 +5,7 @@ import { AudioEngine } from "./audio.js";
 import { Renderer } from "./render.js";
 import { UI } from "./ui.js";
 import { formatTime, crossedLapForward } from "./physics.js";
+import { getRecord, saveRecord, GhostRecorder, ghostPose } from "./records.js";
 
 function clamp(v, a, b) {
   return Math.max(a, Math.min(b, v));
@@ -43,6 +44,13 @@ let state = "menu",
   lapArmed = false,
   lapDistance = 0,
   totalDistance = 0;
+// Lap splits for the current session, the stored record for the selected track,
+// and the recording of the lap in progress (saved if it becomes the new record).
+let laps = [],
+  record = getRecord(track.id),
+  newRecord = false,
+  ghostEnabled = localStorage.getItem("dustline86-ghost") !== "0";
+const recorder = new GhostRecorder();
 let last = performance.now(),
   accumulator = 0,
   gearLatch = 0,
@@ -68,7 +76,7 @@ ui.bind({
   onMute: () => ui.setMuted(audio.toggleMute()),
 });
 ui.buildDebug(params, (k, v) => (params[k] = v));
-ui.renderTrackSelector(TRACKS, selectedTrackId, (id) => selectTrack(id));
+ui.renderTrackSelector(TRACKS, selectedTrackId, (id) => selectTrack(id), getRecord);
 ui.setGamepad(input.connectedName());
 ui.setMuted(audio.muted);
 
@@ -79,18 +87,22 @@ function selectTrack(id) {
   scenery = buildScenery(track);
   renderer.upload("track", buildTrackMesh(null, track));
   localStorage.setItem("dustline86-track", id);
-  ui.setTrackSelected(id, track);
+  record = getRecord(id);
+  ui.setTrackSelected(id, track, record);
 }
 
 function loadParams() {
+  const params = cloneCarParams();
   try {
-    return Object.assign(
-      cloneCarParams(),
-      JSON.parse(localStorage.getItem("dustline86-tuning-v12") || "{}"),
+    const saved = JSON.parse(
+      localStorage.getItem("dustline86-tuning-v12") || "{}",
     );
-  } catch {
-    return cloneCarParams();
-  }
+    // Only take keys the current car model knows about, so values for removed
+    // parameters in older saves don't linger and get written back out.
+    for (const key of Object.keys(params))
+      if (saved && key in saved) params[key] = saved[key];
+  } catch {}
+  return params;
 }
 function showMainMenu() {
   state = "menu";
@@ -123,6 +135,10 @@ function start() {
   lapValid = true;
   lapArmed = false;
   lapDistance = 0;
+  laps = [];
+  record = getRecord(track.id);
+  newRecord = false;
+  recorder.reset();
   gearLatch = 0;
   redlinePulseTimer = 0;
   wasSpinning = false;
@@ -165,6 +181,11 @@ function handleFrameInput(ctl) {
   if (ctl.restart && state !== "menu") start();
   if (ctl.mute) {
     ui.setMuted(audio.toggleMute());
+  }
+  if (ctl.ghost) {
+    ghostEnabled = !ghostEnabled;
+    localStorage.setItem("dustline86-ghost", ghostEnabled ? "1" : "0");
+    ui.toast(ghostEnabled ? "Ghost on" : "Ghost off");
   }
   if (state !== "race") return;
   if (ctl.reverse && !gearLatch) {
@@ -231,6 +252,7 @@ function simulate(dt, ctl) {
     if (car.recoverySnap) snapPose();
     raceTime += dt;
     lapTime += dt;
+    recorder.record(lapTime, car);
     totalDistance += car.speed * dt;
     const here = track.nearest(car.x, car.z, car.y, car.trackIndex);
     const prog = here.progress;
@@ -250,21 +272,36 @@ function simulate(dt, ctl) {
     ) {
       // Time the crossing within the step instead of rounding to the step edge.
       const overshoot = (prog / (prog + 1 - lastProgress)) * dt;
+      const completed = lapTime - overshoot;
+      laps.push({ time: completed, valid: lapValid });
+      let message = "";
       if (lapValid) {
-        bestLap = Math.min(bestLap, lapTime - overshoot);
+        bestLap = Math.min(bestLap, completed);
         audio.beep(880, 0.12);
+        if (!record || completed < record.time) {
+          saveRecord(track.id, completed, recorder.samples);
+          record = { time: completed, ghost: recorder.samples };
+          newRecord = true;
+          ui.updateTrackRecord(track.id, record);
+          ui.setTrackSelected(track.id, track, record);
+          message = "NEW TRACK RECORD";
+        }
       }
       lapTime = overshoot;
+      recorder.reset();
+      recorder.record(lapTime, car);
       lapValid = true;
       lap++;
       lapArmed = false;
       lapDistance = 0;
-      if (lap === LAPS - 1) ui.toast("FINAL LAP");
+      if (lap === LAPS - 1)
+        message = message ? `${message} · FINAL LAP` : "FINAL LAP";
+      if (message && lap < LAPS) ui.toast(message);
       if (lap >= LAPS) {
         state = "finish";
         ui.setRaceMenuVisible(false);
         audio.stopVehicleSound?.();
-        ui.finishRace(raceTime - overshoot, bestLap);
+        ui.finishRace(raceTime - overshoot, bestLap, laps, record, newRecord);
         ui.setFinishVisible(true);
       }
     }
@@ -312,7 +349,15 @@ function loop(now) {
   else if (state === "race")
     audio.update(car.rpm, car.throttle, car.gear, car.skid, raceDrift);
   ui.hud(Math.min(lapTime, 99999), lap, LAPS, bestLap, raceTime);
-  renderer.render(interpolatedCar(accumulator / STEP), track, scenery);
+  // The ghost replays the record lap at the current lap time; the accumulator
+  // adds the sub-step remainder so it moves as smoothly as the player's car.
+  const ghost =
+    state === "race" && ghostEnabled
+      ? ghostPose(record?.ghost, lapTime + accumulator)
+      : null;
+  renderer.render(interpolatedCar(accumulator / STEP), track, scenery, {
+    ghost,
+  });
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);

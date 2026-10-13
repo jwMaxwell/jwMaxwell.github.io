@@ -12,6 +12,7 @@ export class Input {
       restart: false,
       fullscreen: false,
       mute: false,
+      ghost: false,
     };
     this.prev = { ...this.state };
     this.gpPrev = { up: false, down: false, options: false, triangle: false };
@@ -76,6 +77,9 @@ export class Input {
         break;
       case "m":
         this.state.mute = true;
+        break;
+      case "g":
+        this.state.ghost = true;
         break;
     }
   }
@@ -143,6 +147,7 @@ export class Input {
     this.state.restart = false;
     this.state.fullscreen = false;
     this.state.mute = false;
+    this.state.ghost = false;
     return out;
   }
   connectedName() {

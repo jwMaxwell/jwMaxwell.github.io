@@ -6,7 +6,6 @@ export const DEFAULT_CAR = {
   weightFront: 0.53,
   steerMax: 0.4,
   steeringRatio: 13.2,
-  diffLock: 0.72,
   engineTorque: 363,
   idleRPM: 950,
   redline: 6400,
@@ -18,8 +17,6 @@ export const DEFAULT_CAR = {
   tireRear: 1.35,
   longGrip: 1.08,
   latGrip: 1.0,
-  tireStiffness: 3.2,
-  slipPeak: 0.115,
   anglePeak: 0.105,
   frontBrake: 1.0,
   rearBrake: 0.72,
@@ -29,8 +26,6 @@ export const DEFAULT_CAR = {
   downforce: 0.008,
   rolling: 0.025,
   surfaceShoulder: 0.64,
-  suspensionStiffness: 32000,
-  suspensionDamping: 3800,
 };
 
 export function cloneCarParams() {
