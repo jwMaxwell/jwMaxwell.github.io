@@ -10,6 +10,14 @@ function clamp(v, a, b) {
   return Math.max(a, Math.min(b, v));
 }
 
+const LAPS = 5;
+// The simulation advances in fixed steps so handling and lap times do not depend
+// on the display refresh rate. Rendering interpolates between the last two steps.
+const STEP = 1 / 120;
+// Longest stretch of real time simulated per frame; beyond this (a stalled tab or
+// a breakpoint) the game slows down instead of trying to catch up all at once.
+const MAX_FRAME_TIME = 0.1;
+
 const canvas = document.getElementById("game");
 const renderer = new Renderer(canvas),
   input = new Input(),
@@ -36,6 +44,7 @@ let state = "menu",
   lapDistance = 0,
   totalDistance = 0;
 let last = performance.now(),
+  accumulator = 0,
   gearLatch = 0,
   redlinePulseTimer = 0,
   wasSpinning = false;
@@ -101,6 +110,7 @@ function start() {
   car.y = startPose.y + 0.42;
   car.trackIndex = 0;
   car.yaw = Math.atan2(startPose.tz, startPose.tx);
+  snapPose();
   state = "countdown";
   count = 3;
   countTimer = 0;
@@ -126,14 +136,66 @@ function toggleFullscreen() {
   if (!document.fullscreenElement) el.requestFullscreen?.();
   else document.exitFullscreen?.();
 }
-function step(dt) {
-  const ctl = input.poll();
+// Pose at the start of the most recent physics step, for render interpolation.
+const prevPose = { x: 0, y: 0, z: 0, yaw: 0, pitch: 0 };
+function snapPose() {
+  prevPose.x = car.x;
+  prevPose.y = car.y;
+  prevPose.z = car.z;
+  prevPose.yaw = car.yaw;
+  prevPose.pitch = car.pitch;
+}
+function interpolatedCar(alpha) {
+  const view = Object.create(car);
+  view.x = prevPose.x + (car.x - prevPose.x) * alpha;
+  view.y = prevPose.y + (car.y - prevPose.y) * alpha;
+  view.z = prevPose.z + (car.z - prevPose.z) * alpha;
+  view.pitch = prevPose.pitch + (car.pitch - prevPose.pitch) * alpha;
+  let dYaw = car.yaw - prevPose.yaw;
+  dYaw -= Math.round(dYaw / (2 * Math.PI)) * 2 * Math.PI;
+  view.yaw = prevPose.yaw + dYaw * alpha;
+  return view;
+}
+
+// Discrete, once-per-press actions are handled once per frame; the physics substeps
+// below then share the same held controls.
+function handleFrameInput(ctl) {
   ui.setGamepad(input.connectedName());
   if (ctl.fullscreen) toggleFullscreen();
   if (ctl.restart && state !== "menu") start();
   if (ctl.mute) {
     ui.setMuted(audio.toggleMute());
   }
+  if (state !== "race") return;
+  if (ctl.reverse && !gearLatch) {
+    if (car.speed < 1.5) {
+      const before = car.gear;
+      car.setGear(car.gear < 0 ? 0 : -1);
+      if (car.gear !== before)
+        audio.shift(car.gear > before ? 1 : -1, car.gear);
+    } else {
+      ui.toast("Slow down to engage reverse");
+    }
+    gearLatch = 1;
+  }
+  if (ctl.up && !gearLatch) {
+    const before = car.gear;
+    if (car.gear < car.p.gears.length) car.setGear(car.gear + 1);
+    if (car.gear !== before) audio.shift(1, car.gear);
+    gearLatch = 1;
+  }
+  if (ctl.down && !gearLatch) {
+    const before = car.gear;
+    if (car.gear > 0) car.setGear(car.gear - 1);
+    if (car.gear !== before) audio.shift(-1, car.gear);
+    gearLatch = 1;
+  }
+  if (!ctl.up && !ctl.down && !ctl.reverse) gearLatch = 0;
+  // Upshifts are entirely manual. At redline the engine simply reaches the limiter;
+  // the selected gear never changes without a driver command.
+}
+
+function simulate(dt, ctl) {
   if (state === "menu") return;
   if (state === "countdown") {
     countTimer += dt;
@@ -161,39 +223,12 @@ function step(dt) {
       { steer: 0, throttle: 0, frontBrake: 0, rearBrake: 0, handbrake: false },
       track,
     );
-    // Keep the engine voice in sync with the reset car; otherwise a restart holds
-    // whatever pitch and tire noise the previous run ended on.
-    audio.update(car.rpm, car.throttle, car.gear, 0, 0);
     return;
   }
   if (state === "race") {
-    if (ctl.reverse && !gearLatch) {
-      if (car.speed < 1.5) {
-        const before = car.gear;
-        car.setGear(car.gear < 0 ? 0 : -1);
-        if (car.gear !== before)
-          audio.shift(car.gear > before ? 1 : -1, car.gear);
-      } else {
-        ui.toast("Slow down to engage reverse");
-      }
-      gearLatch = 1;
-    }
-    if (ctl.up && !gearLatch) {
-      const before = car.gear;
-      if (car.gear < car.p.gears.length) car.setGear(car.gear + 1);
-      if (car.gear !== before) audio.shift(1, car.gear);
-      gearLatch = 1;
-    }
-    if (ctl.down && !gearLatch) {
-      const before = car.gear;
-      if (car.gear > 0) car.setGear(car.gear - 1);
-      if (car.gear !== before) audio.shift(-1, car.gear);
-      gearLatch = 1;
-    }
-    if (!ctl.up && !ctl.down && !ctl.reverse) gearLatch = 0;
-    // Upshifts are entirely manual. At redline the engine simply reaches the limiter;
-    // the selected gear never changes without a driver command.
     car.update(dt, ctl, track);
+    // A marshal reset teleports the car; don't interpolate across the jump.
+    if (car.recoverySnap) snapPose();
     raceTime += dt;
     lapTime += dt;
     totalDistance += car.speed * dt;
@@ -213,20 +248,23 @@ function step(dt) {
       lapDistance > track.length * 0.78 &&
       crossedLapForward(lastProgress, prog)
     ) {
+      // Time the crossing within the step instead of rounding to the step edge.
+      const overshoot = (prog / (prog + 1 - lastProgress)) * dt;
       if (lapValid) {
-        bestLap = Math.min(bestLap, lapTime);
+        bestLap = Math.min(bestLap, lapTime - overshoot);
         audio.beep(880, 0.12);
       }
-      lapTime = 0;
+      lapTime = overshoot;
       lapValid = true;
       lap++;
       lapArmed = false;
       lapDistance = 0;
-      if (lap >= 5) {
+      if (lap === LAPS - 1) ui.toast("FINAL LAP");
+      if (lap >= LAPS) {
         state = "finish";
         ui.setRaceMenuVisible(false);
         audio.stopVehicleSound?.();
-        ui.finishRace(raceTime, bestLap);
+        ui.finishRace(raceTime - overshoot, bestLap);
         ui.setFinishVisible(true);
       }
     }
@@ -252,15 +290,29 @@ function step(dt) {
       audio.redline();
       redlinePulseTimer = 0.24;
     }
-    audio.update(car.rpm, car.throttle, car.gear, car.skid, drift);
+    raceDrift = drift;
   }
-  ui.hud(car, Math.min(lapTime, 99999), lap, bestLap, raceTime);
 }
+
+let raceDrift = 0;
 function loop(now) {
-  const dt = Math.min(0.033, (now - last) / 1000);
+  const frameTime = Math.min(MAX_FRAME_TIME, (now - last) / 1000);
   last = now;
-  step(dt);
-  renderer.render(car, track, scenery);
+  const ctl = input.poll();
+  handleFrameInput(ctl);
+  accumulator += frameTime;
+  while (accumulator >= STEP) {
+    snapPose();
+    simulate(STEP, ctl);
+    accumulator -= STEP;
+  }
+  // Audio is driven once per frame from the latest simulated state. Updating it
+  // during the countdown keeps a restart from holding the previous run's pitch.
+  if (state === "countdown") audio.update(car.rpm, car.throttle, car.gear, 0, 0);
+  else if (state === "race")
+    audio.update(car.rpm, car.throttle, car.gear, car.skid, raceDrift);
+  ui.hud(Math.min(lapTime, 99999), lap, LAPS, bestLap, raceTime);
+  renderer.render(interpolatedCar(accumulator / STEP), track, scenery);
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);

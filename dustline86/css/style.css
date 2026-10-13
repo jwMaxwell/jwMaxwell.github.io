@@ -65,6 +65,9 @@ canvas {
   letter-spacing: 2px;
   color: #c9a86a;
 }
+#lap-count {
+  color: #fff9dc;
+}
 .timer-box div:last-child {
   font-size: 18px;
   color: #fff9dc;

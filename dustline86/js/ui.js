@@ -135,8 +135,9 @@ export class UI {
       ? `Gamepad: ${name}`
       : "Gamepad: none (keyboard fallback)";
   }
-  hud(car, lap, total, best, race) {
-    this.$("lap-time").textContent = formatTime(lap);
+  hud(lapTime, lap, laps, best, race) {
+    this.$("lap-count").textContent = `${Math.min(lap + 1, laps)}/${laps}`;
+    this.$("lap-time").textContent = formatTime(lapTime);
     this.$("best-lap").textContent = formatTime(best);
     this.$("race-time").textContent = formatTime(race);
   }
