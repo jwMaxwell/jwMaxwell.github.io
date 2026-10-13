@@ -109,8 +109,6 @@ export class Car {
     const forwardSpeed = this.vx * fx + this.vz * fz;
     const lateralSpeed = this.vx * rx + this.vz * rz;
     const roadPitch = nearest.point.pitch || 0;
-    const roadGrade = nearest.point.grade || 0;
-    const trackAlong = fx * nearest.point.tx + fz * nearest.point.tz;
     this.speed = Math.hypot(this.vx, this.vz);
     const longitudinalAccel = Number.isFinite(this._prevForwardSpeed)
       ? (forwardSpeed - this._prevForwardSpeed) / Math.max(dt, 0.001)
@@ -193,9 +191,6 @@ export class Car {
       redlineCut *
       limiterPulse *
       driveDirection;
-    const brakeTorque =
-      frontBrakeTorque(p, this.frontBrake) +
-      rearBrakeTorque(p, this.rearBrake, this.handbrake);
     const drivenPerWheel = (driveTorque * 0.5) / wheelR;
 
     let totalX = 0,
@@ -207,7 +202,8 @@ export class Car {
     // Project gravity down the road grade. The previous model was completely flat
     // to the dynamics, so an uphill could be rendered visually while the physics
     // still behaved like level pavement.
-    const gradeForce = -p.mass * g * Math.sin(roadPitch) * trackAlong * 0.82;
+    // Gravity acts along the road tangent regardless of which way the car faces.
+    const gradeForce = -p.mass * g * Math.sin(roadPitch) * 0.82;
     totalX += nearest.point.tx * gradeForce;
     totalZ += nearest.point.tz * gradeForce;
 
@@ -265,7 +261,12 @@ export class Car {
           : 1;
       const lateralDemand =
         -Math.sign(slipAng || 1) * fyMax * peakCurve * rearBreakaway;
-      const latF = clamp(lateralDemand, -fyMax, fyMax);
+      // At crawling speed the tire curve is extremely stiff; limit the side force to
+      // what cancels this wheel's sideways velocity in one step so the explicit
+      // integrator does not overshoot and wobble the parked car every frame.
+      const latStop = (Math.abs(tireLat) * p.mass * 0.25) / Math.max(dt, 0.001);
+      const latCap = Math.min(fyMax, latStop);
+      const latF = clamp(lateralDemand, -latCap, latCap);
       const remaining = Math.sqrt(Math.max(0, fxMax * fxMax - latF * latF));
 
       let longDemand = 0;
@@ -277,15 +278,16 @@ export class Car {
         longDemand += drivenPerWheel;
       }
 
+      // Friction brakes can only bring the wheel's contact patch to rest; they must
+      // never push it the other way, or a stopped car jitters while braking.
+      const stopForce = (Math.abs(tireLong) * p.mass * 0.25) / Math.max(dt, 0.001);
       const tireBrake = w.brake > 0 ? w.brake * 5200 : 0;
       if (tireBrake)
         longDemand -=
-          Math.min(tireBrake, fxMax) *
-          sign(tireLong || forwardSpeed || 1) *
-          p.brakeLockup;
+          Math.min(Math.min(tireBrake, fxMax) * p.brakeLockup, stopForce) *
+          sign(tireLong);
       if (this.handbrake && idx >= 2)
-        longDemand -=
-          Math.min(1500, fxMax) * sign(tireLong || forwardSpeed || 1);
+        longDemand -= Math.min(1500, fxMax, stopForce) * sign(tireLong);
 
       const longF = clamp(longDemand, -remaining, remaining);
       const carLong = longF * ca - latF * sa,
@@ -374,7 +376,11 @@ export class Car {
     this.trackIndex = post.index;
     const previousY = this.y;
     this.roadY = post.point.y;
-    this.pitch = post.point.pitch || 0;
+    // Pitch as seen along the car's heading, so driving backwards down a hill
+    // looks downhill rather than uphill.
+    const headingAlong =
+      Math.cos(this.yaw) * post.point.tx + Math.sin(this.yaw) * post.point.tz;
+    this.pitch = Math.atan((post.point.grade || 0) * headingAlong);
     const targetY = post.point.y + 0.42;
     const verticalContactError = Math.abs(post.dy || 0);
     const validSurface = verticalContactError < 3.5;
@@ -523,15 +529,8 @@ export class Car {
       this.gear !== 0
     ) {
       const creep = (0.35 * this.p.engineTorque) / p.mass;
-      this.vx += fx * creep * dt;
-      this.vz += fz * creep * dt;
+      this.vx += fx * creep * dt * driveDirection;
+      this.vz += fz * creep * dt * driveDirection;
     }
   }
-}
-
-function frontBrakeTorque(p, pedal) {
-  return pedal * p.frontBrake * 2600 * p.brakeBias;
-}
-function rearBrakeTorque(p, pedal, handbrake) {
-  return (pedal * p.rearBrake * (1 - p.brakeBias) + handbrake * 0.75) * 2600;
 }

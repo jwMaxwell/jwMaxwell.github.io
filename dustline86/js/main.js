@@ -15,8 +15,9 @@ const renderer = new Renderer(canvas),
   input = new Input(),
   audio = new AudioEngine(),
   ui = new UI();
-let selectedTrackId = localStorage.getItem("dustline86-track") || "mesa86";
-let track = TRACKS[selectedTrackId] || TRACKS.mesa86;
+let selectedTrackId = localStorage.getItem("dustline86-track");
+if (!TRACKS[selectedTrackId]) selectedTrackId = "mesa86";
+let track = TRACKS[selectedTrackId];
 const params = loadParams(),
   car = new Car(params);
 let scenery = buildScenery(track);
@@ -160,6 +161,9 @@ function step(dt) {
       { steer: 0, throttle: 0, frontBrake: 0, rearBrake: 0, handbrake: false },
       track,
     );
+    // Keep the engine voice in sync with the reset car; otherwise a restart holds
+    // whatever pitch and tire noise the previous run ended on.
+    audio.update(car.rpm, car.throttle, car.gear, 0, 0);
     return;
   }
   if (state === "race") {
@@ -192,13 +196,18 @@ function step(dt) {
     car.update(dt, ctl, track);
     raceTime += dt;
     lapTime += dt;
-    const distanceStep = car.speed * dt;
-    lapDistance += distanceStep;
-    totalDistance += distanceStep;
-    const prog = track.nearest(car.x, car.z, car.y, car.trackIndex).progress;
+    totalDistance += car.speed * dt;
+    const here = track.nearest(car.x, car.z, car.y, car.trackIndex);
+    const prog = here.progress;
+    // Lap distance is signed progress along the course, not an odometer, so
+    // reversing or shuffling back and forth near the line cannot build up a lap.
+    let dProg = prog - lastProgress;
+    if (dProg > 0.5) dProg -= 1;
+    else if (dProg < -0.5) dProg += 1;
+    lapDistance += dProg * track.length;
     // The start line is physically the same point as the lap seam. Do not allow the
     // first few meters of movement to count as a completed lap due to sample jitter.
-    if (!lapArmed && prog > 0.12) lapArmed = true;
+    if (!lapArmed && prog > 0.12 && prog < 0.5) lapArmed = true;
     if (
       lapArmed &&
       lapDistance > track.length * 0.78 &&
@@ -223,11 +232,7 @@ function step(dt) {
     }
     // If the player goes substantially off track, mark the lap dirty rather than
     // inventing a reset or invisible wall.
-    if (
-      Math.abs(track.nearest(car.x, car.z, car.y, car.trackIndex).lateral) >
-      track.width * 0.75
-    )
-      lapValid = false;
+    if (Math.abs(here.lateral) > track.width * 0.75) lapValid = false;
     lastProgress = prog;
     const drift =
       car.speed > 10 && Math.abs(car.slipAngle) > 0.105

@@ -276,14 +276,14 @@ export class AudioEngine {
       g = this.ctx.createGain();
     o.frequency.value = freq;
     o.type = "square";
-    g.gain.value = 0.04;
+    const now = this.ctx.currentTime;
+    // Anchor the envelope; a ramp with no preceding event can start from time 0
+    // and make the beep nearly inaudible.
+    g.gain.setValueAtTime(0.04, now);
     o.connect(g);
     g.connect(this.effectsBus);
-    o.start();
-    g.gain.exponentialRampToValueAtTime(
-      0.0001,
-      this.ctx.currentTime + duration,
-    );
-    o.stop(this.ctx.currentTime + duration);
+    o.start(now);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    o.stop(now + duration);
   }
 }

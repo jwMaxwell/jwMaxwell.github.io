@@ -42,6 +42,18 @@ function fogColor(hex, fog) {
   return rgbToHex(r + (fr - r) * fog, g + (fg - g) * fog, b + (fb - b) * fog);
 }
 
+const DEFAULT_THEME = {
+  skyTop: "#5c9ec2",
+  skyMid: "#a9ced0",
+  skyBottom: "#d6bb82",
+  groundTop: "#9e8560",
+  groundBottom: "#39342c",
+  road: "#353d3f",
+  roadAlt: "#4c5553",
+  curbA: "#d05b46",
+  curbB: "#e5d39a",
+};
+
 export class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
@@ -68,6 +80,7 @@ export class Renderer {
     this.roadCtx = this.roadCanvas.getContext("2d", { alpha: true });
     this.roadImage = null;
     this.roadDepth = null;
+    this.theme = DEFAULT_THEME;
   }
 
   // Kept for compatibility with main.js and older builds. The current renderer is
@@ -249,6 +262,8 @@ export class Renderer {
     ctx.globalAlpha = 1;
     ctx.clearRect(0, 0, w, h);
     this.setupCamera(car, track);
+    // Each course defines its own palette; fall back to the Mesa colors.
+    this.theme = { ...DEFAULT_THEME, ...(track.theme || {}) };
     this.drawSky(ctx, w, h);
     this.drawMountains(ctx, w, h);
     this.drawGround(ctx, w, h, h * 0.43);
@@ -262,9 +277,9 @@ export class Renderer {
 
   drawSky(ctx, w, h) {
     const g = ctx.createLinearGradient(0, 0, 0, h * 0.68);
-    g.addColorStop(0, "#5c9ec2");
-    g.addColorStop(0.48, "#a9ced0");
-    g.addColorStop(1, "#d6bb82");
+    g.addColorStop(0, this.theme.skyTop);
+    g.addColorStop(0.48, this.theme.skyMid);
+    g.addColorStop(1, this.theme.skyBottom);
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h * 0.72);
     ctx.fillStyle = "rgba(248,243,220,.58)";
@@ -309,9 +324,9 @@ export class Renderer {
 
   drawGround(ctx, w, h, horizon) {
     const g = ctx.createLinearGradient(0, horizon, 0, h);
-    g.addColorStop(0, "#9e8560");
+    g.addColorStop(0, this.theme.groundTop);
     g.addColorStop(0.55, "#6e6047");
-    g.addColorStop(1, "#39342c");
+    g.addColorStop(1, this.theme.groundBottom);
     ctx.fillStyle = g;
     ctx.fillRect(0, horizon, w, h - horizon);
     // Screen-space horizon bands are only a distant backdrop. All near ground is
@@ -517,7 +532,7 @@ export class Renderer {
       );
       this.rasterPoly(
         poly,
-        fogColor(i % 28 < 4 ? "#4c5553" : "#353d3f", fog),
+        fogColor(i % 28 < 4 ? this.theme.roadAlt : this.theme.road, fog),
         -0.045,
       );
 
@@ -547,7 +562,10 @@ export class Renderer {
         b.z + b.nz * (W + curbW),
       ];
       const rightRoadB = [b.x + b.nx * W, b.y + 0.055, b.z + b.nz * W];
-      const curbColor = fogColor(i % 10 < 5 ? "#d05b46" : "#e5d39a", fog);
+      const curbColor = fogColor(
+        i % 10 < 5 ? this.theme.curbA : this.theme.curbB,
+        fog,
+      );
       this.rasterPoly(
         [
           this.cameraPoint(...leftOuterA),
