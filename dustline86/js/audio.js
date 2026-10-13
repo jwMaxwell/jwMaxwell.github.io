@@ -192,8 +192,11 @@ export class AudioEngine {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
     this.engineBus?.gain.setTargetAtTime(0, now, 0.035);
+    // Each noise loop is { src, filter, gain } where `gain` is a GainNode, so the
+    // AudioParam is `gain.gain`. Calling it on the node threw a TypeError, which
+    // froze the game loop at the finish line and left the engine running on MENU.
     for (const source of [this.intake, this.tireNoise, this.driftNoise])
-      source?.gain.setTargetAtTime(0, now, 0.035);
+      source?.gain.gain.setTargetAtTime(0, now, 0.035);
   }
 
   shift(direction = 1, gear = 1) {
