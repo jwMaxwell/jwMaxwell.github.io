@@ -16,6 +16,19 @@ Then open `http://localhost:8000/`.
 
 Firefox/LibreWolf should work with the same local-server fallback.
 
+## Tests
+
+The tests use Node's built-in test runner (Node 20+), so there is nothing to install:
+
+```bash
+cd dustline86
+npm test
+```
+
+They cover lap detection and timing, the car physics (including a scripted autopilot lap of Mesa Circuit and Drift Basin as a coarse handling check), track geometry, records/ghost storage, keyboard and gamepad input, audio teardown, and the software rasterizer. Browser APIs are replaced with small stand-ins in `tests/helpers.js` and the individual test files.
+
+Note that `track.sample(p)` indexes samples by `p * N`, while `track.nearest().progress` is distance along the road divided by its length. The two agree at the start/finish line.
+
 ## Controls
 
 ### DualShock 4 / Gamepad API
@@ -58,7 +71,7 @@ Firefox/LibreWolf should work with the same local-server fallback.
 
 - `js/car.js`: four-wheel tire-force vehicle model, drivetrain, brakes and load transfer.
 - `js/track.js`: track data, centerline sampling, nearest-point query, road mesh and scenery.
-- `js/physics.js`: shared timing/progress helpers.
+- `js/physics.js`: lap timing (`LapTracker`) and formatting helpers.
 - `js/input.js`: Gamepad API and keyboard fallback.
 - `js/render.js`: Canvas 2D pseudo-3D presentation renderer.
 - `js/audio.js`: synthesized engine and event sounds.

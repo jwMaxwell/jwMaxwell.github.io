@@ -4,7 +4,7 @@ import { Input } from "./input.js";
 import { AudioEngine } from "./audio.js";
 import { Renderer } from "./render.js";
 import { UI } from "./ui.js";
-import { formatTime, crossedLapForward } from "./physics.js";
+import { formatTime, LapTracker } from "./physics.js";
 import { getRecord, saveRecord, GhostRecorder, ghostPose } from "./records.js";
 
 function clamp(v, a, b) {
@@ -36,13 +36,9 @@ let state = "menu",
   count = 3,
   countTimer = 0,
   raceTime = 0,
-  lapTime = 0,
   bestLap = Infinity,
   lap = 0,
-  lastProgress = 0,
-  lapValid = true,
-  lapArmed = false,
-  lapDistance = 0,
+  lapTimer = new LapTracker(track.length),
   totalDistance = 0;
 // Lap splits for the current session, the stored record for the selected track,
 // and the recording of the lap in progress (saved if it becomes the new record).
@@ -127,14 +123,11 @@ function start() {
   count = 3;
   countTimer = 0;
   raceTime = 0;
-  lapTime = 0;
   bestLap = Infinity;
   lap = 0;
   totalDistance = 0;
-  lastProgress = track.nearest(car.x, car.z, car.y, car.trackIndex).progress;
-  lapValid = true;
-  lapArmed = false;
-  lapDistance = 0;
+  lapTimer = new LapTracker(track.length);
+  lapTimer.reset(track.nearest(car.x, car.z, car.y, car.trackIndex).progress);
   laps = [];
   record = getRecord(track.id);
   newRecord = false;
@@ -230,14 +223,9 @@ function simulate(dt, ctl) {
       state = "race";
       ui.setRaceMenuVisible(true);
       ui.hideCountdown();
-      lastProgress = track.nearest(
-        car.x,
-        car.z,
-        car.y,
-        car.trackIndex,
-      ).progress;
-      lapArmed = false;
-      lapDistance = 0;
+      lapTimer.reset(
+        track.nearest(car.x, car.z, car.y, car.trackIndex).progress,
+      );
     }
     car.update(
       dt,
@@ -251,31 +239,15 @@ function simulate(dt, ctl) {
     // A marshal reset teleports the car; don't interpolate across the jump.
     if (car.recoverySnap) snapPose();
     raceTime += dt;
-    lapTime += dt;
-    recorder.record(lapTime, car);
+    recorder.record(lapTimer.lapTime + dt, car);
     totalDistance += car.speed * dt;
     const here = track.nearest(car.x, car.z, car.y, car.trackIndex);
-    const prog = here.progress;
-    // Lap distance is signed progress along the course, not an odometer, so
-    // reversing or shuffling back and forth near the line cannot build up a lap.
-    let dProg = prog - lastProgress;
-    if (dProg > 0.5) dProg -= 1;
-    else if (dProg < -0.5) dProg += 1;
-    lapDistance += dProg * track.length;
-    // The start line is physically the same point as the lap seam. Do not allow the
-    // first few meters of movement to count as a completed lap due to sample jitter.
-    if (!lapArmed && prog > 0.12 && prog < 0.5) lapArmed = true;
-    if (
-      lapArmed &&
-      lapDistance > track.length * 0.78 &&
-      crossedLapForward(lastProgress, prog)
-    ) {
-      // Time the crossing within the step instead of rounding to the step edge.
-      const overshoot = (prog / (prog + 1 - lastProgress)) * dt;
-      const completed = lapTime - overshoot;
-      laps.push({ time: completed, valid: lapValid });
+    const done = lapTimer.update(here.progress, dt);
+    if (done) {
+      const { time: completed, overshoot } = done;
+      laps.push({ time: completed, valid: done.valid });
       let message = "";
-      if (lapValid) {
+      if (done.valid) {
         bestLap = Math.min(bestLap, completed);
         audio.beep(880, 0.12);
         if (!record || completed < record.time) {
@@ -287,13 +259,9 @@ function simulate(dt, ctl) {
           message = "NEW TRACK RECORD";
         }
       }
-      lapTime = overshoot;
       recorder.reset();
-      recorder.record(lapTime, car);
-      lapValid = true;
+      recorder.record(lapTimer.lapTime, car);
       lap++;
-      lapArmed = false;
-      lapDistance = 0;
       if (lap === LAPS - 1)
         message = message ? `${message} · FINAL LAP` : "FINAL LAP";
       if (message && lap < LAPS) ui.toast(message);
@@ -307,8 +275,7 @@ function simulate(dt, ctl) {
     }
     // If the player goes substantially off track, mark the lap dirty rather than
     // inventing a reset or invisible wall.
-    if (Math.abs(here.lateral) > track.width * 0.75) lapValid = false;
-    lastProgress = prog;
+    if (Math.abs(here.lateral) > track.width * 0.75) lapTimer.invalidate();
     const drift =
       car.speed > 10 && Math.abs(car.slipAngle) > 0.105
         ? clamp((Math.abs(car.slipAngle) - 0.08) / 0.25, 0, 1)
@@ -348,12 +315,12 @@ function loop(now) {
   if (state === "countdown") audio.update(car.rpm, car.throttle, car.gear, 0, 0);
   else if (state === "race")
     audio.update(car.rpm, car.throttle, car.gear, car.skid, raceDrift);
-  ui.hud(Math.min(lapTime, 99999), lap, LAPS, bestLap, raceTime);
+  ui.hud(Math.min(lapTimer.lapTime, 99999), lap, LAPS, bestLap, raceTime);
   // The ghost replays the record lap at the current lap time; the accumulator
   // adds the sub-step remainder so it moves as smoothly as the player's car.
   const ghost =
     state === "race" && ghostEnabled
-      ? ghostPose(record?.ghost, lapTime + accumulator)
+      ? ghostPose(record?.ghost, lapTimer.lapTime + accumulator)
       : null;
   renderer.render(interpolatedCar(accumulator / STEP), track, scenery, {
     ghost,
