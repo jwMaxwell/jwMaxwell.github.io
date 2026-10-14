@@ -4,6 +4,39 @@ function formatKm(m) {
   return `${(m / 1000).toFixed(2)} KM`;
 }
 
+// Vehicle Lab layout, shared by the sliders and "Copy values". Every entry here is
+// read by the physics or the cockpit renderer.
+const TUNING_GROUPS = {
+  Engine: [
+    "engineTorque",
+    "redline",
+    "idleRPM",
+    "rpmResponse",
+    "reverseRatio",
+    "finalDrive",
+  ],
+  Steering: ["steerMax", "steeringRatio"],
+  Tires: [
+    "tireFront",
+    "tireRear",
+    "longGrip",
+    "latGrip",
+    "anglePeak",
+    "surfaceShoulder",
+  ],
+  Brakes: ["frontBrake", "rearBrake", "brakeBias", "brakeLockup"],
+  Vehicle: [
+    "mass",
+    "cgHeight",
+    "wheelbase",
+    "trackWidth",
+    "weightFront",
+    "drag",
+    "downforce",
+    "rolling",
+  ],
+};
+
 export class UI {
   constructor() {
     this.$ = (id) => document.getElementById(id);
@@ -67,41 +100,7 @@ export class UI {
   }
 
   async copyTuning(params) {
-    const groups = {
-      Engine: [
-        "engineTorque",
-        "redline",
-        "idleRPM",
-        "rpmResponse",
-        "reverseRatio",
-        "finalDrive",
-        "steerMax",
-      ],
-      Tires: [
-        "tireFront",
-        "tireRear",
-        "longGrip",
-        "latGrip",
-        "tireStiffness",
-        "slipPeak",
-        "anglePeak",
-        "surfaceShoulder",
-      ],
-      Brakes: ["frontBrake", "rearBrake", "brakeBias", "brakeLockup"],
-      Vehicle: [
-        "mass",
-        "cgHeight",
-        "wheelbase",
-        "trackWidth",
-        "weightFront",
-        "steeringRatio",
-        "diffLock",
-        "drag",
-        "downforce",
-        "rolling",
-      ],
-      Suspension: ["suspensionStiffness", "suspensionDamping"],
-    };
+    const groups = TUNING_GROUPS;
     const lines = ["DUSTLINE 86 VEHICLE TUNING", ""];
     for (const [group, names] of Object.entries(groups)) {
       lines.push(`[${group}]`);
@@ -135,14 +134,33 @@ export class UI {
       ? `Gamepad: ${name}`
       : "Gamepad: none (keyboard fallback)";
   }
-  hud(car, lap, total, best, race) {
-    this.$("lap-time").textContent = formatTime(lap);
+  hud(lapTime, lap, laps, best, race) {
+    this.$("lap-count").textContent = `${Math.min(lap + 1, laps)}/${laps}`;
+    this.$("lap-time").textContent = formatTime(lapTime);
     this.$("best-lap").textContent = formatTime(best);
     this.$("race-time").textContent = formatTime(race);
   }
-  finishRace(total, best) {
+  finishRace(total, best, laps = [], record = null, newRecord = false) {
     this.$("finish-time").textContent = formatTime(total);
     this.$("finish-best").textContent = formatTime(best);
+    const recordLine = this.$("finish-record");
+    recordLine.textContent = record
+      ? `${newRecord ? "NEW TRACK RECORD" : "Track record"} ${formatTime(record.time)}`
+      : "";
+    recordLine.classList.toggle("new-record", newRecord);
+    const list = this.$("finish-splits");
+    list.innerHTML = "";
+    laps.forEach((l, i) => {
+      const row = document.createElement("li");
+      if (l.valid && l.time === best) row.className = "best";
+      if (!l.valid) row.className = "invalid";
+      const name = document.createElement("span");
+      name.textContent = `LAP ${i + 1}`;
+      const time = document.createElement("span");
+      time.textContent = formatTime(l.time) + (l.valid ? "" : " OFF");
+      row.append(name, time);
+      list.appendChild(row);
+    });
   }
   toast(t) {
     const x = this.$("toast");
@@ -152,26 +170,36 @@ export class UI {
     this.tt = setTimeout(() => x.classList.remove("show"), 1300);
   }
 
-  renderTrackSelector(tracks, selectedId, onSelect) {
+  renderTrackSelector(tracks, selectedId, onSelect, getRecord = () => null) {
     this.trackGrid.innerHTML = "";
     for (const track of Object.values(tracks)) {
       const card = document.createElement("button");
       card.type = "button";
       card.className = "track-card";
       card.dataset.trackId = track.id;
-      card.innerHTML = `<canvas class="track-preview" width="320" height="116"></canvas><div class="track-card-head"><span class="track-name"></span><span class="track-difficulty"></span></div><div class="track-card-meta"></div>`;
+      card.innerHTML = `<canvas class="track-preview" width="320" height="116"></canvas><div class="track-card-head"><span class="track-name"></span><span class="track-difficulty"></span></div><div class="track-card-meta"></div><div class="track-card-record"></div>`;
       card.querySelector(".track-name").textContent = track.name;
       card.querySelector(".track-difficulty").textContent = track.difficulty;
       card.querySelector(".track-card-meta").textContent =
         `${formatKm(track.length)} · ${track.subtitle}`;
       card.onclick = () => onSelect(track.id);
       this.trackGrid.appendChild(card);
+      this.updateTrackRecord(track.id, getRecord(track.id));
       this.drawTrackPreview(card.querySelector("canvas"), track);
     }
     this.setTrackSelected(
       selectedId,
       tracks[selectedId] || Object.values(tracks)[0],
+      getRecord(selectedId),
     );
+  }
+
+  updateTrackRecord(id, record) {
+    const el = this.trackGrid?.querySelector(
+      `.track-card[data-track-id="${id}"] .track-card-record`,
+    );
+    if (el)
+      el.textContent = record ? `BEST ${formatTime(record.time)}` : "NO TIME SET";
   }
 
   drawTrackPreview(canvas, track) {
@@ -242,52 +270,20 @@ export class UI {
     ctx.restore();
   }
 
-  setTrackSelected(id, track) {
+  setTrackSelected(id, track, record = null) {
     if (!track) return;
     for (const card of this.trackGrid?.querySelectorAll(".track-card") || [])
       card.classList.toggle("selected", card.dataset.trackId === id);
     this.trackSubtitle.textContent = `SOLO TIME TRIAL / ${track.name.toUpperCase()}`;
-    this.trackMeta.textContent = `${formatKm(track.length)} · ${track.difficulty}`;
+    this.trackMeta.textContent =
+      `${formatKm(track.length)} · ${track.difficulty}` +
+      (record ? ` · BEST ${formatTime(record.time)}` : "");
     this.trackDescription.textContent = track.description;
   }
 
   buildDebug(params, onChange) {
     this.controls.innerHTML = "";
-    const groups = {
-      Engine: [
-        "engineTorque",
-        "redline",
-        "idleRPM",
-        "rpmResponse",
-        "reverseRatio",
-        "finalDrive",
-        "steerMax",
-      ],
-      Tires: [
-        "tireFront",
-        "tireRear",
-        "longGrip",
-        "latGrip",
-        "tireStiffness",
-        "slipPeak",
-        "anglePeak",
-        "surfaceShoulder",
-      ],
-      Brakes: ["frontBrake", "rearBrake", "brakeBias", "brakeLockup"],
-      Vehicle: [
-        "mass",
-        "cgHeight",
-        "wheelbase",
-        "trackWidth",
-        "weightFront",
-        "steeringRatio",
-        "diffLock",
-        "drag",
-        "downforce",
-        "rolling",
-      ],
-      Suspension: ["suspensionStiffness", "suspensionDamping"],
-    };
+    const groups = TUNING_GROUPS;
     const ranges = {
       engineTorque: [50, 1500, 1],
       redline: [3000, 14000, 50],
@@ -300,8 +296,6 @@ export class UI {
       tireRear: [0.2, 3, 0.01],
       longGrip: [0.2, 2.5, 0.01],
       latGrip: [0.2, 2.5, 0.01],
-      tireStiffness: [0.5, 20, 0.1],
-      slipPeak: [0.02, 0.4, 0.005],
       anglePeak: [0.02, 0.35, 0.005],
       surfaceShoulder: [0.2, 1.5, 0.01],
       frontBrake: [0.1, 3, 0.01],
@@ -314,12 +308,9 @@ export class UI {
       trackWidth: [0.9, 2.3, 0.01],
       weightFront: [0.2, 0.8, 0.01],
       steeringRatio: [5, 30, 0.1],
-      diffLock: [0, 1, 0.01],
       drag: [0, 2, 0.01],
       downforce: [0, 0.1, 0.001],
       rolling: [0, 0.1, 0.001],
-      suspensionStiffness: [5000, 150000, 500],
-      suspensionDamping: [250, 20000, 100],
     };
     for (const [group, names] of Object.entries(groups)) {
       const h = document.createElement("div");

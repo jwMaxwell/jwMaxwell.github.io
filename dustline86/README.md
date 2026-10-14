@@ -16,6 +16,19 @@ Then open `http://localhost:8000/`.
 
 Firefox/LibreWolf should work with the same local-server fallback.
 
+## Tests
+
+The tests use Node's built-in test runner (Node 20+), so there is nothing to install:
+
+```bash
+cd dustline86
+npm test
+```
+
+They cover lap detection and timing, the car physics (including a scripted autopilot lap of Mesa Circuit and Drift Basin as a coarse handling check), track geometry, records/ghost storage, keyboard and gamepad input, audio teardown, and the software rasterizer. Browser APIs are replaced with small stand-ins in `tests/helpers.js` and the individual test files.
+
+Note that `track.sample(p)` indexes samples by `p * N`, while `track.nearest().progress` is distance along the road divided by its length. The two agree at the start/finish line.
+
 ## Controls
 
 ### DualShock 4 / Gamepad API
@@ -51,16 +64,19 @@ Firefox/LibreWolf should work with the same local-server fallback.
 - X: reverse at low speed
 - R: restart
 - F: fullscreen
+- M: mute
+- G: toggle the record-lap ghost
 
 ## Architecture
 
 - `js/car.js`: four-wheel tire-force vehicle model, drivetrain, brakes and load transfer.
 - `js/track.js`: track data, centerline sampling, nearest-point query, road mesh and scenery.
-- `js/physics.js`: shared timing/progress helpers.
+- `js/physics.js`: lap timing (`LapTracker`) and formatting helpers.
 - `js/input.js`: Gamepad API and keyboard fallback.
 - `js/render.js`: Canvas 2D pseudo-3D presentation renderer.
 - `js/audio.js`: synthesized engine and event sounds.
 - `js/ui.js`: HUD, start/finish screens, live tuning controls, map selector, and tuning export.
+- `js/records.js`: per-track best laps and ghost recordings in `localStorage`.
 - `js/main.js`: game state and orchestration.
 
 ## Physics simplifications
@@ -71,9 +87,17 @@ The track is a procedural ribbon with elevation and soft off-road behavior. The 
 
 The debug panel changes live parameters. "Save local" stores the tuning in `localStorage`; reload will reuse it. "Reset defaults" restores the built-in baseline.
 
+## Records and ghost
+
+The best valid lap on each course is saved locally with a ghost recording (the car pose sampled every 50 ms of lap time). The start screen shows each course's record, the results screen shows lap splits, and during a race the record lap replays as a translucent ghost car. Records are not tied to the Vehicle Lab tuning, so a heavily tuned car can set times the stock car cannot match.
+
+## Simulation and rendering
+
+Physics runs at a fixed 120 Hz independent of the display, with the car pose interpolated for rendering. The software renderer fills each triangle row by row over its covered span and lowers its internal resolution automatically when the world pass exceeds about 8 ms, recovering when there is headroom.
+
 ## Future extension points
 
-Tracks are objects with `sample()` and `nearest()` plus render/scenery builders. A ghost car can record `{time,x,z,yaw,gear}` samples and replay them through a second `Car`/render path without changing the timing model.
+Tracks are objects with `sample()` and `nearest()` plus render/scenery builders.
 
 Additional cars can be created by cloning `DEFAULT_CAR` and swapping the parameter object. The physics code does not depend on the UI or renderer.
 
